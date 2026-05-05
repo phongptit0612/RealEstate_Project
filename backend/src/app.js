@@ -56,6 +56,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 const pool = require('./config/db');
 app.get('/api/rates', async (req, res) => {

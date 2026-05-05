@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Edit, Trash2, Crown, Zap, RefreshCw } from 'lucide-react';
+import { Edit, Trash2, Crown, Zap, RefreshCw, Eye, Heart, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useCurrencyStore from '../../store/currencyStore';
 
@@ -74,6 +74,7 @@ export default function ManageListings() {
                                 <th className="p-5 font-medium">Live Converted Val</th>
                                 <th className="p-5 font-medium">VIP Status</th>
                                 <th className="p-5 font-medium">Approval</th>
+                                <th className="p-5 font-medium">Stats</th>
                                 <th className="p-5 font-medium">Expiry</th>
                                 <th className="p-5 font-medium">Asset Status</th>
                             </tr>
@@ -135,6 +136,23 @@ export default function ManageListings() {
                                         <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider ${prop.mod_status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : prop.mod_status === 'rejected' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'}`}>
                                             {prop.mod_status}
                                         </span>
+                                    </td>
+                                    {/* Stats: views, saved, inquiries */}
+                                    <td className="p-5">
+                                        <div className="flex flex-col gap-1 text-xs text-gray-400 min-w-[80px]">
+                                            <span className="flex items-center gap-1.5">
+                                                <Eye className="w-3 h-3 text-sky-400" />
+                                                {Number(prop.view_count || 0).toLocaleString()} views
+                                            </span>
+                                            <span className="flex items-center gap-1.5">
+                                                <Heart className="w-3 h-3 text-red-400" />
+                                                {Number(prop.favorites_count || 0)} saved
+                                            </span>
+                                            <span className="flex items-center gap-1.5">
+                                                <MessageSquare className="w-3 h-3 text-emerald-400" />
+                                                {Number(prop.inquiry_count || 0)} inquiries
+                                            </span>
+                                        </div>
                                     </td>
                                     {/* Expiry + Renew */}
                                     <td className="p-5">

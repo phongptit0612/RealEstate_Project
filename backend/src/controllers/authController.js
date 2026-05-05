@@ -260,3 +260,24 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// GET /api/auth/agents — public seller directory
+exports.getAgents = async (req, res) => {
+    try {
+        const [agents] = await pool.query(`
+            SELECT u.user_id, u.full_name, u.email, u.avatar_url, u.created_at,
+                   COUNT(p.property_id) AS listing_count,
+                   AVG(p.price_usd) AS avg_price
+            FROM users u
+            JOIN properties p ON u.user_id = p.owner_id
+            WHERE p.mod_status = 'approved' AND u.is_active = 1
+            GROUP BY u.user_id
+            HAVING listing_count > 0
+            ORDER BY listing_count DESC, u.created_at ASC
+            LIMIT 50
+        `);
+        res.json(agents);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

@@ -18,4 +18,7 @@ router.get('/me', protect, authController.getMe);
 router.put('/profile', protect, authController.updateProfile);
 router.put('/change-password', protect, authController.changePassword);
 
+// Public - agents directory
+router.get('/agents', authController.getAgents);
+
 module.exports = router;

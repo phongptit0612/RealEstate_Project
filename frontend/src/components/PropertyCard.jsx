@@ -1,9 +1,14 @@
 import React from 'react';
-import { Bed, Bath, Square, MapPin, Heart } from 'lucide-react';
+import { Bed, Bath, Square, MapPin, Heart, Eye } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
 import useFavoriteStore from '../store/favoriteStore';
 import useUserStore from '../store/userStore';
 import { Link, useNavigate } from 'react-router-dom';
+
+function getDaysSince(dateStr) {
+    if (!dateStr) return 999;
+    return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
+}
 
 export default function PropertyCard({ property }) {
     const { formatPrice } = useCurrencyStore();
@@ -18,7 +23,7 @@ export default function PropertyCard({ property }) {
         : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop';
 
     const handleFavorite = (e) => {
-        e.preventDefault(); // Prevent navigating to detail page
+        e.preventDefault();
         e.stopPropagation();
         if (!isAuthenticated) { navigate('/login'); return; }
         toggleFavorite(property.property_id);
@@ -27,6 +32,11 @@ export default function PropertyCard({ property }) {
     // VIP styling
     const isGold   = property.vip_tier === 'gold';
     const isSilver = property.vip_tier === 'silver';
+
+    // Status badges
+    const daysSince = getDaysSince(property.created_at);
+    const isNew      = daysSince <= 3;
+    const isPriceDrop = property.has_price_drop; // set by backend when price_history has a reduction
 
     return (
         <Link
@@ -54,6 +64,8 @@ export default function PropertyCard({ property }) {
                 )}
                 {isGold   && <span className="bg-amber-400 text-black text-xs font-extrabold px-3 py-1.5 rounded-full shadow-md">🥇 Gold VIP</span>}
                 {isSilver && <span className="bg-slate-200 text-slate-700 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-md">🥈 Silver VIP</span>}
+                {isNew      && !isGold && !isSilver && <span className="bg-blue-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-full shadow-md">🆕 New</span>}
+                {isPriceDrop && <span className="bg-rose-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-full shadow-md">💰 Price Drop</span>}
             </div>
 
             {/* ❤️ Favorite Button */}
@@ -77,6 +89,13 @@ export default function PropertyCard({ property }) {
                     alt={property.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                 />
+                {/* View count overlay */}
+                {property.view_count > 0 && (
+                    <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1 bg-black/50 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full">
+                        <Eye className="w-3 h-3" />
+                        <span>{property.view_count.toLocaleString()}</span>
+                    </div>
+                )}
             </div>
 
             {/* Content */}

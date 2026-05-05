@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, MapPin, Building, DollarSign, Compass, FilterX, ChevronLeft, Map, LayoutGrid, Heart, User } from 'lucide-react';
+import { Search, MapPin, Building, DollarSign, Compass, FilterX, ChevronLeft, Map, LayoutGrid, Heart, User, ArrowUpDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useCurrencyStore from '../store/currencyStore';
 import useUserStore from '../store/userStore';
@@ -19,6 +19,7 @@ export default function Properties() {
     const [page, setPage] = useState(1);
     const [totalResults, setTotalResults] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
+    const [sort, setSort] = useState('newest');
 
     // Filter States
     const [keyword, setKeyword] = useState('');
@@ -62,6 +63,7 @@ export default function Properties() {
             if (preferredCurrency) params.append('currency', preferredCurrency);
             params.append('page', currentPage);
             params.append('limit', 12);
+            params.append('sort', sort);
 
             Object.entries(filters).forEach(([key, val]) => {
                 if (val) params.append(key, val);
@@ -102,6 +104,7 @@ export default function Properties() {
     const handleClear = () => {
         setKeyword('');
         setFilters({ city_id: '', district_id: '', type_id: '', minPrice: '', maxPrice: '', direction: '', bedrooms: '', bathrooms: '' });
+        setSort('newest');
         setPage(1);
     };
 
@@ -298,6 +301,22 @@ export default function Properties() {
                         <div className="flex items-center gap-3">
                             <div className="text-[#0033ab] font-bold bg-[#0033ab]/10 px-4 py-2 rounded-xl border border-[#0033ab]/20">
                                 {loading ? '...' : `${properties.length} of ${totalResults}`}
+                            </div>
+                            {/* Sort dropdown */}
+                            <div className="flex items-center gap-2">
+                                <ArrowUpDown className="w-4 h-4 text-slate-400" />
+                                <select
+                                    value={sort}
+                                    onChange={e => { setSort(e.target.value); setPage(1); fetchProperties(1, false); }}
+                                    className="bg-white border border-gray-200 text-slate-700 text-sm rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-[#0033ab] cursor-pointer"
+                                >
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                    <option value="price_asc">Price: Low → High</option>
+                                    <option value="price_desc">Price: High → Low</option>
+                                    <option value="area_asc">Area: Small → Large</option>
+                                    <option value="area_desc">Area: Large → Small</option>
+                                </select>
                             </div>
                             {/* View mode toggle */}
                             <div className="flex bg-gray-100 rounded-xl p-1 border border-gray-200">

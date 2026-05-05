@@ -4,7 +4,8 @@ import axios from 'axios';
 import {
     Bed, Bath, Square, MapPin, Compass, Home, Phone, Mail,
     ChevronLeft, ChevronRight, Tag, TrendingDown, Flag,
-    Calendar, User, CheckCircle, Heart, Share2, ArrowLeft, Crown, Zap
+    Calendar, User, CheckCircle, Heart, Share2, ArrowLeft, Crown, Zap,
+    Printer, Eye, Video
 } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
 import useUserStore from '../store/userStore';
@@ -33,13 +34,26 @@ export default function PropertyDetail() {
     const [reportModal, setReportModal] = useState(false);
     const [reportData, setReportData] = useState({ reason: '', details: '' });
     const [reportSent, setReportSent] = useState(false);
+    const [similar, setSimilar] = useState([]);
+    const [copiedLink, setCopiedLink] = useState(false);
 
     useEffect(() => {
         setLoading(true);
         axios.get(`http://localhost:5000/api/properties/${id}`, { withCredentials: true })
             .then(r => { setProperty(r.data); setLoading(false); })
             .catch(() => { setError('Property not found or not approved.'); setLoading(false); });
+        // Fetch similar listings
+        axios.get(`http://localhost:5000/api/properties/${id}/similar`)
+            .then(r => setSimilar(r.data || []))
+            .catch(() => {});
     }, [id]);
+
+    const handleShare = () => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            setCopiedLink(true);
+            setTimeout(() => setCopiedLink(false), 2500);
+        });
+    };
 
     const submitReport = async (e) => {
         e.preventDefault();
@@ -94,8 +108,22 @@ export default function PropertyDetail() {
                     </button>
                     <Link to="/" className="text-lg font-bold text-slate-900">LuxEstates</Link>
                     <div className="flex items-center gap-2">
-                        <button className="p-2 rounded-full hover:bg-slate-100 transition-colors">
-                            <Share2 className="w-5 h-5 text-slate-600" />
+                        <button
+                            className={`p-2 rounded-full transition-colors flex items-center gap-1.5 text-sm font-medium ${
+                                copiedLink ? 'bg-green-100 text-green-600' : 'hover:bg-slate-100 text-slate-600'
+                            }`}
+                            onClick={handleShare}
+                            title="Share listing"
+                        >
+                            <Share2 className="w-5 h-5" />
+                            {copiedLink && <span className="text-xs">Copied!</span>}
+                        </button>
+                        <button
+                            className="p-2 rounded-full hover:bg-slate-100 transition-colors hidden sm:block"
+                            onClick={() => window.print()}
+                            title="Print listing"
+                        >
+                            <Printer className="w-5 h-5 text-slate-600" />
                         </button>
                         <button
                             onClick={() => { if(!isAuthenticated) navigate('/login'); else toggleFavorite(id); }}
@@ -214,6 +242,20 @@ export default function PropertyDetail() {
                                     )}
                                 </div>
                             </div>
+
+                            {/* View / Favorites counter row */}
+                            <div className="flex items-center gap-4 mt-3 text-sm text-slate-400">
+                                {property.view_count > 0 && (
+                                    <span className="flex items-center gap-1">
+                                        <Eye className="w-3.5 h-3.5" /> {Number(property.view_count).toLocaleString()} views
+                                    </span>
+                                )}
+                                {property.favorites_count > 0 && (
+                                    <span className="flex items-center gap-1">
+                                        <Heart className="w-3.5 h-3.5 text-red-400 fill-current" /> {Number(property.favorites_count).toLocaleString()} saved
+                                    </span>
+                                )}
+                            </div>
                         </div>
 
                         {/* Key Stats */}
@@ -231,6 +273,27 @@ export default function PropertyDetail() {
                                 </div>
                             ))}
                         </div>
+
+                        {/* Video Tour */}
+                        {property.video_url && (
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                                <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    <Video className="w-5 h-5 text-[#0033ab]" /> Video Tour
+                                </h2>
+                                <div className="aspect-video rounded-xl overflow-hidden bg-slate-100">
+                                    {property.video_url.includes('youtube.com') || property.video_url.includes('youtu.be') ? (
+                                        <iframe
+                                            src={property.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')}
+                                            className="w-full h-full"
+                                            allowFullScreen
+                                            title="Property video tour"
+                                        />
+                                    ) : (
+                                        <video src={property.video_url} controls className="w-full h-full object-cover" />
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Features / Tags */}
                         {property.features?.length > 0 && (
@@ -477,6 +540,36 @@ export default function PropertyDetail() {
                                 )}
                             </>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* ── SIMILAR LISTINGS ── */}
+            {similar.length > 0 && (
+                <div className="max-w-6xl mx-auto px-4 pb-16">
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Similar Properties</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        {similar.map(p => {
+                            const img = p.primary_image
+                                ? (p.primary_image.startsWith('http') ? p.primary_image : `http://localhost:5000${p.primary_image}`)
+                                : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop';
+                            return (
+                                <Link
+                                    key={p.property_id}
+                                    to={`/properties/${p.property_id}`}
+                                    className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:border-[#0033ab]/30 transition-all duration-300"
+                                >
+                                    <div className="h-40 overflow-hidden">
+                                        <img src={img} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    </div>
+                                    <div className="p-4">
+                                        <p className="text-sm font-bold text-slate-900 line-clamp-1">{p.title}</p>
+                                        <p className="text-[#0033ab] font-bold text-sm mt-1">{formatPrice(p.price_usd)}</p>
+                                        <p className="text-xs text-slate-400 mt-1">{p.district_name || p.city_name || 'N/A'}</p>
+                                    </div>
+                                </Link>
+                            );
+                        })}
                     </div>
                 </div>
             )}

@@ -45,7 +45,16 @@ exports.createProperty = async (req, res) => {
 exports.getMyProperties = async (req, res) => {
     try {
         const owner_id = req.user.userId;
-        const [properties] = await pool.query('SELECT * FROM properties WHERE owner_id = ? ORDER BY created_at DESC', [owner_id]);
+        const [properties] = await pool.query(`
+            SELECT p.*,
+                (SELECT COUNT(*) FROM recently_viewed rv WHERE rv.property_id = p.property_id) AS view_count,
+                (SELECT COUNT(*) FROM favorites f WHERE f.property_id = p.property_id) AS favorites_count,
+                (SELECT COUNT(*) FROM messages m JOIN conversations c ON m.conversation_id = c.conversation_id
+                 WHERE c.property_id = p.property_id AND m.sender_id != p.owner_id) AS inquiry_count
+            FROM properties p
+            WHERE p.owner_id = ?
+            ORDER BY p.created_at DESC
+        `, [owner_id]);
         
         // Fetch primary images for these properties
         if (properties.length > 0) {
@@ -55,7 +64,6 @@ exports.getMyProperties = async (req, res) => {
             properties.forEach(p => {
                 const img = images.find(i => i.property_id === p.property_id);
                 p.primary_image = img ? img.image_url : null;
-                // Hack to let the UI parse city
                 p.city = p.address ? p.address.split(',')[1] || 'Unknown' : 'Unknown';
                 p.status = p.listing_status;
             });
@@ -138,7 +146,7 @@ exports.searchProperties = async (req, res) => {
         const {
             keyword, city_id, district_id, type_id,
             minPrice, maxPrice, direction, bedrooms, bathrooms,
-            currency
+            currency, sort = 'newest'
         } = req.query;
 
         // Pagination
@@ -208,9 +216,19 @@ exports.searchProperties = async (req, res) => {
              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'properties' AND COLUMN_NAME = 'vip_tier'`
         );
         const hasVip = cols.length > 0;
+        // Safe whitelist of user-selectable sort options
+        const sortMap = {
+            newest:     'p.created_at DESC',
+            oldest:     'p.created_at ASC',
+            price_asc:  'p.price_usd ASC',
+            price_desc: 'p.price_usd DESC',
+            area_asc:   'p.area_m2 ASC',
+            area_desc:  'p.area_m2 DESC',
+        };
+        const sortClause = sortMap[sort] || 'p.created_at DESC';
         const orderClause = hasVip
-            ? `ORDER BY CASE p.vip_tier WHEN 'gold' THEN 0 WHEN 'silver' THEN 1 ELSE 2 END ASC, p.created_at DESC`
-            : `ORDER BY p.created_at DESC`;
+            ? `ORDER BY CASE p.vip_tier WHEN 'gold' THEN 0 WHEN 'silver' THEN 1 ELSE 2 END ASC, ${sortClause}`
+            : `ORDER BY ${sortClause}`;
 
         // COUNT for pagination total
         const countQuery = `SELECT COUNT(*) as total FROM properties p
@@ -391,9 +409,48 @@ exports.getPropertyById = async (req, res) => {
             } catch (_) {}
         }
 
-        res.json({ ...property, images, features, priceHistory });
+        // Track view count from recently_viewed
+        const [[{ view_count }]] = await pool.query(
+            'SELECT COUNT(*) as view_count FROM recently_viewed WHERE property_id = ?', [id]
+        );
+        const [[{ favorites_count }]] = await pool.query(
+            'SELECT COUNT(*) as favorites_count FROM favorites WHERE property_id = ?', [id]
+        );
+
+        res.json({ ...property, images, features, priceHistory, view_count, favorites_count });
     } catch (error) {
         console.error('Property detail error:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// GET /api/properties/:id/similar — 4 listings with same type in same city
+exports.getSimilarProperties = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [[base]] = await pool.query(
+            'SELECT type_id, district_id FROM properties WHERE property_id = ?', [id]
+        );
+        if (!base) return res.json([]);
+
+        const [similar] = await pool.query(`
+            SELECT p.property_id, p.title, p.price_usd, p.listing_type, p.bedrooms, p.area_m2,
+                   pt.name as type_name, d.name as district_name, c.name as city_name,
+                   (SELECT image_url FROM property_images pi2
+                    WHERE pi2.property_id = p.property_id AND pi2.sort_order = 1 LIMIT 1) AS primary_image
+            FROM properties p
+            LEFT JOIN property_types pt ON p.type_id = pt.type_id
+            LEFT JOIN districts d ON p.district_id = d.district_id
+            LEFT JOIN cities c ON d.city_id = c.city_id
+            WHERE p.property_id != ?
+              AND p.mod_status = 'approved'
+              AND p.type_id = ?
+            ORDER BY p.vip_tier = 'gold' DESC, p.vip_tier = 'silver' DESC, p.created_at DESC
+            LIMIT 4
+        `, [id, base.type_id]);
+
+        res.json(similar);
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };

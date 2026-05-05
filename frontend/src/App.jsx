@@ -28,6 +28,7 @@ import SubscriptionSuccess from './pages/Subscription/SubscriptionSuccess';
 import SubscriptionCancel from './pages/Subscription/SubscriptionCancel';
 import MySubscriptions from './pages/Dashboard/MySubscriptions';
 import ActivityHistory from './pages/Dashboard/ActivityHistory';
+import Agencies from './pages/Agencies';
 
 // Guard: requires login
 const PrivateRoute = ({ children }) => {
@@ -66,6 +67,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/properties/:id" element={<PropertyDetail />} />
+        <Route path="/agencies" element={<Agencies />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<VerifyOTP />} />
