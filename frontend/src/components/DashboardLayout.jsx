@@ -115,7 +115,7 @@ export default function DashboardLayout() {
                 <div className="p-6">
                     <Link to="/" className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 group">
                         <div className="group-hover:scale-110 transition-transform">
-                            <img src="/logo.png" alt="LuxEstates" className="w-8 h-8 object-contain" />
+                            <img src="/logo.png" alt="LuxEstates" className="w-8 h-8 object-contain brightness-0 invert" />
                         </div>
                         LuxEstates
                     </Link>

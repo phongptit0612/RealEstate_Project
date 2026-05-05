@@ -121,10 +121,8 @@ export default function Properties() {
             <nav className="sticky top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 py-3 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <Link to="/" className="flex items-center gap-2 cursor-pointer group">
-                        <div className="group-hover:scale-105 transition-transform duration-300">
-                            <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center text-white font-bold shadow-sm">
-                                LE
-                            </div>
+                        <div className="group-hover:scale-110 transition-transform">
+                            <img src="/logo.png" alt="LuxEstates" className="w-10 h-10 object-contain filter invert" />
                         </div>
                         <span className="text-xl font-bold tracking-tight text-brand-900 hidden sm:block">LuxEstates</span>
                     </Link>
@@ -132,8 +130,8 @@ export default function Properties() {
                     <div className="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-600">
                         <Link to="/properties" className="text-brand-600 transition-colors cursor-default">Properties</Link>
                         <Link to="/agencies" className="hover:text-brand-600 transition-colors">Agencies</Link>
-                        <Link to="/pricing" className="hover:text-brand-600 transition-colors flex items-center gap-1.5">
-                            <span className="text-amber-500 text-lg leading-none">👑</span> VIP Plans
+                        <Link to="/pricing" className="hover:text-brand-600 transition-colors">
+                            VIP Plans
                         </Link>
                         
                         <div className="relative">

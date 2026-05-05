@@ -178,8 +178,14 @@ exports.searchProperties = async (req, res) => {
         const params = [];
 
         if (keyword) {
-            queryStr += ` AND MATCH(p.title, p.description) AGAINST(? IN NATURAL LANGUAGE MODE)`;
-            params.push(keyword);
+            queryStr += ` AND (
+                MATCH(p.title, p.description) AGAINST(? IN NATURAL LANGUAGE MODE)
+                OR p.address LIKE ?
+                OR c.name LIKE ?
+                OR d.name LIKE ?
+            )`;
+            const likeKeyword = `%${keyword}%`;
+            params.push(keyword, likeKeyword, likeKeyword, likeKeyword);
         }
         if (minPrice || maxPrice) {
             queryStr += ` AND p.price_usd BETWEEN ? AND ?`;
