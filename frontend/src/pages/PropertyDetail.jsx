@@ -1,0 +1,487 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import {
+    Bed, Bath, Square, MapPin, Compass, Home, Phone, Mail,
+    ChevronLeft, ChevronRight, Tag, TrendingDown, Flag,
+    Calendar, User, CheckCircle, Heart, Share2, ArrowLeft, Crown, Zap
+} from 'lucide-react';
+import useCurrencyStore from '../store/currencyStore';
+import useUserStore from '../store/userStore';
+import useFavoriteStore from '../store/favoriteStore';
+import MortgageCalculator from '../components/MortgageCalculator';
+import MapView from '../components/MapView';
+import Footer from '../components/Footer';
+
+const DIRECTION_MAP = {
+    north: 'North', south: 'South', east: 'East', west: 'West',
+    northeast: 'North-East', northwest: 'North-West',
+    southeast: 'South-East', southwest: 'South-West',
+};
+
+export default function PropertyDetail() {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { formatPrice } = useCurrencyStore();
+    const { isAuthenticated, user } = useUserStore();
+    const { isFavorited, toggleFavorite } = useFavoriteStore();
+
+    const [property, setProperty] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [activeImg, setActiveImg] = useState(0);
+    const [reportModal, setReportModal] = useState(false);
+    const [reportData, setReportData] = useState({ reason: '', details: '' });
+    const [reportSent, setReportSent] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+        axios.get(`http://localhost:5000/api/properties/${id}`, { withCredentials: true })
+            .then(r => { setProperty(r.data); setLoading(false); })
+            .catch(() => { setError('Property not found or not approved.'); setLoading(false); });
+    }, [id]);
+
+    const submitReport = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post('http://localhost:5000/api/reports', {
+                property_id: id, ...reportData
+            }, { withCredentials: true });
+            setReportSent(true);
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to submit report');
+        }
+    };
+
+    // Loading skeleton
+    if (loading) return (
+        <div className="min-h-screen bg-slate-50">
+            <div className="max-w-6xl mx-auto px-4 pt-24 pb-16 animate-pulse space-y-6">
+                <div className="h-96 bg-slate-200 rounded-3xl" />
+                <div className="grid grid-cols-3 gap-6">
+                    <div className="col-span-2 space-y-4">
+                        <div className="h-8 bg-slate-200 rounded-xl w-3/4" />
+                        <div className="h-4 bg-slate-200 rounded-xl w-1/2" />
+                        <div className="h-32 bg-slate-200 rounded-xl" />
+                    </div>
+                    <div className="h-64 bg-slate-200 rounded-3xl" />
+                </div>
+            </div>
+        </div>
+    );
+
+    if (error) return (
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+            <Home className="w-16 h-16 text-slate-300" />
+            <h2 className="text-2xl font-bold text-slate-700">{error}</h2>
+            <Link to="/properties" className="text-[#0033ab] font-semibold hover:underline">← Back to listings</Link>
+        </div>
+    );
+
+    const images = property.images?.length > 0
+        ? property.images.map(i => i.image_url.startsWith('http') ? i.image_url : `http://localhost:5000${i.image_url}`)
+        : ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2675&auto=format&fit=crop'];
+
+    const fullAddress = [property.address, property.district_name, property.city_name, property.country].filter(Boolean).join(', ');
+
+    return (
+        <div className="min-h-screen bg-slate-50 font-sans">
+            {/* Slim Navbar */}
+            <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-600 hover:text-[#0033ab] font-semibold transition-colors">
+                        <ArrowLeft className="w-5 h-5" /> Back
+                    </button>
+                    <Link to="/" className="text-lg font-bold text-slate-900">LuxEstates</Link>
+                    <div className="flex items-center gap-2">
+                        <button className="p-2 rounded-full hover:bg-slate-100 transition-colors">
+                            <Share2 className="w-5 h-5 text-slate-600" />
+                        </button>
+                        <button
+                            onClick={() => { if(!isAuthenticated) navigate('/login'); else toggleFavorite(id); }}
+                            className={`p-2 rounded-full transition-all ${isFavorited(id) ? 'bg-red-500 text-white' : 'hover:bg-slate-100 text-slate-600'}`}
+                        >
+                            <Heart className={`w-5 h-5 ${isFavorited(id) ? 'fill-current' : ''}`} />
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div className="max-w-6xl mx-auto px-4 pt-20 pb-16">
+
+                {/* ── IMAGE GALLERY ── */}
+                <div className="relative rounded-3xl overflow-hidden mb-10 shadow-xl group mt-6">
+                    <img
+                        src={images[activeImg]}
+                        alt={property.title}
+                        className="w-full h-[480px] object-cover transition-all duration-500"
+                    />
+
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-black/20" />
+
+                    {/* Type + Status badges */}
+                    <div className="absolute top-5 left-5 flex gap-2 z-10">
+                        <span className="bg-white/95 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+                            {property.type_name || 'Estate'}
+                        </span>
+                        <span className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-sm ${
+                            property.listing_type === 'rent' ? 'bg-violet-100 text-violet-700' : 'bg-emerald-100 text-emerald-700'
+                        }`}>
+                            For {property.listing_type === 'sale' ? 'Sale' : 'Rent'}
+                        </span>
+                    </div>
+
+                    {/* Nav arrows */}
+                    {images.length > 1 && (<>
+                        <button
+                            onClick={() => setActiveImg(i => (i - 1 + images.length) % images.length)}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-slate-800 rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                        ><ChevronLeft className="w-5 h-5" /></button>
+                        <button
+                            onClick={() => setActiveImg(i => (i + 1) % images.length)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-slate-800 rounded-full flex items-center justify-center shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                        ><ChevronRight className="w-5 h-5" /></button>
+                    </>)}
+
+                    {/* Thumbnail strip */}
+                    {images.length > 1 && (
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                            {images.map((img, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setActiveImg(i)}
+                                    className={`w-12 h-12 rounded-xl overflow-hidden border-2 transition-all ${i === activeImg ? 'border-white scale-110' : 'border-white/40 opacity-70'}`}
+                                >
+                                    <img src={img} alt="" className="w-full h-full object-cover" />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Image count */}
+                    <div className="absolute top-5 right-5 bg-black/50 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                        {activeImg + 1} / {images.length}
+                    </div>
+                </div>
+
+                {/* ── MAIN LAYOUT ── */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                    {/* LEFT COLUMN — Property Info */}
+                    <div className="lg:col-span-2 space-y-8">
+
+                        {/* Header */}
+                        <div>
+                            <div className="flex items-start justify-between gap-4 flex-wrap">
+                                <div>
+                                    <div className="flex items-center gap-3 flex-wrap mb-1">
+                                        <h1 className="text-3xl font-bold text-slate-900">{property.title}</h1>
+                                        {/* VIP badge */}
+                                        {property.vip_tier === 'gold' && (
+                                            <span className="inline-flex items-center gap-1 bg-amber-400 text-black text-xs font-extrabold px-3 py-1 rounded-full shadow">
+                                                <Crown className="w-3 h-3" /> Gold VIP
+                                            </span>
+                                        )}
+                                        {property.vip_tier === 'silver' && (
+                                            <span className="inline-flex items-center gap-1 bg-slate-200 text-slate-700 text-xs font-extrabold px-3 py-1 rounded-full shadow">
+                                                <Crown className="w-3 h-3" /> Silver VIP
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-slate-500">
+                                        <MapPin className="w-4 h-4 text-[#0033ab] flex-shrink-0" />
+                                        <span className="text-sm">{fullAddress}</span>
+                                    </div>
+                                </div>
+                                <div className="text-right flex-shrink-0">
+                                    <p className="text-3xl font-bold text-[#0033ab]">{formatPrice(property.price_usd)}</p>
+                                    {property.listing_type === 'rent' && <p className="text-sm text-slate-400">/month</p>}
+                                    {property.expires_at && (
+                                        <p className="text-xs text-slate-400 mt-1 flex items-center justify-end gap-1">
+                                            <Calendar className="w-3 h-3" />
+                                            Expires {new Date(property.expires_at).toLocaleDateString()}
+                                        </p>
+                                    )}
+                                    {/* Boost button — owner only */}
+                                    {user && user.id === property.seller_id && property.vip_tier === 'none' && (
+                                        <Link
+                                            to={`/pricing?property_id=${property.property_id}`}
+                                            className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 border border-amber-300 hover:border-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-all"
+                                        >
+                                            <Zap className="w-3 h-3" /> Boost this listing
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Key Stats */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {[
+                                { icon: Bed, label: 'Bedrooms', value: property.bedrooms ?? '—' },
+                                { icon: Bath, label: 'Bathrooms', value: property.bathrooms ?? '—' },
+                                { icon: Square, label: 'Area', value: property.area_m2 ? `${property.area_m2} m²` : '—' },
+                                { icon: Compass, label: 'Direction', value: DIRECTION_MAP[property.direction] || '—' },
+                            ].map(({ icon: Icon, label, value }) => (
+                                <div key={label} className="bg-white rounded-2xl p-4 text-center border border-gray-100 shadow-sm">
+                                    <Icon className="w-5 h-5 text-[#0033ab] mx-auto mb-2" />
+                                    <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">{label}</p>
+                                    <p className="text-lg font-bold text-slate-900 mt-1">{value}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Features / Tags */}
+                        {property.features?.length > 0 && (
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                                <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    <Tag className="w-5 h-5 text-[#0033ab]" /> Features & Amenities
+                                </h2>
+                                <div className="flex flex-wrap gap-2">
+                                    {property.features.map(f => (
+                                        <span key={f.feature_id} className="bg-[#0033ab]/8 text-[#0033ab] text-sm font-semibold px-4 py-2 rounded-full border border-[#0033ab]/15">
+                                            {f.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Description */}
+                        {property.description && (
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                                <h2 className="text-lg font-bold text-slate-900 mb-4">About This Property</h2>
+                                <p className="text-slate-600 leading-relaxed whitespace-pre-line">{property.description}</p>
+                            </div>
+                        )}
+
+                        {/* Location */}
+                        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                            <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-[#0033ab]" /> Location
+                            </h2>
+                            <p className="text-slate-600 text-sm mb-4">{fullAddress}</p>
+                            <MapView
+                                properties={[{ ...property, primary_image: property.images?.[0]?.image_url || null }]}
+                                center={property.latitude && property.longitude
+                                    ? [parseFloat(property.latitude), parseFloat(property.longitude)]
+                                    : null
+                                }
+                                zoom={15}
+                                height="280px"
+                                singlePin={true}
+                            />
+                        </div>
+
+                        {/* Price History */}
+                        {property.priceHistory?.length > 0 && (
+                            <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                                <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    <TrendingDown className="w-5 h-5 text-[#0033ab]" /> Price History
+                                </h2>
+                                <div className="space-y-3">
+                                    {property.priceHistory.map((h, i) => {
+                                        const dropped = h.new_price_usd < h.old_price_usd;
+                                        return (
+                                            <div key={i} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                                                <span className="text-xs text-slate-400">{new Date(h.changed_at).toLocaleDateString()}</span>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-sm text-slate-500 line-through">{formatPrice(h.old_price_usd)}</span>
+                                                    <span className={`text-sm font-bold ${dropped ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                                        {dropped ? '▼' : '▲'} {formatPrice(h.new_price_usd)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Mortgage Calculator */}
+                        <MortgageCalculator basePriceUsd={parseFloat(property.price_usd)} />
+
+                        {/* Report */}
+                        <div className="text-center pt-2">
+                            <button
+                                onClick={() => setReportModal(true)}
+                                className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-red-500 transition-colors font-medium"
+                            >
+                                <Flag className="w-4 h-4" /> Report this listing
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* RIGHT COLUMN — Seller Card (sticky) */}
+                    <div className="space-y-6">
+                        <div className="sticky top-24 space-y-4">
+                            {/* Price Summary */}
+                            <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center">
+                                <p className="text-sm text-slate-400 uppercase tracking-widest font-semibold mb-1">Asking Price</p>
+                                <p className="text-3xl font-bold text-[#0033ab]">{formatPrice(property.price_usd)}</p>
+                                {property.area_m2 && (
+                                    <p className="text-xs text-slate-400 mt-1">
+                                        ≈ {formatPrice(property.price_usd / property.area_m2)} /m²
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Seller Card */}
+                            <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                                <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    <User className="w-4 h-4 text-[#0033ab]" /> Listed By
+                                </h3>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-12 h-12 rounded-full bg-[#0033ab]/10 flex items-center justify-center text-[#0033ab] font-bold text-lg flex-shrink-0 overflow-hidden">
+                                        {property.seller_avatar
+                                            ? <img src={property.seller_avatar.startsWith('http') ? property.seller_avatar : `http://localhost:5000${property.seller_avatar}`} alt="" className="w-full h-full object-cover" />
+                                            : property.seller_name?.[0]?.toUpperCase()
+                                        }
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-slate-800">{property.seller_name}</p>
+                                        <p className="text-xs text-slate-400 flex items-center gap-1">
+                                            <CheckCircle className="w-3 h-3 text-emerald-500" /> Verified Member
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {property.seller_phone && (
+                                    <a href={`tel:${property.seller_phone}`}
+                                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm transition-colors mb-2">
+                                        <Phone className="w-4 h-4" /> {property.seller_phone}
+                                    </a>
+                                )}
+
+                                {/* ── SEND MESSAGE BUTTON — always visible ── */}
+                                {isAuthenticated ? (
+                                    // Don't show if viewing your own listing
+                                    Number(user?.id) !== Number(property.seller_id) ? (
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    await axios.post('http://localhost:5000/api/conversations', {
+                                                        property_id: property.property_id,
+                                                        seller_id: property.seller_id,
+                                                    }, { withCredentials: true });
+                                                    navigate('/dashboard/inbox', {
+                                                        state: {
+                                                            startConversation: {
+                                                                sellerId: property.seller_id,
+                                                                propertyId: property.property_id,
+                                                                propertyTitle: property.title,
+                                                            }
+                                                        }
+                                                    });
+                                                } catch (err) {
+                                                    console.error(err);
+                                                    navigate('/dashboard/inbox');
+                                                }
+                                            }}
+                                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#0033ab] hover:bg-[#002273] text-white font-bold text-sm transition-colors shadow-md"
+                                        >
+                                            <Mail className="w-4 h-4" /> Send Message
+                                        </button>
+                                    ) : (
+                                        <div className="w-full py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 text-sm font-semibold text-center">
+                                            This is your listing
+                                        </div>
+                                    )
+                                ) : (
+                                    <Link
+                                        to="/login"
+                                        state={{ from: `/properties/${id}` }}
+                                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#0033ab] hover:bg-[#002273] text-white font-bold text-sm transition-colors shadow-md"
+                                    >
+                                        <Mail className="w-4 h-4" /> Login to Send Message
+                                    </Link>
+                                )}
+                            </div>
+
+                            {/* Quick info card */}
+                            <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-3">
+                                <h3 className="font-bold text-slate-900 text-sm">Property Details</h3>
+                                {[
+                                    { label: 'Status', value: property.listing_status },
+                                    { label: 'Listing Type', value: property.listing_type },
+                                    { label: 'Posted', value: new Date(property.created_at).toLocaleDateString() },
+                                    { label: 'ID', value: `#${property.property_id}` },
+                                ].map(({ label, value }) => (
+                                    <div key={label} className="flex justify-between text-sm">
+                                        <span className="text-slate-400">{label}</span>
+                                        <span className="font-semibold text-slate-800 capitalize">{value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {/* Report Modal */}
+            {reportModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+                        {reportSent ? (
+                            <div className="text-center py-4">
+                                <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+                                <h3 className="font-bold text-slate-900 text-lg mb-1">Report Submitted</h3>
+                                <p className="text-slate-500 text-sm mb-4">Our team will review this listing shortly.</p>
+                                <button onClick={() => { setReportModal(false); setReportSent(false); }}
+                                    className="px-6 py-2.5 bg-[#0033ab] text-white font-semibold rounded-xl">Close</button>
+                            </div>
+                        ) : (
+                            <>
+                                <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                    <Flag className="w-5 h-5 text-red-500" /> Report Listing
+                                </h2>
+                                {!isAuthenticated ? (
+                                    <div className="text-center py-4">
+                                        <p className="text-slate-500 mb-4">You must be logged in to report a listing.</p>
+                                        <Link to="/login" className="px-6 py-2.5 bg-[#0033ab] text-white font-semibold rounded-xl">Login</Link>
+                                    </div>
+                                ) : (
+                                    <form onSubmit={submitReport} className="space-y-4">
+                                        <div>
+                                            <label className="text-sm font-semibold text-slate-700 mb-1 block">Reason</label>
+                                            <select value={reportData.reason} onChange={e => setReportData(d => ({ ...d, reason: e.target.value }))} required
+                                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-[#0033ab]">
+                                                <option value="">Select a reason</option>
+                                                <option value="spam">Spam or duplicate</option>
+                                                <option value="fraud">Fraud or scam</option>
+                                                <option value="wrong_info">Wrong information</option>
+                                                <option value="offensive">Offensive content</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-semibold text-slate-700 mb-1 block">Details (optional)</label>
+                                            <textarea rows={3} value={reportData.details}
+                                                onChange={e => setReportData(d => ({ ...d, details: e.target.value }))}
+                                                placeholder="Describe the issue..."
+                                                className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#0033ab] resize-none" />
+                                        </div>
+                                        <div className="flex gap-3 pt-1">
+                                            <button type="button" onClick={() => setReportModal(false)}
+                                                className="flex-1 py-2.5 border border-gray-200 rounded-xl text-slate-600 text-sm font-semibold hover:bg-slate-50">
+                                                Cancel
+                                            </button>
+                                            <button type="submit"
+                                                className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-xl transition-colors">
+                                                Submit Report
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            <Footer />
+        </div>
+    );
+}

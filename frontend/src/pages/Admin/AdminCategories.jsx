@@ -1,0 +1,171 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Plus, Trash2, MapPin, Building, ChevronDown, ChevronUp } from 'lucide-react';
+
+function Section({ title, icon: Icon, children }) {
+    const [open, setOpen] = useState(true);
+    return (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <button
+                onClick={() => setOpen(o => !o)}
+                className="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors"
+            >
+                <div className="flex items-center gap-3">
+                    <Icon className="w-5 h-5 text-[#0033ab]" />
+                    <h2 className="font-bold text-slate-900">{title}</h2>
+                </div>
+                {open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            </button>
+            {open && <div className="px-6 pb-6">{children}</div>}
+        </div>
+    );
+}
+
+export default function AdminCategories() {
+    const [cities, setCities] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [types, setTypes] = useState([]);
+
+    const [newCity, setNewCity] = useState('');
+    const [newDistrict, setNewDistrict] = useState({ city_id: '', name: '', zipcode: '' });
+    const [newType, setNewType] = useState({ name: '', parent_id: '' });
+
+    const load = async () => {
+        const [c, d, t] = await Promise.all([
+            axios.get('http://localhost:5000/api/admin/cities', { withCredentials: true }),
+            axios.get('http://localhost:5000/api/admin/districts', { withCredentials: true }),
+            axios.get('http://localhost:5000/api/admin/property-types', { withCredentials: true }),
+        ]);
+        setCities(c.data);
+        setDistricts(d.data);
+        setTypes(t.data);
+    };
+
+    useEffect(() => { load(); }, []);
+
+    const addCity = async (e) => {
+        e.preventDefault();
+        if (!newCity.trim()) return;
+        await axios.post('http://localhost:5000/api/admin/cities', { name: newCity }, { withCredentials: true });
+        setNewCity(''); load();
+    };
+    const deleteCity = async (id) => {
+        if (!window.confirm('Delete this city? This will also delete all its districts.')) return;
+        await axios.delete(`http://localhost:5000/api/admin/cities/${id}`, { withCredentials: true });
+        load();
+    };
+
+    const addDistrict = async (e) => {
+        e.preventDefault();
+        if (!newDistrict.city_id || !newDistrict.name.trim()) return;
+        await axios.post('http://localhost:5000/api/admin/districts', newDistrict, { withCredentials: true });
+        setNewDistrict({ city_id: '', name: '', zipcode: '' }); load();
+    };
+    const deleteDistrict = async (id) => {
+        await axios.delete(`http://localhost:5000/api/admin/districts/${id}`, { withCredentials: true });
+        load();
+    };
+
+    const addType = async (e) => {
+        e.preventDefault();
+        if (!newType.name.trim()) return;
+        await axios.post('http://localhost:5000/api/admin/property-types', { name: newType.name, parent_id: newType.parent_id || null }, { withCredentials: true });
+        setNewType({ name: '', parent_id: '' }); load();
+    };
+    const deleteType = async (id) => {
+        await axios.delete(`http://localhost:5000/api/admin/property-types/${id}`, { withCredentials: true });
+        load();
+    };
+
+    const inputCls = "border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0033ab] bg-slate-50";
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-2xl font-bold text-slate-900">Categories</h1>
+                <p className="text-slate-500 mt-1">Manage cities, districts, and property types</p>
+            </div>
+
+            {/* Cities */}
+            <Section title={`Cities (${cities.length})`} icon={MapPin}>
+                <form onSubmit={addCity} className="flex gap-3 mb-4">
+                    <input value={newCity} onChange={e => setNewCity(e.target.value)}
+                        placeholder="City name" className={`flex-1 ${inputCls}`} />
+                    <button type="submit" className="px-4 py-2.5 bg-[#0033ab] hover:bg-[#002273] text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
+                        <Plus className="w-4 h-4" /> Add
+                    </button>
+                </form>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {cities.map(c => (
+                        <div key={c.city_id} className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xl">
+                            <span className="text-sm font-medium text-slate-800">{c.name}</span>
+                            <button onClick={() => deleteCity(c.city_id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </Section>
+
+            {/* Districts */}
+            <Section title={`Districts (${districts.length})`} icon={MapPin}>
+                <form onSubmit={addDistrict} className="flex gap-3 mb-4 flex-wrap">
+                    <select value={newDistrict.city_id} onChange={e => setNewDistrict(d => ({ ...d, city_id: e.target.value }))}
+                        className={inputCls}>
+                        <option value="">Select city</option>
+                        {cities.map(c => <option key={c.city_id} value={c.city_id}>{c.name}</option>)}
+                    </select>
+                    <input value={newDistrict.name} onChange={e => setNewDistrict(d => ({ ...d, name: e.target.value }))}
+                        placeholder="District name" className={`flex-1 min-w-[140px] ${inputCls}`} />
+                    <input value={newDistrict.zipcode} onChange={e => setNewDistrict(d => ({ ...d, zipcode: e.target.value }))}
+                        placeholder="Zipcode (optional)" className={`w-28 ${inputCls}`} />
+                    <button type="submit" className="px-4 py-2.5 bg-[#0033ab] hover:bg-[#002273] text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
+                        <Plus className="w-4 h-4" /> Add
+                    </button>
+                </form>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {districts.map(d => (
+                        <div key={d.district_id} className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xl">
+                            <div>
+                                <span className="text-sm font-medium text-slate-800">{d.name}</span>
+                                <span className="ml-2 text-xs text-slate-400">— {d.city_name} {d.zipcode ? `(${d.zipcode})` : ''}</span>
+                            </div>
+                            <button onClick={() => deleteDistrict(d.district_id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </Section>
+
+            {/* Property Types */}
+            <Section title={`Property Types (${types.length})`} icon={Building}>
+                <form onSubmit={addType} className="flex gap-3 mb-4 flex-wrap">
+                    <input value={newType.name} onChange={e => setNewType(t => ({ ...t, name: e.target.value }))}
+                        placeholder="Type name (e.g. Penthouse)" className={`flex-1 min-w-[160px] ${inputCls}`} />
+                    <select value={newType.parent_id} onChange={e => setNewType(t => ({ ...t, parent_id: e.target.value }))}
+                        className={inputCls}>
+                        <option value="">No parent</option>
+                        {types.filter(t => !t.parent_id).map(t => <option key={t.type_id} value={t.type_id}>{t.name}</option>)}
+                    </select>
+                    <button type="submit" className="px-4 py-2.5 bg-[#0033ab] hover:bg-[#002273] text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
+                        <Plus className="w-4 h-4" /> Add
+                    </button>
+                </form>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {types.map(t => (
+                        <div key={t.type_id} className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xl">
+                            <div>
+                                <span className="text-sm font-medium text-slate-800">{t.name}</span>
+                                {t.parent_name && <span className="ml-2 text-xs text-slate-400">under {t.parent_name}</span>}
+                            </div>
+                            <button onClick={() => deleteType(t.type_id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </Section>
+        </div>
+    );
+}

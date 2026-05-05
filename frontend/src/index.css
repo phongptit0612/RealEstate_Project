@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-ocean-900: #0F2854;
+  --color-ocean-800: #1C4D8D;
+  --color-ocean-500: #4988C4;
+  --color-ocean-400: #7CB5DB;
+  --color-ocean-200: #BDE8F5;
+}
+
+@theme {
+  --color-ocean-900: #0F2854;
+  --color-ocean-800: #1C4D8D;
+  --color-ocean-500: #4988C4;
+  --color-ocean-400: #7CB5DB;
+  --color-ocean-200: #BDE8F5;
+}
+
+@layer base {
+  body {
+    @apply bg-black text-white font-sans;
+    margin: 0;
+    overflow-x: hidden;
+  }
+}
+
+.glass-nav {
+  @apply bg-white/5 backdrop-blur-lg border-b border-white/10;
+}
