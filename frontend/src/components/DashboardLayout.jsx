@@ -130,14 +130,14 @@ export default function DashboardLayout() {
                                 key={item.path}
                                 to={item.path}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${isActive
-                                    ? 'bg-[#0033ab]/20 text-[#4d88ff] border border-[#0033ab]/30'
+                                    ? 'bg-brand-600/20 text-[#4d88ff] border border-brand-600/30'
                                     : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
                                     }`}
                             >
                                 <Icon className="w-5 h-5" />
                                 <span className="flex-1">{item.label}</span>
                                 {item.badge > 0 && (
-                                    <span className="w-5 h-5 bg-[#0033ab] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                                    <span className="w-5 h-5 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                                         {item.badge > 9 ? '9+' : item.badge}
                                     </span>
                                 )}
@@ -148,7 +148,7 @@ export default function DashboardLayout() {
 
                 <div className="p-4 border-t border-white/10">
                     <div className="flex items-center gap-3 mb-4 px-2">
-                        <div className="w-10 h-10 rounded-full bg-[#0033ab]/30 flex items-center justify-center text-white font-bold uppercase border border-[#0033ab]/50 shadow-md overflow-hidden">
+                        <div className="w-10 h-10 rounded-full bg-brand-600/30 flex items-center justify-center text-white font-bold uppercase border border-brand-600/50 shadow-md overflow-hidden">
                             {user?.avatar
                                 ? <img src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`} alt="" className="w-full h-full object-cover" />
                                 : user?.name?.[0] || 'U'
@@ -220,7 +220,7 @@ export default function DashboardLayout() {
                                     ) : notifs.map(n => (
                                         <div
                                             key={n.notification_id}
-                                            className={`flex gap-3 px-4 py-3 transition-colors ${n.is_read ? 'opacity-60' : 'bg-[#0033ab]/5'}`}
+                                            className={`flex gap-3 px-4 py-3 transition-colors ${n.is_read ? 'opacity-60' : 'bg-brand-600/5'}`}
                                         >
                                             <span className="text-lg flex-shrink-0 mt-0.5">
                                                 {NOTIF_ICONS[n.type] || NOTIF_ICONS.default}
@@ -241,7 +241,7 @@ export default function DashboardLayout() {
                     </div>
                 </div>
 
-                <div className="p-8 max-w-6xl mx-auto mt-2">
+                <div className="p-8 w-full max-w-[1600px] mx-auto mt-2">
                     <Outlet />
                 </div>
             </main>

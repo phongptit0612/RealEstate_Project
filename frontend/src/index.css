@@ -1,31 +1,67 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @import "tailwindcss";
 
+/* ── Design System Tokens ────────────────────────────────── */
 @theme {
+  /* Brand blues */
+  --color-brand-900: #001566;
+  --color-brand-800: #001f8a;
+  --color-brand-700: #0029a0;
+  --color-brand-600: #0033ab;
+  --color-brand-500: #1a4ec4;
+  --color-brand-400: #4d78db;
+  --color-brand-100: #dce6ff;
+  --color-brand-50:  #eef2ff;
+
+  /* Ocean palette (dashboard) */
   --color-ocean-900: #0F2854;
   --color-ocean-800: #1C4D8D;
   --color-ocean-500: #4988C4;
   --color-ocean-400: #7CB5DB;
   --color-ocean-200: #BDE8F5;
+
+  /* Surface / bg */
+  --color-surface:   #f8faff;
+  --color-surface-2: #f1f5fb;
 }
 
-@theme {
-  --color-ocean-900: #0F2854;
-  --color-ocean-800: #1C4D8D;
-  --color-ocean-500: #4988C4;
-  --color-ocean-400: #7CB5DB;
-  --color-ocean-200: #BDE8F5;
-}
-
+/* ── Base Reset ──────────────────────────────────────────── */
 @layer base {
   body {
-    @apply bg-black text-white font-sans;
+    font-family: 'Inter', sans-serif;
     margin: 0;
     overflow-x: hidden;
+    background-color: #f8faff;
+    color: #0f172a;
   }
+
+  /* Dashboard & admin keep their own dark bg via inline classes */
 }
 
+/* ── Utilities ───────────────────────────────────────────── */
 .glass-nav {
   @apply bg-white/5 backdrop-blur-lg border-b border-white/10;
+}
+
+/* Filter chip active state */
+.filter-chip-active {
+  background: #0033ab;
+  color: white;
+  border-color: #0033ab;
+}
+
+/* Smooth page transition */
+.page-enter {
+  animation: fadeSlideIn 0.4s ease-out;
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Print styles */
+@media print {
+  nav, .no-print { display: none !important; }
+  body { background: white; color: black; }
 }

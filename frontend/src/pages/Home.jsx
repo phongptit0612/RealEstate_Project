@@ -30,7 +30,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-[#0033ab] selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-brand-600 selection:text-white">
       {/* Navbar */}
       <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 20 ? 'bg-white shadow-md py-4' : 'bg-white border-b border-gray-200 py-4'}`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
@@ -42,12 +42,12 @@ export default function Home() {
           </div>
 
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-700">
-            <Link to="/properties" className="hover:text-[#0033ab] transition-colors">Properties</Link>
-            <Link to="/agencies" className="hover:text-[#0033ab] transition-colors">Agencies</Link>
-            <a href="#" className="hover:text-[#0033ab] transition-colors">About Us</a>
+            <Link to="/properties" className="hover:text-brand-600 transition-colors">Properties</Link>
+            <Link to="/agencies" className="hover:text-brand-600 transition-colors">Agencies</Link>
+            <a href="#" className="hover:text-brand-600 transition-colors">About Us</a>
             <div className="relative">
               <select
-                className="appearance-none bg-gray-100 border border-gray-200 rounded-lg pl-4 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#0033ab] transition-all cursor-pointer font-medium hover:bg-gray-200 text-slate-700"
+                className="appearance-none bg-gray-100 border border-gray-200 rounded-lg pl-4 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-600 transition-all cursor-pointer font-medium hover:bg-gray-200 text-slate-700"
                 value={preferredCurrency}
                 onChange={(e) => setCurrency(e.target.value)}
               >
@@ -70,13 +70,13 @@ export default function Home() {
                 {user?.role === 'admin' ? (
                   <Link
                     to="/admin"
-                    className="flex items-center gap-2 text-sm font-bold bg-[#0033ab] text-white hover:bg-[#002273] px-4 py-2 rounded-full transition-all shadow-md"
+                    className="flex items-center gap-2 text-sm font-bold bg-brand-600 text-white hover:bg-brand-700 px-4 py-2 rounded-full transition-all shadow-md"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     Admin Panel
                   </Link>
                 ) : (
-                  <Link to="/dashboard/properties" className="text-sm font-bold text-[#0033ab] hover:text-white transition-all hover:bg-[#0033ab] px-4 py-2 rounded-full border border-[#0033ab]">
+                  <Link to="/dashboard/properties" className="text-sm font-bold text-brand-600 hover:text-white transition-all hover:bg-brand-600 px-4 py-2 rounded-full border border-brand-600">
                     Dashboard
                   </Link>
                 )}
@@ -123,7 +123,7 @@ export default function Home() {
           {/* Search Bar - Zillow Style */}
           <div className="bg-white p-2 md:p-3 rounded-full flex flex-col md:flex-row items-center gap-2 max-w-3xl mx-auto transition-all shadow-2xl group">
             <div className="flex-1 flex items-center gap-3 px-4 w-full md:w-auto h-12 md:border-r border-gray-200 transition-colors">
-              <MapPin className="w-5 h-5 text-[#0033ab]" />
+              <MapPin className="w-5 h-5 text-brand-600" />
               <input
                 type="text"
                 placeholder="City, Neighborhood, or Address"
@@ -131,7 +131,7 @@ export default function Home() {
               />
             </div>
             <div className="flex-1 flex items-center gap-3 px-4 w-full md:w-auto h-12">
-              <Building className="w-5 h-5 text-[#0033ab]" />
+              <Building className="w-5 h-5 text-brand-600" />
               <select className="bg-transparent border-none outline-none text-slate-900 w-full cursor-pointer appearance-none font-medium">
                 <option value="">Property Type</option>
                 <option value="villa">Villa</option>
@@ -139,7 +139,7 @@ export default function Home() {
                 <option value="penthouse">Penthouse</option>
               </select>
             </div>
-            <button className="w-full md:w-auto bg-[#0033ab] hover:bg-[#009dff] text-white px-8 h-12 rounded-full font-bold flex items-center justify-center gap-2 outline-none border-none shadow-none">
+            <button className="w-full md:w-auto bg-brand-600 hover:bg-[#009dff] text-white px-8 h-12 rounded-full font-bold flex items-center justify-center gap-2 outline-none border-none shadow-none">
               <Search className="w-4 h-4" />
               Search
             </button>
@@ -148,14 +148,14 @@ export default function Home() {
       </div>
 
       {/* Featured Properties Demo Section */}
-      <div className="bg-slate-50 py-24 relative overflow-hidden">
+      <div className="bg-surface py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Featured <span className="font-light text-slate-500">Listings</span></h2>
               <p className="text-slate-600 max-w-xl font-medium">Curated estates selected for their exceptional quality, design, and location.</p>
             </div>
-            <Link to="/properties" className="flex items-center gap-2 text-[#0033ab] hover:text-[#002273] font-bold transition-colors mt-4 md:mt-0 group">
+            <Link to="/properties" className="flex items-center gap-2 text-brand-600 hover:text-brand-700 font-bold transition-colors mt-4 md:mt-0 group">
               View all listings
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>

@@ -44,7 +44,7 @@ export default function PropertyCard({ property }) {
             className={`group block bg-white rounded-3xl overflow-hidden transition-all duration-300 shadow-sm hover:shadow-xl relative
                 ${isGold   ? 'border-2 border-amber-400 shadow-amber-400/20 hover:shadow-amber-400/40' :
                   isSilver ? 'border-2 border-slate-400 shadow-slate-400/20 hover:shadow-slate-400/30' :
-                             'border border-gray-200 hover:border-[#0033ab]'
+                             'border border-gray-200 hover:border-brand-600'
                 }`
             }>
 
@@ -102,10 +102,10 @@ export default function PropertyCard({ property }) {
             <div className="p-5">
                 {/* Price */}
                 <div className="flex items-start justify-between gap-2 mb-3">
-                    <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-[#0033ab] transition-colors flex-1">
+                    <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-brand-600 transition-colors flex-1">
                         {property.title}
                     </h3>
-                    <p className="text-lg font-bold text-[#0033ab] flex-shrink-0">
+                    <p className="text-lg font-bold text-brand-600 flex-shrink-0">
                         {formatPrice(property.price_usd)}
                     </p>
                 </div>

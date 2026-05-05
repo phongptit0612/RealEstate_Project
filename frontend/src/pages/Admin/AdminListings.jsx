@@ -67,7 +67,7 @@ export default function AdminListings() {
                     <button
                         key={t}
                         onClick={() => setTab(t)}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${tab === t ? 'bg-white shadow text-[#0033ab]' : 'text-slate-500 hover:text-slate-700'}`}
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${tab === t ? 'bg-white shadow text-brand-600' : 'text-slate-500 hover:text-slate-700'}`}
                     >
                         {t}
                     </button>
@@ -79,7 +79,7 @@ export default function AdminListings() {
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-gray-100 bg-slate-50">
+                            <tr className="border-b border-gray-100 bg-surface">
                                 <th className="text-left px-6 py-4 text-slate-500 font-semibold">Title</th>
                                 <th className="text-left px-4 py-4 text-slate-500 font-semibold">Owner</th>
                                 <th className="text-left px-4 py-4 text-slate-500 font-semibold">Price</th>
@@ -107,7 +107,7 @@ export default function AdminListings() {
                                     </td>
                                 </tr>
                             ) : listings.map(l => (
-                                <tr key={l.property_id} className="border-b border-gray-50 hover:bg-slate-50 transition-colors">
+                                <tr key={l.property_id} className="border-b border-gray-50 hover:bg-surface transition-colors">
                                     <td className="px-6 py-4">
                                         <p className="font-semibold text-slate-800 line-clamp-1 max-w-[180px]">{l.title}</p>
                                         <p className="text-xs text-slate-400 capitalize">{l.listing_type}</p>
@@ -162,11 +162,11 @@ export default function AdminListings() {
                             placeholder="Reason for rejection (will be sent to the owner)..."
                             value={rejectReason}
                             onChange={e => setRejectReason(e.target.value)}
-                            className="w-full border border-gray-200 rounded-xl p-3 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-[#0033ab] resize-none"
+                            className="w-full border border-gray-200 rounded-xl p-3 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-brand-600 resize-none"
                         />
                         <div className="flex gap-3 mt-4">
                             <button onClick={() => { setRejectModal(null); setRejectReason(''); }}
-                                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-slate-600 text-sm font-semibold hover:bg-slate-50">
+                                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-slate-600 text-sm font-semibold hover:bg-surface">
                                 Cancel
                             </button>
                             <button onClick={reject}

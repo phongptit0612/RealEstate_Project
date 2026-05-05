@@ -8,10 +8,10 @@ function Section({ title, icon: Icon, children }) {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <button
                 onClick={() => setOpen(o => !o)}
-                className="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors"
+                className="w-full flex items-center justify-between px-6 py-4 hover:bg-surface transition-colors"
             >
                 <div className="flex items-center gap-3">
-                    <Icon className="w-5 h-5 text-[#0033ab]" />
+                    <Icon className="w-5 h-5 text-brand-600" />
                     <h2 className="font-bold text-slate-900">{title}</h2>
                 </div>
                 {open ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -77,7 +77,7 @@ export default function AdminCategories() {
         load();
     };
 
-    const inputCls = "border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0033ab] bg-slate-50";
+    const inputCls = "border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600 bg-surface";
 
     return (
         <div className="space-y-6">
@@ -91,13 +91,13 @@ export default function AdminCategories() {
                 <form onSubmit={addCity} className="flex gap-3 mb-4">
                     <input value={newCity} onChange={e => setNewCity(e.target.value)}
                         placeholder="City name" className={`flex-1 ${inputCls}`} />
-                    <button type="submit" className="px-4 py-2.5 bg-[#0033ab] hover:bg-[#002273] text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
+                    <button type="submit" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
                         <Plus className="w-4 h-4" /> Add
                     </button>
                 </form>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                     {cities.map(c => (
-                        <div key={c.city_id} className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xl">
+                        <div key={c.city_id} className="flex items-center justify-between py-2 px-3 bg-surface rounded-xl">
                             <span className="text-sm font-medium text-slate-800">{c.name}</span>
                             <button onClick={() => deleteCity(c.city_id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                                 <Trash2 className="w-4 h-4" />
@@ -119,13 +119,13 @@ export default function AdminCategories() {
                         placeholder="District name" className={`flex-1 min-w-[140px] ${inputCls}`} />
                     <input value={newDistrict.zipcode} onChange={e => setNewDistrict(d => ({ ...d, zipcode: e.target.value }))}
                         placeholder="Zipcode (optional)" className={`w-28 ${inputCls}`} />
-                    <button type="submit" className="px-4 py-2.5 bg-[#0033ab] hover:bg-[#002273] text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
+                    <button type="submit" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
                         <Plus className="w-4 h-4" /> Add
                     </button>
                 </form>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                     {districts.map(d => (
-                        <div key={d.district_id} className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xl">
+                        <div key={d.district_id} className="flex items-center justify-between py-2 px-3 bg-surface rounded-xl">
                             <div>
                                 <span className="text-sm font-medium text-slate-800">{d.name}</span>
                                 <span className="ml-2 text-xs text-slate-400">— {d.city_name} {d.zipcode ? `(${d.zipcode})` : ''}</span>
@@ -148,13 +148,13 @@ export default function AdminCategories() {
                         <option value="">No parent</option>
                         {types.filter(t => !t.parent_id).map(t => <option key={t.type_id} value={t.type_id}>{t.name}</option>)}
                     </select>
-                    <button type="submit" className="px-4 py-2.5 bg-[#0033ab] hover:bg-[#002273] text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
+                    <button type="submit" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
                         <Plus className="w-4 h-4" /> Add
                     </button>
                 </form>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                     {types.map(t => (
-                        <div key={t.type_id} className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xl">
+                        <div key={t.type_id} className="flex items-center justify-between py-2 px-3 bg-surface rounded-xl">
                             <div>
                                 <span className="text-sm font-medium text-slate-800">{t.name}</span>
                                 {t.parent_name && <span className="ml-2 text-xs text-slate-400">under {t.parent_name}</span>}

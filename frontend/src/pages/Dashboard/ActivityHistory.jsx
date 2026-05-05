@@ -56,7 +56,7 @@ export default function ActivityHistory() {
                     <p className="text-gray-500 mb-6">Browse properties and they'll appear here.</p>
                     <Link
                         to="/properties"
-                        className="inline-flex items-center gap-2 bg-[#0033ab] hover:bg-[#002273] text-white font-bold px-6 py-3 rounded-xl transition-all"
+                        className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-3 rounded-xl transition-all"
                     >
                         Browse Properties
                     </Link>
@@ -67,7 +67,7 @@ export default function ActivityHistory() {
                         <Link
                             key={`${prop.property_id}-${idx}`}
                             to={`/properties/${prop.property_id}`}
-                            className="group flex items-center gap-5 bg-[#051124] border border-white/10 hover:border-[#0033ab]/50 rounded-2xl p-4 transition-all duration-200 hover:bg-[#051124]/80"
+                            className="group flex items-center gap-5 bg-[#051124] border border-white/10 hover:border-brand-600/50 rounded-2xl p-4 transition-all duration-200 hover:bg-[#051124]/80"
                         >
                             {/* Thumbnail */}
                             <div className="w-20 h-16 rounded-xl bg-black border border-white/10 overflow-hidden flex-shrink-0">

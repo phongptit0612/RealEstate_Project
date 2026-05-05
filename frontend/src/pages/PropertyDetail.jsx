@@ -69,7 +69,7 @@ export default function PropertyDetail() {
 
     // Loading skeleton
     if (loading) return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-surface">
             <div className="max-w-6xl mx-auto px-4 pt-24 pb-16 animate-pulse space-y-6">
                 <div className="h-96 bg-slate-200 rounded-3xl" />
                 <div className="grid grid-cols-3 gap-6">
@@ -85,10 +85,10 @@ export default function PropertyDetail() {
     );
 
     if (error) return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+        <div className="min-h-screen bg-surface flex flex-col items-center justify-center gap-4">
             <Home className="w-16 h-16 text-slate-300" />
             <h2 className="text-2xl font-bold text-slate-700">{error}</h2>
-            <Link to="/properties" className="text-[#0033ab] font-semibold hover:underline">← Back to listings</Link>
+            <Link to="/properties" className="text-brand-600 font-semibold hover:underline">← Back to listings</Link>
         </div>
     );
 
@@ -99,11 +99,11 @@ export default function PropertyDetail() {
     const fullAddress = [property.address, property.district_name, property.city_name, property.country].filter(Boolean).join(', ');
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans">
+        <div className="min-h-screen bg-surface font-sans">
             {/* Slim Navbar */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-600 hover:text-[#0033ab] font-semibold transition-colors">
+                    <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-600 hover:text-brand-600 font-semibold transition-colors">
                         <ArrowLeft className="w-5 h-5" /> Back
                     </button>
                     <Link to="/" className="text-lg font-bold text-slate-900">LuxEstates</Link>
@@ -218,12 +218,12 @@ export default function PropertyDetail() {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2 text-slate-500">
-                                        <MapPin className="w-4 h-4 text-[#0033ab] flex-shrink-0" />
+                                        <MapPin className="w-4 h-4 text-brand-600 flex-shrink-0" />
                                         <span className="text-sm">{fullAddress}</span>
                                     </div>
                                 </div>
                                 <div className="text-right flex-shrink-0">
-                                    <p className="text-3xl font-bold text-[#0033ab]">{formatPrice(property.price_usd)}</p>
+                                    <p className="text-3xl font-bold text-brand-600">{formatPrice(property.price_usd)}</p>
                                     {property.listing_type === 'rent' && <p className="text-sm text-slate-400">/month</p>}
                                     {property.expires_at && (
                                         <p className="text-xs text-slate-400 mt-1 flex items-center justify-end gap-1">
@@ -267,7 +267,7 @@ export default function PropertyDetail() {
                                 { icon: Compass, label: 'Direction', value: DIRECTION_MAP[property.direction] || '—' },
                             ].map(({ icon: Icon, label, value }) => (
                                 <div key={label} className="bg-white rounded-2xl p-4 text-center border border-gray-100 shadow-sm">
-                                    <Icon className="w-5 h-5 text-[#0033ab] mx-auto mb-2" />
+                                    <Icon className="w-5 h-5 text-brand-600 mx-auto mb-2" />
                                     <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">{label}</p>
                                     <p className="text-lg font-bold text-slate-900 mt-1">{value}</p>
                                 </div>
@@ -278,7 +278,7 @@ export default function PropertyDetail() {
                         {property.video_url && (
                             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                                 <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <Video className="w-5 h-5 text-[#0033ab]" /> Video Tour
+                                    <Video className="w-5 h-5 text-brand-600" /> Video Tour
                                 </h2>
                                 <div className="aspect-video rounded-xl overflow-hidden bg-slate-100">
                                     {property.video_url.includes('youtube.com') || property.video_url.includes('youtu.be') ? (
@@ -299,11 +299,11 @@ export default function PropertyDetail() {
                         {property.features?.length > 0 && (
                             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                                 <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <Tag className="w-5 h-5 text-[#0033ab]" /> Features & Amenities
+                                    <Tag className="w-5 h-5 text-brand-600" /> Features & Amenities
                                 </h2>
                                 <div className="flex flex-wrap gap-2">
                                     {property.features.map(f => (
-                                        <span key={f.feature_id} className="bg-[#0033ab]/8 text-[#0033ab] text-sm font-semibold px-4 py-2 rounded-full border border-[#0033ab]/15">
+                                        <span key={f.feature_id} className="bg-brand-600/8 text-brand-600 text-sm font-semibold px-4 py-2 rounded-full border border-brand-600/15">
                                             {f.name}
                                         </span>
                                     ))}
@@ -322,7 +322,7 @@ export default function PropertyDetail() {
                         {/* Location */}
                         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                             <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-[#0033ab]" /> Location
+                                <MapPin className="w-5 h-5 text-brand-600" /> Location
                             </h2>
                             <p className="text-slate-600 text-sm mb-4">{fullAddress}</p>
                             <MapView
@@ -341,7 +341,7 @@ export default function PropertyDetail() {
                         {property.priceHistory?.length > 0 && (
                             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                                 <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <TrendingDown className="w-5 h-5 text-[#0033ab]" /> Price History
+                                    <TrendingDown className="w-5 h-5 text-brand-600" /> Price History
                                 </h2>
                                 <div className="space-y-3">
                                     {property.priceHistory.map((h, i) => {
@@ -382,7 +382,7 @@ export default function PropertyDetail() {
                             {/* Price Summary */}
                             <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center">
                                 <p className="text-sm text-slate-400 uppercase tracking-widest font-semibold mb-1">Asking Price</p>
-                                <p className="text-3xl font-bold text-[#0033ab]">{formatPrice(property.price_usd)}</p>
+                                <p className="text-3xl font-bold text-brand-600">{formatPrice(property.price_usd)}</p>
                                 {property.area_m2 && (
                                     <p className="text-xs text-slate-400 mt-1">
                                         ≈ {formatPrice(property.price_usd / property.area_m2)} /m²
@@ -393,10 +393,10 @@ export default function PropertyDetail() {
                             {/* Seller Card */}
                             <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
                                 <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <User className="w-4 h-4 text-[#0033ab]" /> Listed By
+                                    <User className="w-4 h-4 text-brand-600" /> Listed By
                                 </h3>
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 rounded-full bg-[#0033ab]/10 flex items-center justify-center text-[#0033ab] font-bold text-lg flex-shrink-0 overflow-hidden">
+                                    <div className="w-12 h-12 rounded-full bg-brand-600/10 flex items-center justify-center text-brand-600 font-bold text-lg flex-shrink-0 overflow-hidden">
                                         {property.seller_avatar
                                             ? <img src={property.seller_avatar.startsWith('http') ? property.seller_avatar : `http://localhost:5000${property.seller_avatar}`} alt="" className="w-full h-full object-cover" />
                                             : property.seller_name?.[0]?.toUpperCase()
@@ -442,12 +442,12 @@ export default function PropertyDetail() {
                                                     navigate('/dashboard/inbox');
                                                 }
                                             }}
-                                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#0033ab] hover:bg-[#002273] text-white font-bold text-sm transition-colors shadow-md"
+                                            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm transition-colors shadow-md"
                                         >
                                             <Mail className="w-4 h-4" /> Send Message
                                         </button>
                                     ) : (
-                                        <div className="w-full py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 text-sm font-semibold text-center">
+                                        <div className="w-full py-3 rounded-xl bg-surface border border-slate-200 text-slate-400 text-sm font-semibold text-center">
                                             This is your listing
                                         </div>
                                     )
@@ -455,7 +455,7 @@ export default function PropertyDetail() {
                                     <Link
                                         to="/login"
                                         state={{ from: `/properties/${id}` }}
-                                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#0033ab] hover:bg-[#002273] text-white font-bold text-sm transition-colors shadow-md"
+                                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm transition-colors shadow-md"
                                     >
                                         <Mail className="w-4 h-4" /> Login to Send Message
                                     </Link>
@@ -493,7 +493,7 @@ export default function PropertyDetail() {
                                 <h3 className="font-bold text-slate-900 text-lg mb-1">Report Submitted</h3>
                                 <p className="text-slate-500 text-sm mb-4">Our team will review this listing shortly.</p>
                                 <button onClick={() => { setReportModal(false); setReportSent(false); }}
-                                    className="px-6 py-2.5 bg-[#0033ab] text-white font-semibold rounded-xl">Close</button>
+                                    className="px-6 py-2.5 bg-brand-600 text-white font-semibold rounded-xl">Close</button>
                             </div>
                         ) : (
                             <>
@@ -503,14 +503,14 @@ export default function PropertyDetail() {
                                 {!isAuthenticated ? (
                                     <div className="text-center py-4">
                                         <p className="text-slate-500 mb-4">You must be logged in to report a listing.</p>
-                                        <Link to="/login" className="px-6 py-2.5 bg-[#0033ab] text-white font-semibold rounded-xl">Login</Link>
+                                        <Link to="/login" className="px-6 py-2.5 bg-brand-600 text-white font-semibold rounded-xl">Login</Link>
                                     </div>
                                 ) : (
                                     <form onSubmit={submitReport} className="space-y-4">
                                         <div>
                                             <label className="text-sm font-semibold text-slate-700 mb-1 block">Reason</label>
                                             <select value={reportData.reason} onChange={e => setReportData(d => ({ ...d, reason: e.target.value }))} required
-                                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-[#0033ab]">
+                                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-brand-600">
                                                 <option value="">Select a reason</option>
                                                 <option value="spam">Spam or duplicate</option>
                                                 <option value="fraud">Fraud or scam</option>
@@ -524,11 +524,11 @@ export default function PropertyDetail() {
                                             <textarea rows={3} value={reportData.details}
                                                 onChange={e => setReportData(d => ({ ...d, details: e.target.value }))}
                                                 placeholder="Describe the issue..."
-                                                className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#0033ab] resize-none" />
+                                                className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-brand-600 resize-none" />
                                         </div>
                                         <div className="flex gap-3 pt-1">
                                             <button type="button" onClick={() => setReportModal(false)}
-                                                className="flex-1 py-2.5 border border-gray-200 rounded-xl text-slate-600 text-sm font-semibold hover:bg-slate-50">
+                                                className="flex-1 py-2.5 border border-gray-200 rounded-xl text-slate-600 text-sm font-semibold hover:bg-surface">
                                                 Cancel
                                             </button>
                                             <button type="submit"
@@ -557,14 +557,14 @@ export default function PropertyDetail() {
                                 <Link
                                     key={p.property_id}
                                     to={`/properties/${p.property_id}`}
-                                    className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:border-[#0033ab]/30 transition-all duration-300"
+                                    className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:border-brand-600/30 transition-all duration-300"
                                 >
                                     <div className="h-40 overflow-hidden">
                                         <img src={img} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     </div>
                                     <div className="p-4">
                                         <p className="text-sm font-bold text-slate-900 line-clamp-1">{p.title}</p>
-                                        <p className="text-[#0033ab] font-bold text-sm mt-1">{formatPrice(p.price_usd)}</p>
+                                        <p className="text-brand-600 font-bold text-sm mt-1">{formatPrice(p.price_usd)}</p>
                                         <p className="text-xs text-slate-400 mt-1">{p.district_name || p.city_name || 'N/A'}</p>
                                     </div>
                                 </Link>

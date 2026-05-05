@@ -116,7 +116,7 @@ export default function LocationPicker({ initialLat, initialLng, onSelect }) {
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                         placeholder="Search location (e.g. District 1, Ho Chi Minh City)..."
-                        className="w-full bg-[#020813] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0033ab] focus:ring-1 focus:ring-[#0033ab] transition-all"
+                        className="w-full bg-[#020813] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                     />
                     {searchQuery && (
                         <button type="button" onClick={() => { setSearchQuery(''); setSearchResults([]); }}
@@ -126,7 +126,7 @@ export default function LocationPicker({ initialLat, initialLng, onSelect }) {
                     )}
                 </div>
                 <button type="submit" disabled={searching}
-                    className="px-4 py-2.5 bg-[#0033ab] hover:bg-[#002273] text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2">
+                    className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 flex items-center gap-2">
                     {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 </button>
             </form>

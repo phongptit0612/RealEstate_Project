@@ -27,7 +27,7 @@ export default function ForgotPassword() {
         <div className="min-h-screen flex items-center justify-center bg-[#020813] relative overflow-hidden">
             {/* Background glow */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#020813] via-[#051124] to-[#0a1e3d]" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#0033ab]/15 blur-[120px] rounded-full pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-600/15 blur-[120px] rounded-full pointer-events-none" />
 
             <Link to="/login" className="absolute top-8 left-8 text-slate-400 hover:text-white flex items-center gap-2 transition-colors z-20 text-sm">
                 <ArrowLeft className="w-4 h-4" /> Back to Login
@@ -47,7 +47,7 @@ export default function ForgotPassword() {
                             <Link
                                 to="/reset-password"
                                 state={{ email }}
-                                className="w-full flex items-center justify-center gap-2 bg-[#0033ab] hover:bg-[#002273] text-white font-bold py-3 rounded-xl transition-colors"
+                                className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition-colors"
                             >
                                 Enter Reset Code <ArrowRight className="w-4 h-4" />
                             </Link>
@@ -58,7 +58,7 @@ export default function ForgotPassword() {
                     ) : (
                         <>
                             <div className="text-center mb-8">
-                                <div className="w-14 h-14 bg-[#0033ab]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <div className="w-14 h-14 bg-brand-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                                     <Mail className="w-7 h-7 text-[#4d88ff]" />
                                 </div>
                                 <h1 className="text-2xl font-bold text-white mb-2">Forgot Password?</h1>
@@ -79,13 +79,13 @@ export default function ForgotPassword() {
                                         value={email}
                                         onChange={e => setEmail(e.target.value)}
                                         placeholder="your@email.com"
-                                        className="w-full bg-[#020813] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0033ab] focus:ring-1 focus:ring-[#0033ab] transition-all"
+                                        className="w-full bg-[#020813] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                                     />
                                 </div>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-[#0033ab] hover:bg-[#002273] disabled:opacity-50 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                                    className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
                                 >
                                     {loading ? 'Sending...' : <><ArrowRight className="w-4 h-4" /> Send Reset Code</>}
                                 </button>

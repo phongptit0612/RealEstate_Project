@@ -6,7 +6,7 @@ import LocationPicker from '../../components/LocationPicker';
 
 const API = 'http://localhost:5000/api';
 
-const inputClass = "w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0033ab] focus:ring-1 focus:ring-[#0033ab] transition-all";
+const inputClass = "w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all";
 const labelClass = "text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block";
 
 export default function EditListing() {
@@ -213,7 +213,7 @@ export default function EditListing() {
                     </Link>
                     <button
                         type="submit" disabled={saving || success}
-                        className="flex-1 flex items-center justify-center gap-2 bg-[#0033ab] hover:bg-[#002273] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-colors text-sm"
+                        className="flex-1 flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-colors text-sm"
                     >
                         {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Changes</>}
                     </button>

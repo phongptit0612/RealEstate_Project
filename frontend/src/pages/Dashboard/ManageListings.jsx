@@ -101,7 +101,7 @@ export default function ManageListings() {
                                         <div className="text-gray-300 font-mono text-sm">${Number(prop.price_usd).toLocaleString()}</div>
                                     </td>
                                     <td className="p-5">
-                                        <div className="text-[#0033ab] font-bold text-lg">
+                                        <div className="text-brand-600 font-bold text-lg">
                                             {formatPrice(prop.price_usd)}
                                         </div>
                                     </td>
@@ -179,7 +179,7 @@ export default function ManageListings() {
                                             <select 
                                                 value={prop.status} 
                                                 onChange={(e) => updateStatus(prop.property_id, e.target.value)}
-                                                className="bg-black/50 border border-white/10 text-white font-medium rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#0033ab] outline-none text-sm cursor-pointer"
+                                                className="bg-black/50 border border-white/10 text-white font-medium rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-600 outline-none text-sm cursor-pointer"
                                             >
                                                 <option value="active">✅ Active</option>
                                                 <option value="negotiating">💬 Negotiating</option>
@@ -190,7 +190,7 @@ export default function ManageListings() {
                                             </select>
                                             <Link
                                                 to={`/dashboard/edit/${prop.property_id}`}
-                                                className="p-2 bg-[#0033ab]/10 text-[#4d88ff] border border-[#0033ab]/20 rounded-lg hover:bg-[#0033ab] hover:text-white transition-all"
+                                                className="p-2 bg-brand-600/10 text-[#4d88ff] border border-brand-600/20 rounded-lg hover:bg-brand-600 hover:text-white transition-all"
                                                 title="Edit Listing"
                                             >
                                                 <Edit className="w-4 h-4" />

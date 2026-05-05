@@ -21,7 +21,7 @@ export default function Agencies() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-surface">
             {/* Hero */}
             <div className="bg-gradient-to-br from-[#0033ab] to-[#001f7a] pt-28 pb-16 px-4">
                 <div className="max-w-6xl mx-auto text-center">
@@ -51,7 +51,7 @@ export default function Agencies() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {agents.map(agent => (
-                            <div key={agent.user_id} className="group bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-[#0033ab]/30 transition-all duration-300">
+                            <div key={agent.user_id} className="group bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:border-brand-600/30 transition-all duration-300">
                                 {/* Avatar */}
                                 <div className="flex items-start gap-4 mb-5">
                                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0033ab] to-[#4d88ff] flex items-center justify-center text-white text-xl font-black overflow-hidden flex-shrink-0">
@@ -68,11 +68,11 @@ export default function Agencies() {
 
                                 {/* Stats */}
                                 <div className="grid grid-cols-2 gap-3 mb-5">
-                                    <div className="bg-slate-50 rounded-xl p-3 text-center">
-                                        <div className="text-2xl font-black text-[#0033ab]">{agent.listing_count}</div>
+                                    <div className="bg-surface rounded-xl p-3 text-center">
+                                        <div className="text-2xl font-black text-brand-600">{agent.listing_count}</div>
                                         <div className="text-xs text-slate-400 font-medium">Active Listings</div>
                                     </div>
-                                    <div className="bg-slate-50 rounded-xl p-3 text-center">
+                                    <div className="bg-surface rounded-xl p-3 text-center">
                                         <div className="text-2xl font-black text-slate-800">{formatPrice(agent.avg_price || 0)}</div>
                                         <div className="text-xs text-slate-400 font-medium">Avg. Price</div>
                                     </div>
@@ -81,7 +81,7 @@ export default function Agencies() {
                                 {/* View Properties Link */}
                                 <Link
                                     to={`/properties?seller=${agent.user_id}`}
-                                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-[#0033ab]/20 text-[#0033ab] hover:bg-[#0033ab] hover:text-white font-semibold text-sm transition-all group-hover:border-[#0033ab]"
+                                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-brand-600/20 text-brand-600 hover:bg-brand-600 hover:text-white font-semibold text-sm transition-all group-hover:border-brand-600"
                                 >
                                     <Eye className="w-4 h-4" /> View Listings <ArrowRight className="w-3.5 h-3.5" />
                                 </Link>

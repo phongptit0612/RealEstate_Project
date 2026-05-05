@@ -75,7 +75,7 @@ export default function Register() {
                         />
                     </div>
 
-                    <button type="submit" disabled={loading} className="w-full mt-8 bg-[#0033ab] hover:bg-[#002273] text-white font-bold py-3.5 rounded-xl flex justify-center items-center outline-none border-none shadow-none filter-none">
+                    <button type="submit" disabled={loading} className="w-full mt-8 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl flex justify-center items-center outline-none border-none shadow-none filter-none">
                         {loading ? 'Creating...' : 'Register Account'}
                     </button>
                 </form>

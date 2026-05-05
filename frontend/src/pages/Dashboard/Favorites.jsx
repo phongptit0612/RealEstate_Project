@@ -48,7 +48,7 @@ export default function Favorites() {
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-white flex items-center gap-2">
                         <Heart className="w-6 h-6 text-red-500 fill-current" />
                         Saved Properties
                     </h1>
@@ -58,7 +58,7 @@ export default function Favorites() {
                 </div>
                 <Link
                     to="/properties"
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[#0033ab] hover:bg-[#002273] text-white font-semibold text-sm rounded-xl transition-colors"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm rounded-xl transition-colors"
                 >
                     <Search className="w-4 h-4" /> Browse More
                 </Link>
@@ -76,7 +76,7 @@ export default function Favorites() {
                     </p>
                     <Link
                         to="/properties"
-                        className="flex items-center gap-2 px-6 py-3 bg-[#0033ab] text-white font-semibold rounded-xl hover:bg-[#002273] transition-colors"
+                        className="flex items-center gap-2 px-6 py-3 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 transition-colors"
                     >
                         <Home className="w-4 h-4" /> Explore Listings
                     </Link>

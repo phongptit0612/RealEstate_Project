@@ -72,7 +72,7 @@ export default function Login() {
                         <Link to="/forgot-password" className="text-sm text-ocean-400 hover:text-ocean-200 font-medium transition-colors">Forgot Password?</Link>
                     </div>
 
-                    <button type="submit" className="w-full bg-[#0033ab] hover:bg-[#002273] text-white font-bold py-3.5 rounded-xl flex justify-center items-center gap-2 group outline-none border-none shadow-none filter-none">
+                    <button type="submit" className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl flex justify-center items-center gap-2 group outline-none border-none shadow-none filter-none">
                         Sign In
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>

@@ -129,13 +129,13 @@ export default function Profile() {
                     {/* Avatar */}
                     <div className="flex items-center gap-5">
                         <div className="relative">
-                            <div className="w-20 h-20 rounded-2xl bg-[#0033ab]/20 border border-[#0033ab]/30 overflow-hidden flex items-center justify-center text-[#4d88ff] font-bold text-2xl">
+                            <div className="w-20 h-20 rounded-2xl bg-brand-600/20 border border-brand-600/30 overflow-hidden flex items-center justify-center text-[#4d88ff] font-bold text-2xl">
                                 {avatarSrc
                                     ? <img src={avatarSrc} alt="avatar" className="w-full h-full object-cover" />
                                     : user?.name?.[0]?.toUpperCase() || 'U'
                                 }
                             </div>
-                            <label className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#0033ab] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#002273] transition-colors shadow-lg">
+                            <label className="absolute -bottom-1 -right-1 w-7 h-7 bg-brand-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-brand-700 transition-colors shadow-lg">
                                 <Camera className="w-3.5 h-3.5 text-white" />
                                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                             </label>
@@ -157,7 +157,7 @@ export default function Profile() {
                                 value={name}
                                 onChange={e => setName(e.target.value)}
                                 placeholder="Your full name"
-                                className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0033ab] focus:ring-1 focus:ring-[#0033ab] transition-all"
+                                className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                             />
                         </div>
                     </div>
@@ -172,7 +172,7 @@ export default function Profile() {
                                 value={phone}
                                 onChange={e => setPhone(e.target.value)}
                                 placeholder="+84 xxx xxx xxxx"
-                                className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0033ab] focus:ring-1 focus:ring-[#0033ab] transition-all"
+                                className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                             />
                         </div>
                     </div>
@@ -185,13 +185,13 @@ export default function Profile() {
                             value={avatarUrl}
                             onChange={e => setAvatarUrl(e.target.value)}
                             placeholder="https://..."
-                            className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0033ab] focus:ring-1 focus:ring-[#0033ab] transition-all"
+                            className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                         />
                     </div>
 
                     <button
                         type="submit" disabled={profileLoading}
-                        className="bg-[#0033ab] hover:bg-[#002273] disabled:opacity-50 text-white font-bold py-2.5 px-6 rounded-xl transition-colors text-sm"
+                        className="bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold py-2.5 px-6 rounded-xl transition-colors text-sm"
                     >
                         {profileLoading ? 'Saving...' : 'Save Changes'}
                     </button>
@@ -209,7 +209,7 @@ export default function Profile() {
                                 value={currentPw}
                                 onChange={e => setCurrentPw(e.target.value)}
                                 placeholder="Your current password"
-                                className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 pl-4 pr-12 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0033ab] focus:ring-1 focus:ring-[#0033ab] transition-all"
+                                className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 pl-4 pr-12 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                             />
                             <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">
                                 {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -224,7 +224,7 @@ export default function Profile() {
                             value={newPw}
                             onChange={e => setNewPw(e.target.value)}
                             placeholder="At least 6 characters"
-                            className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0033ab] focus:ring-1 focus:ring-[#0033ab] transition-all"
+                            className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                         />
                     </div>
 
@@ -235,13 +235,13 @@ export default function Profile() {
                             value={confirmPw}
                             onChange={e => setConfirmPw(e.target.value)}
                             placeholder="Repeat new password"
-                            className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-[#0033ab] focus:ring-1 focus:ring-[#0033ab] transition-all"
+                            className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                         />
                     </div>
 
                     <button
                         type="submit" disabled={pwLoading}
-                        className="bg-[#0033ab] hover:bg-[#002273] disabled:opacity-50 text-white font-bold py-2.5 px-6 rounded-xl transition-colors text-sm"
+                        className="bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold py-2.5 px-6 rounded-xl transition-colors text-sm"
                     >
                         {pwLoading ? 'Updating...' : 'Change Password'}
                     </button>

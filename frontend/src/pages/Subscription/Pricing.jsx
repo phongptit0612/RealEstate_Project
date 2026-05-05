@@ -144,7 +144,7 @@ export default function Pricing() {
                         <select
                             value={selectedCurrency}
                             onChange={e => setSelectedCurrency(e.target.value)}
-                            className="appearance-none bg-white/5 border border-white/10 text-white text-sm rounded-xl pl-4 pr-9 py-2.5 outline-none focus:border-[#0033ab] cursor-pointer"
+                            className="appearance-none bg-white/5 border border-white/10 text-white text-sm rounded-xl pl-4 pr-9 py-2.5 outline-none focus:border-brand-600 cursor-pointer"
                         >
                             {CURRENCIES.map(c => (
                                 <option key={c.code} value={c.code}>{c.label}</option>
@@ -159,7 +159,7 @@ export default function Pricing() {
                         value={propertyId}
                         onChange={e => setPropertyId(e.target.value)}
                         placeholder="Enter your Property ID to boost"
-                        className="bg-white/5 border border-white/10 text-white text-sm rounded-xl px-4 py-2.5 w-72 outline-none focus:border-[#0033ab] placeholder:text-slate-600"
+                        className="bg-white/5 border border-white/10 text-white text-sm rounded-xl px-4 py-2.5 w-72 outline-none focus:border-brand-600 placeholder:text-slate-600"
                     />
                 </div>
 

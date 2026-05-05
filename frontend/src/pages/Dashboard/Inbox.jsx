@@ -24,7 +24,7 @@ function timeAgo(dateStr) {
 function Avatar({ name, src, size = 10, online }) {
     return (
         <div className="relative flex-shrink-0">
-            <div className={`w-${size} h-${size} rounded-full bg-[#0033ab]/10 overflow-hidden flex items-center justify-center text-[#0033ab] font-bold`}>
+            <div className={`w-${size} h-${size} rounded-full bg-brand-600/10 overflow-hidden flex items-center justify-center text-brand-600 font-bold`}>
                 {src
                     ? <img src={src.startsWith('http') ? src : `http://localhost:5000${src}`} alt="" className="w-full h-full object-cover" />
                     : <span className={size >= 10 ? 'text-base' : 'text-sm'}>{name?.[0]?.toUpperCase() || '?'}</span>
@@ -259,7 +259,7 @@ export default function Inbox() {
             <aside className={`w-full md:w-80 border-r border-gray-100 flex flex-col flex-shrink-0 ${mobileView === 'chat' ? 'hidden md:flex' : 'flex'}`}>
                 <div className="p-4 border-b border-gray-100">
                     <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
-                        <MessageSquare className="w-5 h-5 text-[#0033ab]" /> Inbox
+                        <MessageSquare className="w-5 h-5 text-brand-600" /> Inbox
                     </h2>
                     <div className="relative">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -267,7 +267,7 @@ export default function Inbox() {
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder="Search conversations..."
-                            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0033ab]"
+                            className="w-full pl-9 pr-3 py-2 bg-surface border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-600"
                         />
                     </div>
                 </div>
@@ -297,12 +297,12 @@ export default function Inbox() {
                             <button
                                 key={conv.conversation_id}
                                 onClick={() => openConversation(conv)}
-                                className={`w-full text-left flex items-center gap-3 p-4 border-b border-gray-50 transition-colors ${isActive ? 'bg-[#0033ab]/5' : 'hover:bg-slate-50'}`}
+                                className={`w-full text-left flex items-center gap-3 p-4 border-b border-gray-50 transition-colors ${isActive ? 'bg-brand-600/5' : 'hover:bg-surface'}`}
                             >
                                 <Avatar name={other.name} src={other.avatar} size={10} online={isOnline} />
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-0.5">
-                                        <p className={`text-sm font-semibold truncate ${isActive ? 'text-[#0033ab]' : 'text-slate-800'}`}>{other.name}</p>
+                                        <p className={`text-sm font-semibold truncate ${isActive ? 'text-brand-600' : 'text-slate-800'}`}>{other.name}</p>
                                         <span className="text-[10px] text-slate-400 flex-shrink-0 ml-2">{timeAgo(conv.last_message_at)}</span>
                                     </div>
                                     {conv.property_title && (
@@ -313,7 +313,7 @@ export default function Inbox() {
                                     <p className="text-xs text-slate-500 truncate">{conv.last_message || 'Start the conversation'}</p>
                                 </div>
                                 {conv.unread_count > 0 && (
-                                    <span className="flex-shrink-0 w-5 h-5 bg-[#0033ab] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                                    <span className="flex-shrink-0 w-5 h-5 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                                         {conv.unread_count > 9 ? '9+' : conv.unread_count}
                                     </span>
                                 )}
@@ -345,15 +345,15 @@ export default function Inbox() {
                                 <p className="font-bold text-slate-900 text-sm">{currentOther?.name}</p>
                                 <p className="text-xs text-slate-400">
                                     {isOtherTyping ? (
-                                        <span className="text-[#0033ab] font-medium animate-pulse">typing...</span>
+                                        <span className="text-brand-600 font-medium animate-pulse">typing...</span>
                                     ) : onlineUsers.has(Number(currentOther?.id)) ? (
                                         <span className="text-emerald-500">● Online</span>
                                     ) : 'Offline'}
                                 </p>
                             </div>
                             {activeConv.property_title && (
-                                <div className="hidden sm:flex items-center gap-1.5 bg-slate-50 border border-gray-200 px-3 py-1.5 rounded-xl">
-                                    <Home className="w-3.5 h-3.5 text-[#0033ab]" />
+                                <div className="hidden sm:flex items-center gap-1.5 bg-surface border border-gray-200 px-3 py-1.5 rounded-xl">
+                                    <Home className="w-3.5 h-3.5 text-brand-600" />
                                     <span className="text-xs text-slate-600 font-medium max-w-[140px] truncate">{activeConv.property_title}</span>
                                 </div>
                             )}
@@ -363,7 +363,7 @@ export default function Inbox() {
                         <div className="flex-1 overflow-y-auto p-5 space-y-3">
                             {loadingMsgs ? (
                                 <div className="flex justify-center py-12">
-                                    <Loader2 className="w-6 h-6 text-[#0033ab] animate-spin" />
+                                    <Loader2 className="w-6 h-6 text-brand-600 animate-spin" />
                                 </div>
                             ) : messages.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-full text-center py-12">
@@ -388,7 +388,7 @@ export default function Inbox() {
                                                 <div className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                                                     <div className="max-w-[70%]">
                                                         <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words
-                                                            ${isMine ? 'bg-[#0033ab] text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm'}
+                                                            ${isMine ? 'bg-brand-600 text-white rounded-br-sm' : 'bg-slate-100 text-slate-800 rounded-bl-sm'}
                                                             ${isOptimistic ? 'opacity-60' : ''}`}
                                                         >
                                                             {msg.body}
@@ -398,7 +398,7 @@ export default function Inbox() {
                                                                 {new Date(msg.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             </span>
                                                             {isMine && (
-                                                                <CheckCheck className={`w-3 h-3 ${msg.is_read ? 'text-[#0033ab]' : 'text-slate-300'}`} />
+                                                                <CheckCheck className={`w-3 h-3 ${msg.is_read ? 'text-brand-600' : 'text-slate-300'}`} />
                                                             )}
                                                         </div>
                                                     </div>
@@ -428,13 +428,13 @@ export default function Inbox() {
                                 value={input}
                                 onChange={handleTyping}
                                 placeholder="Type a message..."
-                                className="flex-1 border border-gray-200 rounded-2xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0033ab] bg-slate-50"
+                                className="flex-1 border border-gray-200 rounded-2xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600 bg-surface"
                                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) sendMessage(e); }}
                             />
                             <button
                                 type="submit"
                                 disabled={!input.trim() || sending}
-                                className="w-11 h-11 bg-[#0033ab] hover:bg-[#002273] disabled:opacity-40 text-white rounded-2xl flex items-center justify-center transition-colors flex-shrink-0"
+                                className="w-11 h-11 bg-brand-600 hover:bg-brand-700 disabled:opacity-40 text-white rounded-2xl flex items-center justify-center transition-colors flex-shrink-0"
                             >
                                 <Send className="w-4 h-4" />
                             </button>

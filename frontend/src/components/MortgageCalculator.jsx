@@ -44,10 +44,10 @@ export default function MortgageCalculator({ basePriceUsd = 1000000 }) {
     return (
         <div className="bg-[#051124] border border-white/10 rounded-3xl p-8 relative overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-500">
             {/* Background Accent Blur */}
-            <div className="absolute top-0 right-0 w-64 h-64 opacity-10 blur-[100px] bg-[#0033ab]"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 opacity-10 blur-[100px] bg-brand-600"></div>
 
             <div className="flex items-center gap-3 mb-8 border-b border-white/5 pb-6">
-                <div className="p-3 rounded-2xl bg-[#0033ab] shadow-lg">
+                <div className="p-3 rounded-2xl bg-brand-600 shadow-lg">
                     <Calculator className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -111,7 +111,7 @@ export default function MortgageCalculator({ basePriceUsd = 1000000 }) {
                 {/* Visual Data Output */}
                 <div className="flex flex-col justify-center">
                     <div className="bg-black/60 border border-white/5 rounded-3xl p-8 text-center shadow-inner relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-[#0033ab]"></div>
+                        <div className="absolute top-0 left-0 w-full h-1 bg-brand-600"></div>
                         
                         <p className="text-sm text-gray-400 uppercase tracking-widest font-bold mb-3">Estimated Monthly Payment</p>
                         <div className="text-4xl lg:text-5xl font-bold text-white mb-6 drop-shadow-lg">

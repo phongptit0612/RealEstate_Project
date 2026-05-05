@@ -15,7 +15,7 @@ export default function SubscriptionCancel() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link to="/pricing"
-                        className="inline-flex items-center justify-center gap-2 bg-[#0033ab] hover:bg-[#002273] text-white font-bold px-6 py-3 rounded-2xl text-sm transition-all">
+                        className="inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-3 rounded-2xl text-sm transition-all">
                         <RefreshCw className="w-4 h-4" /> Try Again
                     </Link>
                     <Link to="/dashboard/properties"

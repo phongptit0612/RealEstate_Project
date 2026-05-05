@@ -29,7 +29,7 @@ export default function AdminLayout() {
         <div className="flex flex-col h-full">
             {/* Brand */}
             <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200">
-                <div className="w-9 h-9 bg-[#0033ab] rounded-xl flex items-center justify-center">
+                <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
                     <ShieldCheck className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -49,7 +49,7 @@ export default function AdminLayout() {
                             onClick={() => setSidebarOpen(false)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
                                 active
-                                    ? 'bg-[#0033ab] text-white shadow-md shadow-[#0033ab]/20'
+                                    ? 'bg-brand-600 text-white shadow-md shadow-[#0033ab]/20'
                                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                             }`}
                         >
@@ -64,7 +64,7 @@ export default function AdminLayout() {
             {/* User footer */}
             <div className="px-4 py-4 border-t border-gray-200">
                 <div className="flex items-center gap-3 mb-3 px-2">
-                    <div className="w-8 h-8 rounded-full bg-[#0033ab]/10 flex items-center justify-center text-[#0033ab] font-bold text-sm">
+                    <div className="w-8 h-8 rounded-full bg-brand-600/10 flex items-center justify-center text-brand-600 font-bold text-sm">
                         {user?.name?.[0]?.toUpperCase() || 'A'}
                     </div>
                     <div className="overflow-hidden">

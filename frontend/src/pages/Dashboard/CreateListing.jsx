@@ -67,7 +67,7 @@ export default function CreateListing() {
             {/* Stepper */}
             <div className="flex gap-4 mb-10">
                 {[{id: 1, icon: ListPlus, label: 'Basics'}, {id: 2, icon: DollarSign, label: 'Metrics'}, {id: 3, icon: MapPin, label: 'Location'}, {id: 4, icon: UploadCloud, label: 'Media'}].map(s => (
-                    <div key={s.id} className={`flex-1 flex flex-col items-center gap-2 p-5 rounded-2xl border ${step >= s.id ? 'bg-[#0033ab] bg-none border-[#002273] text-white font-bold' : 'bg-black/40 border-white/5 text-gray-500'}`}>
+                    <div key={s.id} className={`flex-1 flex flex-col items-center gap-2 p-5 rounded-2xl border ${step >= s.id ? 'bg-brand-600 bg-none border-[#002273] text-white font-bold' : 'bg-black/40 border-white/5 text-gray-500'}`}>
                         <s.icon className={`w-6 h-6 ${step >= s.id ? 'text-ocean-200' : ''}`} />
                         <span className="text-xs font-bold uppercase tracking-widest">{s.label}</span>
                     </div>
@@ -133,17 +133,17 @@ export default function CreateListing() {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">City <span className="text-[#4d88ff]">*</span></label>
-                                <input value={formData.city} onChange={e=>setFormData({...formData, city: e.target.value})} className="w-full bg-black/60 border border-white/10 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-[#0033ab] outline-none" placeholder="Ho Chi Minh City" />
+                                <input value={formData.city} onChange={e=>setFormData({...formData, city: e.target.value})} className="w-full bg-black/60 border border-white/10 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-brand-600 outline-none" placeholder="Ho Chi Minh City" />
                             </div>
                             <div>
                                 <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">Zipcode</label>
-                                <input value={formData.zipcode} onChange={e=>setFormData({...formData, zipcode: e.target.value})} className="w-full bg-black/60 border border-white/10 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-[#0033ab] outline-none tracking-widest" />
+                                <input value={formData.zipcode} onChange={e=>setFormData({...formData, zipcode: e.target.value})} className="w-full bg-black/60 border border-white/10 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-brand-600 outline-none tracking-widest" />
                             </div>
                         </div>
 
                         <div>
                             <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">YouTube Video Walkthrough URL</label>
-                            <input value={formData.video_url} onChange={e=>setFormData({...formData, video_url: e.target.value})} className="w-full bg-black/60 border border-white/10 rounded-xl py-3 px-4 text-[#4d88ff] focus:ring-2 focus:ring-[#0033ab] outline-none" placeholder="https://youtu.be/..." />
+                            <input value={formData.video_url} onChange={e=>setFormData({...formData, video_url: e.target.value})} className="w-full bg-black/60 border border-white/10 rounded-xl py-3 px-4 text-[#4d88ff] focus:ring-2 focus:ring-brand-600 outline-none" placeholder="https://youtu.be/..." />
                         </div>
 
                         <div>
@@ -167,7 +167,7 @@ export default function CreateListing() {
 
                         <div>
                             <label className="block text-gray-400 text-sm font-medium mb-2 uppercase tracking-wider">Street Address</label>
-                            <input value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full bg-black/60 border border-white/10 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-[#0033ab] outline-none" placeholder="Auto-filled from map, or type manually" />
+                            <input value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full bg-black/60 border border-white/10 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-brand-600 outline-none" placeholder="Auto-filled from map, or type manually" />
                         </div>
                     </div>
                 )}
@@ -222,7 +222,7 @@ export default function CreateListing() {
                         <button 
                             onClick={handleUploadMedia}
                             disabled={loading}
-                            className="bg-[#0033ab] hover:bg-[#002273] text-white font-bold py-3.5 px-10 rounded-xl uppercase tracking-wider disabled:opacity-50 outline-none border-none shadow-none filter-none"
+                            className="bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-10 rounded-xl uppercase tracking-wider disabled:opacity-50 outline-none border-none shadow-none filter-none"
                         >
                             {loading ? 'Uploading Multi-Part Streams...' : images.length > 0 ? `Upload ${images.length} Photos & Save` : 'Skip Media & Save List'}
                         </button>
