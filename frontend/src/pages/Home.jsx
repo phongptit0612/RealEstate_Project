@@ -17,9 +17,13 @@ export default function Home() {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
 
-    // Fetch live featured properties
-    axios.get('http://localhost:5000/api/properties/search')
-      .then(res => setFeaturedProperties(res.data.slice(0, 3)))
+    // Fetch live featured properties (limit=6 for homepage)
+    axios.get('http://localhost:5000/api/properties/search?limit=6')
+      .then(res => {
+        const data = res.data;
+        const list = Array.isArray(data) ? data : (data.properties || []);
+        setFeaturedProperties(list.slice(0, 6));
+      })
       .catch(err => console.error("Failed to fetch featured", err));
 
     return () => window.removeEventListener('scroll', handleScroll);

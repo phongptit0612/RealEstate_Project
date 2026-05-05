@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Building, PlusCircle, LogOut, MessageSquare, Heart, UserCircle, Crown } from 'lucide-react';
+import { Building, PlusCircle, LogOut, MessageSquare, Heart, UserCircle, Crown, History } from 'lucide-react';
 import useUserStore from '../store/userStore';
 import { connectSocket, disconnectSocket } from '../lib/socket';
 import axios from 'axios';
@@ -61,6 +61,7 @@ export default function DashboardLayout() {
         { path: '/dashboard/favorites',       icon: Heart,         label: 'Saved' },
         { path: '/dashboard/inbox',           icon: MessageSquare, label: 'Inbox', badge: unreadCount },
         { path: '/dashboard/subscriptions',   icon: Crown,         label: 'VIP Boosts' },
+        { path: '/dashboard/activity',        icon: History,       label: 'Activity' },
         { path: '/dashboard/profile',         icon: UserCircle,    label: 'My Profile' },
     ];
 

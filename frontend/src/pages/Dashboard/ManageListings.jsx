@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Edit, Trash2, Crown, Zap } from 'lucide-react';
+import { Edit, Trash2, Crown, Zap, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useCurrencyStore from '../../store/currencyStore';
 
@@ -42,6 +42,17 @@ export default function ManageListings() {
         }
     };
 
+    const handleRenew = async (id) => {
+        try {
+            const res = await axios.patch(`http://localhost:5000/api/properties/${id}/renew`, {}, { withCredentials: true });
+            const newExpiry = res.data.expires_at;
+            setProperties(properties.map(p => p.property_id === id ? { ...p, expires_at: newExpiry } : p));
+            alert(`✅ Listing renewed! New expiry: ${new Date(newExpiry).toLocaleDateString()}`);
+        } catch (error) {
+            alert('Failed to renew listing');
+        }
+    };
+
     if (loading) return <div className="text-ocean-200 animate-pulse font-medium">Loading private portfolios...</div>;
 
     return (
@@ -63,6 +74,7 @@ export default function ManageListings() {
                                 <th className="p-5 font-medium">Live Converted Val</th>
                                 <th className="p-5 font-medium">VIP Status</th>
                                 <th className="p-5 font-medium">Approval</th>
+                                <th className="p-5 font-medium">Expiry</th>
                                 <th className="p-5 font-medium">Asset Status</th>
                             </tr>
                         </thead>
@@ -123,6 +135,26 @@ export default function ManageListings() {
                                         <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider ${prop.mod_status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : prop.mod_status === 'rejected' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'}`}>
                                             {prop.mod_status}
                                         </span>
+                                    </td>
+                                    {/* Expiry + Renew */}
+                                    <td className="p-5">
+                                        <div className="flex flex-col gap-1.5">
+                                            <span className={`text-xs font-medium ${
+                                                prop.expires_at && new Date(prop.expires_at) < new Date()
+                                                    ? 'text-red-400' : 'text-gray-400'
+                                            }`}>
+                                                {prop.expires_at
+                                                    ? (new Date(prop.expires_at) < new Date() ? '⚠️ Expired' : `📅 ${new Date(prop.expires_at).toLocaleDateString()}`)
+                                                    : '—'}
+                                            </span>
+                                            <button
+                                                onClick={() => handleRenew(prop.property_id)}
+                                                className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-white border border-emerald-500/25 hover:bg-emerald-500 px-2.5 py-1 rounded-lg transition-all w-fit"
+                                                title="Extend listing by 7 days"
+                                            >
+                                                <RefreshCw className="w-3 h-3" /> Renew
+                                            </button>
+                                        </div>
                                     </td>
                                     <td className="p-5">
                                         <div className="flex items-center gap-2">

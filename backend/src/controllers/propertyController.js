@@ -135,7 +135,16 @@ exports.updateProperty = async (req, res) => {
 
 exports.searchProperties = async (req, res) => {
     try {
-        const { keyword, minPrice, maxPrice, currency='USD', type_id, city_id, district_id, direction, bedrooms, bathrooms } = req.query;
+        const {
+            keyword, city_id, district_id, type_id,
+            minPrice, maxPrice, direction, bedrooms, bathrooms,
+            currency
+        } = req.query;
+
+        // Pagination
+        const page  = Math.max(1, parseInt(req.query.page)  || 1);
+        const limit = Math.min(50, parseInt(req.query.limit) || 12);
+        const offset = (page - 1) * limit;
 
         let usdMin = parseFloat(minPrice) || 0;
         let usdMax = parseFloat(maxPrice) || 999999999999;
@@ -193,23 +202,37 @@ exports.searchProperties = async (req, res) => {
             params.push(bathrooms);
         }
 
-        // Check if vip_tier column exists before using it (safe fallback if migration not run yet)
+        // Check if vip_tier column exists before using it (safe fallback)
         const [cols] = await pool.query(
             `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'properties' AND COLUMN_NAME = 'vip_tier'`
         );
         const hasVip = cols.length > 0;
+        const orderClause = hasVip
+            ? `ORDER BY CASE p.vip_tier WHEN 'gold' THEN 0 WHEN 'silver' THEN 1 ELSE 2 END ASC, p.created_at DESC`
+            : `ORDER BY p.created_at DESC`;
 
-        if (hasVip) {
-            // VIP listings float to top: gold → silver → none; then newest first
-            queryStr += ` ORDER BY
-                CASE p.vip_tier WHEN 'gold' THEN 0 WHEN 'silver' THEN 1 ELSE 2 END ASC,
-                p.created_at DESC LIMIT 50`;
-        } else {
-            queryStr += ` ORDER BY p.created_at DESC LIMIT 50`;
-        }
+        // COUNT for pagination total
+        const countQuery = `SELECT COUNT(*) as total FROM properties p
+            LEFT JOIN property_types pt ON p.type_id = pt.type_id
+            LEFT JOIN districts d ON p.district_id = d.district_id
+            LEFT JOIN cities c ON d.city_id = c.city_id
+            ${queryStr.substring(queryStr.indexOf('WHERE'))}`;
+        const [countRows] = await pool.query(countQuery.replace('SELECT COUNT(*) as total FROM properties p', 'SELECT COUNT(*) as total FROM properties p'), params);
+        const total = countRows[0].total;
+        const totalPages = Math.ceil(total / limit);
 
-        const [properties] = await pool.query(queryStr, params);
+        // Paginated data query
+        const dataQuery = `SELECT p.*, pt.name as type_name, d.name as district_name, c.name as city_name
+            FROM properties p
+            LEFT JOIN property_types pt ON p.type_id = pt.type_id
+            LEFT JOIN districts d ON p.district_id = d.district_id
+            LEFT JOIN cities c ON d.city_id = c.city_id
+            ${queryStr.substring(queryStr.indexOf('WHERE'))}
+            ${orderClause}
+            LIMIT ? OFFSET ?`;
+
+        const [properties] = await pool.query(dataQuery, [...params, limit, offset]);
 
         // Map primary image array
         if (properties.length > 0) {
@@ -222,7 +245,7 @@ exports.searchProperties = async (req, res) => {
             });
         }
 
-        res.json(properties);
+        res.json({ properties, total, page, totalPages });
     } catch (error) {
         console.error("Search Error:", error);
         res.status(500).json({ error: error.message });
@@ -238,6 +261,61 @@ exports.deleteProperty = async (req, res) => {
 
         if (result.affectedRows === 0) return res.status(404).json({ error: 'Property not found or unauthorized' });
         res.json({ message: 'Property deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// PATCH /api/properties/:property_id/renew — extend expires_at by 7 days
+exports.renewListing = async (req, res) => {
+    try {
+        const { property_id } = req.params;
+        const owner_id = req.user.userId;
+
+        // Only the owner can renew
+        const [rows] = await pool.query(
+            'SELECT property_id, expires_at FROM properties WHERE property_id = ? AND owner_id = ?',
+            [property_id, owner_id]
+        );
+        if (rows.length === 0) return res.status(404).json({ error: 'Property not found or unauthorized' });
+
+        // Extend from today or current expiry — whichever is later
+        await pool.query(
+            `UPDATE properties
+             SET expires_at = DATE_ADD(GREATEST(IFNULL(expires_at, NOW()), NOW()), INTERVAL 7 DAY),
+                 updated_at = NOW()
+             WHERE property_id = ? AND owner_id = ?`,
+            [property_id, owner_id]
+        );
+
+        const [updated] = await pool.query('SELECT expires_at FROM properties WHERE property_id = ?', [property_id]);
+        res.json({ message: 'Listing renewed for 7 days', expires_at: updated[0].expires_at });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// GET /api/properties/recently-viewed — last 10 properties the user visited
+exports.getRecentlyViewed = async (req, res) => {
+    try {
+        const user_id = req.user.userId;
+        const [rows] = await pool.query(`
+            SELECT p.property_id, p.title, p.slug, p.price_usd, p.listing_type,
+                   p.bedrooms, p.bathrooms, p.area_m2,
+                   pt.name as type_name, d.name as district_name, c.name as city_name,
+                   rv.viewed_at,
+                   (SELECT image_url FROM property_images pi2
+                    WHERE pi2.property_id = p.property_id AND pi2.sort_order = 1 LIMIT 1) AS primary_image
+            FROM recently_viewed rv
+            JOIN properties p ON rv.property_id = p.property_id
+            LEFT JOIN property_types pt ON p.type_id = pt.type_id
+            LEFT JOIN districts d ON p.district_id = d.district_id
+            LEFT JOIN cities c ON d.city_id = c.city_id
+            WHERE rv.user_id = ? AND p.mod_status = 'approved'
+            ORDER BY rv.viewed_at DESC
+            LIMIT 20
+        `, [user_id]);
+        res.json(rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

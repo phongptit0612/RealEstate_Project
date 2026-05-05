@@ -13,8 +13,12 @@ export default function Properties() {
     const { isAuthenticated, user, logout } = useUserStore();
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [metadata, setMetadata] = useState({ cities: [], districts: [], types: [] });
     const [viewMode, setViewMode] = useState('list'); // 'list' | 'map'
+    const [page, setPage] = useState(1);
+    const [totalResults, setTotalResults] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
 
     // Filter States
     const [keyword, setKeyword] = useState('');
@@ -49,37 +53,56 @@ export default function Properties() {
         }
     }, [filters.city_id, metadata.districts]);
 
-    // Fetch Properties
-    const fetchProperties = async () => {
-        setLoading(true);
+    // Fetch Properties (page 1 = fresh search)
+    const fetchProperties = async (currentPage = 1, append = false) => {
+        append ? setLoadingMore(true) : setLoading(true);
         try {
-            // Build Query Params string
             const params = new URLSearchParams();
             if (keyword) params.append('keyword', keyword);
             if (preferredCurrency) params.append('currency', preferredCurrency);
-            
+            params.append('page', currentPage);
+            params.append('limit', 12);
+
             Object.entries(filters).forEach(([key, val]) => {
                 if (val) params.append(key, val);
             });
 
             const res = await axios.get(`http://localhost:5000/api/properties/search?${params.toString()}`);
-            setProperties(res.data);
+            const data = res.data;
+
+            // Support both old array response and new paginated response
+            if (Array.isArray(data)) {
+                setProperties(data);
+                setTotalResults(data.length);
+                setTotalPages(1);
+            } else {
+                setProperties(prev => append ? [...prev, ...data.properties] : data.properties);
+                setTotalResults(data.total);
+                setTotalPages(data.totalPages);
+                setPage(currentPage);
+            }
         } catch (error) {
-            console.error("Search Error:", error);
+            console.error('Search Error:', error);
         } finally {
-            setLoading(false);
+            append ? setLoadingMore(false) : setLoading(false);
         }
     };
 
-    // Initial Load & re-trigger on currency change for accurate translation bounds
+    const handleLoadMore = () => {
+        fetchProperties(page + 1, true);
+    };
+
+    // Initial Load & re-trigger on currency/filter change
     useEffect(() => {
-        fetchProperties();
+        setPage(1);
+        fetchProperties(1, false);
     // eslint-disable-next-line
     }, [preferredCurrency]);
 
     const handleClear = () => {
         setKeyword('');
         setFilters({ city_id: '', district_id: '', type_id: '', minPrice: '', maxPrice: '', direction: '', bedrooms: '', bathrooms: '' });
+        setPage(1);
     };
 
     return (
@@ -255,7 +278,7 @@ export default function Properties() {
                             </div>
 
                             <button 
-                                onClick={fetchProperties}
+                                onClick={() => { setPage(1); fetchProperties(1, false); }}
                                 className="w-full mt-6 bg-[#0033ab] hover:bg-[#002273] text-white font-bold uppercase tracking-widest py-4 rounded-xl outline-none border-none shadow-none filter-none"
                             >
                                 Execute Search
@@ -274,7 +297,7 @@ export default function Properties() {
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="text-[#0033ab] font-bold bg-[#0033ab]/10 px-4 py-2 rounded-xl border border-[#0033ab]/20">
-                                {properties.length} Results
+                                {loading ? '...' : `${properties.length} of ${totalResults}`}
                             </div>
                             {/* View mode toggle */}
                             <div className="flex bg-gray-100 rounded-xl p-1 border border-gray-200">
@@ -332,9 +355,33 @@ export default function Properties() {
                             </div>
                         )
                     )}
-                </div>
-
-            </div>
+                    {/* Load More */}
+                    {viewMode === 'list' && !loading && page < totalPages && (
+                        <div className="flex justify-center mt-10">
+                            <button
+                                onClick={handleLoadMore}
+                                disabled={loadingMore}
+                                className="flex items-center gap-3 bg-white border-2 border-[#0033ab] text-[#0033ab] hover:bg-[#0033ab] hover:text-white font-bold px-10 py-4 rounded-2xl transition-all duration-300 shadow-sm hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                                {loadingMore ? (
+                                    <>
+                                        <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                                        </svg>
+                                        Loading...
+                                    </>
+                                ) : (
+                                    <>Load More &nbsp;<span className="text-sm opacity-70">({totalResults - properties.length} remaining)</span></>
+                                )}
+                            </button>
+                        </div>
+                    )}
+                    {viewMode === 'list' && !loading && properties.length > 0 && page >= totalPages && (
+                        <p className="text-center text-slate-400 text-sm mt-10 font-medium">✓ All {totalResults} listings loaded</p>
+                    )}
+                </div> {/* end flex-1 results */}
+            </div> {/* end max-w-7xl container */}
             <Footer />
         </div>
     );
