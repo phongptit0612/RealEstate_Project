@@ -22,7 +22,7 @@ const TIERS = {
 // Body: { property_id, tier, currency }
 // Creates a Stripe Checkout Session and returns the session URL
 exports.createCheckoutSession = async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const { property_id, tier, currency = 'usd' } = req.body;
 
     if (!TIERS[tier]) return res.status(400).json({ error: 'Invalid tier. Choose silver or gold.' });
@@ -140,7 +140,7 @@ exports.handleWebhook = async (req, res) => {
 
 // ── GET /api/subscriptions/mine ──────────────────────────────────────────────
 exports.getMySubscriptions = async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const [rows] = await pool.query(
         `SELECT s.*, p.title AS property_title, p.vip_tier, p.vip_expires_at
          FROM subscriptions s
@@ -159,7 +159,7 @@ exports.simulatePayment = async (req, res) => {
         return res.status(403).json({ error: 'Simulation disabled in production.' });
     }
 
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const { property_id, tier } = req.body;
     if (!TIERS[tier]) return res.status(400).json({ error: 'Invalid tier.' });
 
