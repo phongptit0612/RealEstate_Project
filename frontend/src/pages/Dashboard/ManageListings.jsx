@@ -207,7 +207,7 @@ export default function ManageListings() {
                                 </tr>
                             ))}
                             {properties.length === 0 && (
-                                <tr><td colSpan="5" className="p-12 text-center text-gray-500 font-light">Your private portfolio is currently empty.</td></tr>
+                                <tr><td colSpan="8" className="p-12 text-center text-gray-500 font-light">Your private portfolio is currently empty.</td></tr>
                             )}
                         </tbody>
                     </table>

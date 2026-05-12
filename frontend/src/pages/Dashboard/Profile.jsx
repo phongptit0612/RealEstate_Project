@@ -58,7 +58,7 @@ export default function Profile() {
         const formData = new FormData();
         formData.append('file', file);
         try {
-            const r = await axios.post(`${API}/media/upload`, formData, {
+            const r = await axios.post(`${API}/auth/avatar`, formData, {
                 withCredentials: true,
                 headers: { 'Content-Type': 'multipart/form-data' },
             });

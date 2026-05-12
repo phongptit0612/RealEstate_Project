@@ -17,6 +17,7 @@ router.post('/reset-password', authController.resetPassword);
 router.get('/me', protect, authController.getMe);
 router.put('/profile', protect, authController.updateProfile);
 router.put('/change-password', protect, authController.changePassword);
+router.post('/avatar', protect, authController.uploadAvatar);
 
 // Public - agents directory
 router.get('/agents', authController.getAgents);

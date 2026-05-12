@@ -1,14 +1,9 @@
 import React from 'react';
-import { Bed, Bath, Square, MapPin, Heart, Eye } from 'lucide-react';
+import { Bed, Bath, Square, MapPin, Heart } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
 import useFavoriteStore from '../store/favoriteStore';
 import useUserStore from '../store/userStore';
 import { Link, useNavigate } from 'react-router-dom';
-
-function getDaysSince(dateStr) {
-    if (!dateStr) return 999;
-    return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000);
-}
 
 export default function PropertyCard({ property }) {
     const { formatPrice } = useCurrencyStore();
@@ -23,49 +18,28 @@ export default function PropertyCard({ property }) {
         : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop';
 
     const handleFavorite = (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Prevent navigating to detail page
         e.stopPropagation();
         if (!isAuthenticated) { navigate('/login'); return; }
         toggleFavorite(property.property_id);
     };
 
-    // VIP styling
-    const isGold   = property.vip_tier === 'gold';
-    const isSilver = property.vip_tier === 'silver';
-
-    // Status badges
-    const daysSince = getDaysSince(property.created_at);
-    const isNew      = daysSince <= 3;
-    const isPriceDrop = property.has_price_drop; // set by backend when price_history has a reduction
-
     return (
-        <Link
-            to={`/properties/${property.property_id}`}
-            className={`group block bg-white rounded-3xl overflow-hidden transition-all duration-300 shadow-sm hover:shadow-xl relative
-                ${isGold   ? 'border-2 border-amber-400 shadow-amber-400/20 hover:shadow-amber-400/40' :
-                  isSilver ? 'border-2 border-slate-400 shadow-slate-400/20 hover:shadow-slate-400/30' :
-                             'border border-gray-200 hover:border-brand-600'
-                }`
-            }>
+        <Link to={`/properties/${property.property_id}`} className="group block bg-white border border-gray-200 rounded-3xl overflow-hidden hover:border-[#0033ab] transition-all duration-300 shadow-sm hover:shadow-xl relative">
 
             {/* Top Badges */}
-            <div className="absolute top-4 left-4 z-10 flex gap-2 flex-wrap">
+            <div className="absolute top-4 left-4 z-10 flex gap-2">
                 <span className="bg-white/95 backdrop-blur-md border border-gray-200 text-slate-800 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm">
                     {property.type_name || 'Estate'}
                 </span>
                 {property.listing_type && (
-                    <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm ${
-                        property.listing_type === 'rent'
+                    <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm ${property.listing_type === 'rent'
                             ? 'bg-violet-100 text-violet-700 border border-violet-200'
                             : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                    }`}>
+                        }`}>
                         {property.listing_type === 'sale' ? 'For Sale' : 'For Rent'}
                     </span>
                 )}
-                {isGold   && <span className="bg-amber-400 text-black text-xs font-extrabold px-3 py-1.5 rounded-full shadow-md">🥇 Gold VIP</span>}
-                {isSilver && <span className="bg-slate-200 text-slate-700 text-xs font-extrabold px-3 py-1.5 rounded-full shadow-md">🥈 Silver VIP</span>}
-                {isNew      && !isGold && !isSilver && <span className="bg-blue-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-full shadow-md">🆕 New</span>}
-                {isPriceDrop && <span className="bg-rose-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-full shadow-md">💰 Price Drop</span>}
             </div>
 
             {/* ❤️ Favorite Button */}
@@ -89,23 +63,16 @@ export default function PropertyCard({ property }) {
                     alt={property.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                 />
-                {/* View count overlay */}
-                {property.view_count > 0 && (
-                    <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1 bg-black/50 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full">
-                        <Eye className="w-3 h-3" />
-                        <span>{property.view_count.toLocaleString()}</span>
-                    </div>
-                )}
             </div>
 
             {/* Content */}
             <div className="p-5">
                 {/* Price */}
                 <div className="flex items-start justify-between gap-2 mb-3">
-                    <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-brand-600 transition-colors flex-1">
+                    <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-[#0033ab] transition-colors flex-1">
                         {property.title}
                     </h3>
-                    <p className="text-lg font-bold text-brand-600 flex-shrink-0">
+                    <p className="text-lg font-bold text-[#0033ab] flex-shrink-0">
                         {formatPrice(property.price_usd)}
                     </p>
                 </div>

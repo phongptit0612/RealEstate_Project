@@ -48,3 +48,38 @@ exports.uploadImages = [
         }
     }
 ];
+
+// DELETE /api/media/:image_id — Remove a single image (owner only)
+exports.deleteImage = async (req, res) => {
+    try {
+        const { image_id } = req.params;
+        const owner_id = req.user.userId;
+
+        // Verify ownership through property
+        const [[img]] = await pool.query(
+            `SELECT pi.image_id, pi.image_url
+             FROM property_images pi
+             JOIN properties p ON pi.property_id = p.property_id
+             WHERE pi.image_id = ? AND p.owner_id = ?`,
+            [image_id, owner_id]
+        );
+        if (!img) return res.status(403).json({ error: 'Not authorized or image not found' });
+
+        // Delete from Cloudinary (extract public_id from URL)
+        try {
+            if (img.image_url && img.image_url.includes('cloudinary')) {
+                const parts = img.image_url.split('/');
+                const fileName = parts[parts.length - 1].split('.')[0];
+                const folder = parts[parts.length - 2];
+                await cloudinary.uploader.destroy(`${folder}/${fileName}`);
+            }
+        } catch (cdnErr) {
+            console.warn('Cloudinary delete warning:', cdnErr.message);
+        }
+
+        await pool.query('DELETE FROM property_images WHERE image_id = ?', [image_id]);
+        res.json({ message: 'Image deleted' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

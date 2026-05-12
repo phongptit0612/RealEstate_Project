@@ -9,7 +9,7 @@ import MapView from '../components/MapView';
 import Footer from '../components/Footer';
 
 export default function Properties() {
-    const { preferredCurrency, setCurrency } = useCurrencyStore();
+    const { preferredCurrency, setCurrency, currencies, currencyLabels } = useCurrencyStore();
     const { isAuthenticated, user, logout } = useUserStore();
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -27,6 +27,7 @@ export default function Properties() {
         city_id: '',
         district_id: '',
         type_id: '',
+        listing_type: '',
         minPrice: '',
         maxPrice: '',
         direction: '',
@@ -104,7 +105,7 @@ export default function Properties() {
 
     const handleClear = () => {
         setKeyword('');
-        setFilters({ city_id: '', district_id: '', type_id: '', minPrice: '', maxPrice: '', direction: '', bedrooms: '', bathrooms: '' });
+        setFilters({ city_id: '', district_id: '', type_id: '', listing_type: '', minPrice: '', maxPrice: '', direction: '', bedrooms: '', bathrooms: '' });
         setSort('newest');
         setPage(1);
         setTimeout(() => fetchProperties(1, false), 0);
@@ -140,9 +141,9 @@ export default function Properties() {
                                 value={preferredCurrency}
                                 onChange={(e) => setCurrency(e.target.value)}
                             >
-                                <option value="USD">USD ($)</option>
-                                <option value="VND">VND (đ)</option>
-                                <option value="EUR">EUR (€)</option>
+                                {currencies.map(c => (
+                                    <option key={c} value={c}>{currencyLabels[c] || c}</option>
+                                ))}
                             </select>
                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
                                 <ChevronDown className="w-4 h-4" />
@@ -192,6 +193,24 @@ export default function Properties() {
 
                         {/* Core Filters */}
                         <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
+
+                            {/* Sale / Rent toggle */}
+                            <div className="flex bg-surface-2 border border-gray-200 rounded-xl p-1 flex-shrink-0">
+                                {[['', 'All'], ['sale', 'For Sale'], ['rent', 'For Rent']].map(([val, label]) => (
+                                    <button
+                                        key={val}
+                                        onClick={() => setFilters(f => ({ ...f, listing_type: val }))}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                            filters.listing_type === val
+                                                ? val === 'rent' ? 'bg-blue-500 text-white shadow' : 'bg-brand-600 text-white shadow'
+                                                : 'text-slate-500 hover:text-slate-700'
+                                        }`}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+
                             <select 
                                 value={filters.type_id} 
                                 onChange={e => { setFilters({...filters, type_id: e.target.value}); }}

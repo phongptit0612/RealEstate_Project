@@ -281,3 +281,34 @@ exports.getAgents = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// POST /api/auth/avatar — Upload profile picture (uses Cloudinary)
+exports.uploadAvatar = async (req, res) => {
+    try {
+        const multer = require('multer');
+        const { v2: cloudinary } = require('cloudinary');
+        const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
+        const avatarStorage = new CloudinaryStorage({
+            cloudinary,
+            params: { folder: 'luxestates/avatars', allowed_formats: ['jpg', 'png', 'jpeg', 'webp'] },
+        });
+        const upload = multer({ storage: avatarStorage }).single('file');
+
+        upload(req, res, async (err) => {
+            if (err) return res.status(400).json({ error: err.message });
+            if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+            const url = req.file.path;
+            await pool.query('UPDATE users SET avatar_url = ? WHERE user_id = ?', [url, req.user.userId]);
+            res.json({ url, message: 'Avatar updated successfully' });
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

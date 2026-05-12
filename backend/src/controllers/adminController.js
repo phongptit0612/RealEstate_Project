@@ -57,6 +57,25 @@ exports.getListings = async (req, res) => {
     }
 };
 
+// PATCH /api/admin/listings/:id — Admin: edit listing content
+exports.updateListing = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, price_usd, listing_type } = req.body;
+        await pool.query(
+            `UPDATE properties SET title = ?, description = ?, price_usd = ?, listing_type = ?, updated_at = NOW() WHERE property_id = ?`,
+            [title, description, parseFloat(price_usd), listing_type, id]
+        );
+        await pool.query(
+            `INSERT INTO admin_logs (admin_id, action, target_type, target_id, note) VALUES (?, ?, ?, ?, ?)`,
+            [req.user.userId, 'edit', 'property', id, 'Admin edited listing content']
+        );
+        res.json({ message: 'Listing updated.' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // PATCH /api/admin/listings/:id/approve
 exports.approveListing = async (req, res) => {
     try {

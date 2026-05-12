@@ -23,6 +23,7 @@ import AdminReports from './pages/Admin/AdminReports';
 import AdminCategories from './pages/Admin/AdminCategories';
 import useUserStore from './store/userStore';
 import useFavoriteStore from './store/favoriteStore';
+import useCurrencyStore from './store/currencyStore';
 import Pricing from './pages/Subscription/Pricing';
 import SubscriptionSuccess from './pages/Subscription/SubscriptionSuccess';
 import SubscriptionCancel from './pages/Subscription/SubscriptionCancel';
@@ -50,10 +51,13 @@ function App() {
   const checkAuth = useUserStore(state => state.checkAuth);
   const { isAuthenticated } = useUserStore();
   const loadFavorites = useFavoriteStore(s => s.loadFavorites);
+  const fetchRates = useCurrencyStore(s => s.fetchRates);
 
+  // Bootstrap: auth + exchange rates on mount
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+    fetchRates(); // Fetch live exchange rates once
+  }, [checkAuth, fetchRates]);
 
   // Load favorite IDs whenever auth state changes
   useEffect(() => {

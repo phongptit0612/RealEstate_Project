@@ -4,5 +4,6 @@ const mediaController = require('../controllers/mediaController');
 const { protect } = require('../middlewares/authMiddleware');
 
 router.post('/upload', protect, mediaController.uploadImages);
+router.delete('/:image_id', protect, mediaController.deleteImage);
 
 module.exports = router;

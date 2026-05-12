@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Save, AlertCircle, CheckCircle, Loader2, MapPin } from 'lucide-react';
+import { ArrowLeft, Save, AlertCircle, CheckCircle, Loader2, MapPin, X, UploadCloud, Trash2, Compass } from 'lucide-react';
 import LocationPicker from '../../components/LocationPicker';
 
 const API = 'http://localhost:5000/api';
@@ -13,10 +13,16 @@ export default function EditListing() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState('');
+    const [loading, setLoading]     = useState(true);
+    const [saving, setSaving]       = useState(false);
+    const [success, setSuccess]     = useState(false);
+    const [error, setError]         = useState('');
+    const [metadata, setMetadata]   = useState({ cities: [], districts: [], features: [] });
+    const [activeDistricts, setActiveDistricts] = useState([]);
+    const [existingImages, setExistingImages]   = useState([]);
+    const [deletingImg, setDeletingImg]         = useState(null);
+    const [newImages, setNewImages]             = useState(null);
+    const [uploadingImg, setUploadingImg]       = useState(false);
 
     const [form, setForm] = useState({
         title: '',
@@ -26,20 +32,33 @@ export default function EditListing() {
         bedrooms: '',
         bathrooms: '',
         listing_type: 'sale',
+        direction: '',
+        city_id: '',
+        district_id: '',
         address: '',
         video_url: '',
         latitude: null,
         longitude: null,
     });
 
-    // ── Load existing property ──────────────────────────────
+    // ── Fetch metadata & property ───────────────────────────
     useEffect(() => {
-        (async () => {
+        const init = async () => {
             try {
-                // Fetch from /me to get user's own listings (bypasses approved filter)
+                // Load metadata (cities, districts)
+                const metaRes = await axios.get(`${API}/properties/metadata`);
+                setMetadata(metaRes.data);
+
+                // Load my listing
                 const r = await axios.get(`${API}/properties/me`, { withCredentials: true });
                 const prop = r.data.find(p => String(p.property_id) === String(id));
                 if (!prop) { setError('Listing not found or you do not own it.'); setLoading(false); return; }
+
+                // Derive city_id from the metadata districts (district_id is in the property)
+                const district_id = prop.district_id;
+                const matchedDistrict = metaRes.data.districts.find(d => d.district_id === parseInt(district_id));
+                const city_id = matchedDistrict?.city_id || prop.city_id || '';
+
                 setForm({
                     title: prop.title || '',
                     description: prop.description || '',
@@ -48,21 +67,75 @@ export default function EditListing() {
                     bedrooms: prop.bedrooms || '',
                     bathrooms: prop.bathrooms || '',
                     listing_type: prop.listing_type || 'sale',
+                    direction: prop.direction || '',
+                    city_id: city_id,
+                    district_id: prop.district_id || '',
                     address: prop.address || '',
                     video_url: prop.video_url || '',
                     latitude: prop.latitude || null,
                     longitude: prop.longitude || null,
                 });
+
+                // Load existing images
+                const imgRes = await axios.get(`${API}/properties/${id}/images`, { withCredentials: true });
+                setExistingImages(imgRes.data || []);
             } catch {
                 setError('Failed to load listing data.');
             } finally {
                 setLoading(false);
             }
-        })();
+        };
+        init();
     }, [id]);
 
-    const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+    // Cascade districts when city changes
+    useEffect(() => {
+        if (form.city_id && metadata.districts.length > 0) {
+            setActiveDistricts(metadata.districts.filter(d => d.city_id === parseInt(form.city_id)));
+        } else {
+            setActiveDistricts([]);
+        }
+    }, [form.city_id, metadata.districts]);
 
+    const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+    const setVal = (field, val) => setForm(f => ({ ...f, [field]: val }));
+
+    // ── Delete an existing image ────────────────────────────
+    const handleDeleteImage = async (image_id) => {
+        if (!window.confirm('Remove this photo?')) return;
+        setDeletingImg(image_id);
+        try {
+            await axios.delete(`${API}/media/${image_id}`, { withCredentials: true });
+            setExistingImages(prev => prev.filter(img => img.image_id !== image_id));
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to delete image');
+        }
+        setDeletingImg(null);
+    };
+
+    // ── Upload new images ───────────────────────────────────
+    const handleUploadNewImages = async () => {
+        if (!newImages || newImages.length === 0) return;
+        setUploadingImg(true);
+        const fd = new FormData();
+        fd.append('property_id', id);
+        Array.from(newImages).forEach(f => fd.append('images', f));
+        try {
+            await axios.post(`${API}/media/upload`, fd, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true,
+            });
+            // Refresh image list
+            const imgRes = await axios.get(`${API}/properties/${id}/images`, { withCredentials: true });
+            setExistingImages(imgRes.data || []);
+            setNewImages(null);
+        } catch (err) {
+            alert(err.response?.data?.error || 'Upload failed');
+        }
+        setUploadingImg(false);
+    };
+
+    // ── Save form ───────────────────────────────────────────
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -71,9 +144,9 @@ export default function EditListing() {
             await axios.put(`${API}/properties/${id}`, {
                 ...form,
                 price_usd: parseFloat(form.price_usd),
-                area_sqm: form.area_sqm ? parseFloat(form.area_sqm) : undefined,
-                bedrooms: form.bedrooms ? parseInt(form.bedrooms) : undefined,
-                bathrooms: form.bathrooms ? parseInt(form.bathrooms) : undefined,
+                area_sqm: form.area_sqm  ? parseFloat(form.area_sqm)  : undefined,
+                bedrooms:  form.bedrooms  ? parseInt(form.bedrooms)   : undefined,
+                bathrooms: form.bathrooms ? parseInt(form.bathrooms)  : undefined,
             }, { withCredentials: true });
             setSuccess(true);
             setTimeout(() => navigate('/dashboard/properties'), 2000);
@@ -99,7 +172,7 @@ export default function EditListing() {
     );
 
     return (
-        <div className="max-w-2xl space-y-6">
+        <div className="max-w-3xl space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Link to="/dashboard/properties" className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
@@ -111,21 +184,76 @@ export default function EditListing() {
                 </div>
             </div>
 
-            {/* Success banner */}
+            {/* Alerts */}
             {success && (
                 <div className="flex items-center gap-3 p-4 bg-emerald-500/15 border border-emerald-500/30 rounded-2xl text-emerald-300 text-sm font-semibold">
                     <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                    Listing updated! Redirecting to My Properties...
+                    Listing updated! Redirecting...
                 </div>
             )}
-
-            {/* Error banner */}
             {error && (
                 <div className="flex items-center gap-3 p-4 bg-red-500/15 border border-red-500/30 rounded-2xl text-red-300 text-sm">
                     <AlertCircle className="w-5 h-5 flex-shrink-0" /> {error}
                 </div>
             )}
 
+            {/* ── Photo Management ── */}
+            <div className="bg-[#051124] border border-white/8 rounded-2xl p-6 space-y-4">
+                <h2 className="text-sm font-bold text-white uppercase tracking-wider">Photos</h2>
+
+                {/* Existing images grid */}
+                {existingImages.length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        {existingImages.map(img => (
+                            <div key={img.image_id} className="relative group aspect-square rounded-xl overflow-hidden bg-black border border-white/10">
+                                <img
+                                    src={img.image_url.startsWith('http') ? img.image_url : `http://localhost:5000${img.image_url}`}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                />
+                                <button
+                                    onClick={() => handleDeleteImage(img.image_id)}
+                                    disabled={deletingImg === img.image_id}
+                                    className="absolute top-1 right-1 w-7 h-7 bg-red-500/90 hover:bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow"
+                                    title="Remove photo"
+                                >
+                                    {deletingImg === img.image_id
+                                        ? <Loader2 className="w-3 h-3 animate-spin" />
+                                        : <X className="w-3 h-3" />}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-slate-500 text-sm">No photos uploaded yet.</p>
+                )}
+
+                {/* Add new photos */}
+                <div className="border border-dashed border-white/10 hover:border-brand-600/40 rounded-xl p-5 transition-all">
+                    <input type="file" id="newImgUpload" multiple accept="image/*" className="hidden"
+                        onChange={e => setNewImages(e.target.files)} />
+                    <label htmlFor="newImgUpload" className="flex items-center gap-3 cursor-pointer text-slate-400 hover:text-white transition-colors">
+                        <UploadCloud className="w-5 h-5 text-brand-400 flex-shrink-0" />
+                        <span className="text-sm">
+                            {newImages && newImages.length > 0
+                                ? `${newImages.length} file${newImages.length > 1 ? 's' : ''} selected — `
+                                : 'Click to add more photos — '}
+                            <span className="text-slate-500 text-xs">JPG, PNG, WebP</span>
+                        </span>
+                    </label>
+                    {newImages && newImages.length > 0 && (
+                        <button
+                            onClick={handleUploadNewImages}
+                            disabled={uploadingImg}
+                            className="mt-3 flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                            {uploadingImg ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</> : <><UploadCloud className="w-4 h-4" /> Upload Photos</>}
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* ── Main Edit Form ── */}
             <form onSubmit={handleSubmit} className="bg-[#051124] border border-white/8 rounded-2xl p-6 space-y-5">
                 {/* Title */}
                 <div>
@@ -136,30 +264,36 @@ export default function EditListing() {
                 {/* Description */}
                 <div>
                     <label className={labelClass}>Description</label>
-                    <textarea
-                        rows={4} value={form.description} onChange={set('description')}
-                        placeholder="Describe the property..."
-                        className={`${inputClass} resize-none`}
-                    />
+                    <textarea rows={4} value={form.description} onChange={set('description')} placeholder="Describe the property..." className={`${inputClass} resize-none`} />
                 </div>
 
-                {/* Price & Type */}
+                {/* Listing Type + Price */}
                 <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className={labelClass}>Listing For</label>
+                        <div className="flex gap-2">
+                            {[['sale', '🏷️ For Sale'], ['rent', '🔑 For Rent']].map(([val, label]) => (
+                                <button
+                                    key={val}
+                                    type="button"
+                                    onClick={() => setVal('listing_type', val)}
+                                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all ${form.listing_type === val
+                                        ? val === 'sale' ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-blue-500 border-blue-500 text-white'
+                                        : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20'}`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                     <div>
                         <label className={labelClass}>Price (USD) *</label>
                         <input type="number" required min="0" step="0.01" value={form.price_usd} onChange={set('price_usd')} placeholder="250000" className={inputClass} />
                     </div>
-                    <div>
-                        <label className={labelClass}>Listing Type</label>
-                        <select value={form.listing_type} onChange={set('listing_type')} className={inputClass}>
-                            <option value="sale">For Sale</option>
-                            <option value="rent">For Rent</option>
-                        </select>
-                    </div>
                 </div>
 
-                {/* Area, Beds, Baths */}
-                <div className="grid grid-cols-3 gap-4">
+                {/* Area, Beds, Baths, Direction */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div>
                         <label className={labelClass}>Area (m²)</label>
                         <input type="number" min="0" value={form.area_sqm} onChange={set('area_sqm')} placeholder="120" className={inputClass} />
@@ -172,41 +306,65 @@ export default function EditListing() {
                         <label className={labelClass}>Bathrooms</label>
                         <input type="number" min="0" max="20" value={form.bathrooms} onChange={set('bathrooms')} placeholder="2" className={inputClass} />
                     </div>
+                    <div>
+                        <label className={labelClass + ' flex items-center gap-1'}><Compass className="w-3 h-3" />Direction</label>
+                        <select value={form.direction} onChange={set('direction')} className={inputClass + ' cursor-pointer'}>
+                            <option value="">Any</option>
+                            <option value="north">North</option>
+                            <option value="south">South</option>
+                            <option value="east">East</option>
+                            <option value="west">West</option>
+                            <option value="northeast">NE</option>
+                            <option value="northwest">NW</option>
+                            <option value="southeast">SE</option>
+                            <option value="southwest">SW</option>
+                        </select>
+                    </div>
                 </div>
 
-                {/* Location Map Picker */}
+                {/* City + District (cascading dropdowns) */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className={labelClass + ' flex items-center gap-1'}><MapPin className="w-3 h-3 text-brand-400" />City</label>
+                        <select value={form.city_id} onChange={e => { setVal('city_id', e.target.value); setVal('district_id', ''); }} className={inputClass + ' cursor-pointer'}>
+                            <option value="">Select city...</option>
+                            {metadata.cities.map(c => <option key={c.city_id} value={c.city_id}>{c.name}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClass + ' flex items-center gap-1'}><MapPin className="w-3 h-3 text-slate-500" />District</label>
+                        <select value={form.district_id} onChange={set('district_id')} disabled={!form.city_id} className={inputClass + ' cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed'}>
+                            <option value="">{form.city_id ? 'Select district...' : 'Select city first'}</option>
+                            {activeDistricts.map(d => <option key={d.district_id} value={d.district_id}>{d.name}</option>)}
+                        </select>
+                    </div>
+                </div>
+
+                {/* Street Address */}
                 <div>
-                    <label className={labelClass}>
-                        <MapPin className="inline w-4 h-4 mr-1 text-[#4d88ff]" />
-                        Pin Location on Map
-                    </label>
+                    <label className={labelClass}>Street Address</label>
+                    <input type="text" value={form.address} onChange={set('address')} placeholder="Auto-filled from map, or type manually" className={inputClass} />
+                </div>
+
+                {/* Video URL */}
+                <div>
+                    <label className={labelClass}>Video URL <span className="normal-case font-normal text-slate-600">(YouTube, optional)</span></label>
+                    <input type="url" value={form.video_url} onChange={set('video_url')} placeholder="https://youtube.com/..." className={inputClass} />
+                </div>
+
+                {/* Map Picker */}
+                <div>
+                    <label className={labelClass}><MapPin className="inline w-4 h-4 mr-1 text-[#4d88ff]" />Pin Location on Map</label>
                     <LocationPicker
                         initialLat={form.latitude}
                         initialLng={form.longitude}
                         onSelect={({ lat, lng, address }) => {
-                            setForm(f => ({
-                                ...f,
-                                latitude: lat,
-                                longitude: lng,
-                                address: address || f.address,
-                            }));
+                            setForm(f => ({ ...f, latitude: lat, longitude: lng, address: address || f.address }));
                         }}
                     />
                 </div>
 
-                {/* Address */}
-                <div>
-                    <label className={labelClass}>Address</label>
-                    <input type="text" value={form.address} onChange={set('address')} placeholder="Auto-filled from map, or type manually" className={inputClass} />
-                </div>
-
-                {/* Video */}
-                <div>
-                    <label className={labelClass}>Video URL <span className="normal-case font-normal text-slate-600">(YouTube/Vimeo, optional)</span></label>
-                    <input type="url" value={form.video_url} onChange={set('video_url')} placeholder="https://youtube.com/..." className={inputClass} />
-                </div>
-
-                {/* Submit */}
+                {/* Actions */}
                 <div className="flex gap-3 pt-2">
                     <Link to="/dashboard/properties" className="flex-1 py-3 border border-white/10 text-slate-300 hover:bg-white/5 hover:text-white font-semibold rounded-xl text-sm transition-all text-center">
                         Cancel

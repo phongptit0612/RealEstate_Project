@@ -12,6 +12,7 @@ router.patch('/:property_id/status', protect, propertyController.updatePropertyS
 router.patch('/:property_id/renew', protect, propertyController.renewListing);
 router.put('/:property_id', protect, propertyController.updateProperty);
 router.delete('/:property_id', protect, propertyController.deleteProperty);
+router.get('/:id/images', protect, propertyController.getMyPropertyImages);
 router.get('/:id/similar', propertyController.getSimilarProperties);
 router.get('/:id', propertyController.getPropertyById);
 

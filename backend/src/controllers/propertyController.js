@@ -2,41 +2,65 @@ const pool = require('../config/db');
 
 exports.createProperty = async (req, res) => {
     try {
-        const { title, description, address, city, zipcode, property_type, price_usd, area_sqm, bedrooms, bathrooms, features, video_url } = req.body;
+        const {
+            title, description, address, city, zipcode,
+            property_type, price_usd, area_sqm, bedrooms, bathrooms,
+            video_url, listing_type = 'sale', district_id, direction, features
+        } = req.body;
         const owner_id = req.user.userId;
 
-        // Basic verification
-        if(!title || !price_usd || !city) {
-             return res.status(400).json({ error: 'Missing required fundamental fields' });
+        if (!title || !price_usd) {
+            return res.status(400).json({ error: 'Missing required fields: title and price_usd' });
         }
 
-        // Map Form data to Strict DB Schema
-        const full_address = `${address}, ${city}, ${zipcode}`.trim();
+        const full_address = [address, city, zipcode].filter(Boolean).join(', ').trim();
         const final_vid = video_url && video_url.trim() !== '' ? video_url : null;
-        
+        const valid_listing_type = ['sale', 'rent'].includes(listing_type) ? listing_type : 'sale';
+
         let type_id = 1;
         try {
-            // Find or create property_type dynamically
             const [types] = await pool.query('SELECT type_id FROM property_types WHERE name = ?', [property_type]);
             if (types.length > 0) {
                 type_id = types[0].type_id;
-            } else {
+            } else if (property_type) {
                 const [resType] = await pool.query('INSERT INTO property_types (name) VALUES (?)', [property_type]);
                 type_id = resType.insertId;
             }
         } catch (e) {
-            console.error("Type creation fallback", e);
+            console.error('Type creation fallback', e);
         }
 
         const { latitude, longitude } = req.body;
         const [result] = await pool.query(
-            `INSERT INTO properties 
-            (owner_id, type_id, title, description, listing_type, address, price_usd, area_m2, bedrooms, bathrooms, video_url, latitude, longitude, mod_status, listing_status, expires_at) 
-            VALUES (?, ?, ?, ?, 'sale', ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'active', DATE_ADD(NOW(), INTERVAL 7 DAY))`,
-            [owner_id, type_id, title, description, full_address, price_usd, area_sqm || null, bedrooms || null, bathrooms || null, final_vid, latitude || null, longitude || null]
+            `INSERT INTO properties
+            (owner_id, type_id, district_id, title, description, listing_type, address,
+             price_usd, area_m2, bedrooms, bathrooms, video_url, direction, latitude, longitude,
+             mod_status, listing_status, expires_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'active', DATE_ADD(NOW(), INTERVAL 7 DAY))`,
+            [
+                owner_id, type_id, district_id || null,
+                title, description, valid_listing_type,
+                full_address, price_usd,
+                area_sqm || null, bedrooms || null, bathrooms || null,
+                final_vid, direction || null, latitude || null, longitude || null
+            ]
         );
 
-        res.status(201).json({ message: 'Property created. Pending admin approval.', property_id: result.insertId });
+        const property_id = result.insertId;
+
+        // Save selected features/amenities
+        if (features) {
+            const featureIds = Array.isArray(features) ? features : JSON.parse(features);
+            if (featureIds.length > 0) {
+                const featureRows = featureIds.map(fid => [property_id, parseInt(fid)]);
+                await pool.query(
+                    'INSERT IGNORE INTO property_features (property_id, feature_id) VALUES ?',
+                    [featureRows]
+                );
+            }
+        }
+
+        res.status(201).json({ message: 'Property created. Pending admin approval.', property_id });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -47,11 +71,17 @@ exports.getMyProperties = async (req, res) => {
         const owner_id = req.user.userId;
         const [properties] = await pool.query(`
             SELECT p.*,
+                pt.name as type_name,
+                d.name as district_name, d.city_id,
+                c.name as city_name,
                 (SELECT COUNT(*) FROM recently_viewed rv WHERE rv.property_id = p.property_id) AS view_count,
                 (SELECT COUNT(*) FROM favorites f WHERE f.property_id = p.property_id) AS favorites_count,
-                (SELECT COUNT(*) FROM messages m JOIN conversations c ON m.conversation_id = c.conversation_id
-                 WHERE c.property_id = p.property_id AND m.sender_id != p.owner_id) AS inquiry_count
+                (SELECT COUNT(*) FROM messages m JOIN conversations c2 ON m.conversation_id = c2.conversation_id
+                 WHERE c2.property_id = p.property_id AND m.sender_id != p.owner_id) AS inquiry_count
             FROM properties p
+            LEFT JOIN property_types pt ON p.type_id = pt.type_id
+            LEFT JOIN districts d ON p.district_id = d.district_id
+            LEFT JOIN cities c ON d.city_id = c.city_id
             WHERE p.owner_id = ?
             ORDER BY p.created_at DESC
         `, [owner_id]);
@@ -64,7 +94,7 @@ exports.getMyProperties = async (req, res) => {
             properties.forEach(p => {
                 const img = images.find(i => i.property_id === p.property_id);
                 p.primary_image = img ? img.image_url : null;
-                p.city = p.address ? p.address.split(',')[1] || 'Unknown' : 'Unknown';
+                p.city = p.city_name || (p.address ? p.address.split(',')[1]?.trim() : 'Unknown');
                 p.status = p.listing_status;
             });
         }
@@ -124,8 +154,10 @@ exports.updateProperty = async (req, res) => {
         if (listing_type !== undefined) { fields.push('listing_type = ?');   values.push(listing_type); }
         if (address !== undefined)      { fields.push('address = ?');        values.push(address); }
         if (video_url !== undefined)    { fields.push('video_url = ?');      values.push(video_url || null); }
-        if (req.body.latitude !== undefined)  { fields.push('latitude = ?');   values.push(req.body.latitude || null); }
-        if (req.body.longitude !== undefined) { fields.push('longitude = ?');  values.push(req.body.longitude || null); }
+        if (req.body.latitude !== undefined)   { fields.push('latitude = ?');    values.push(req.body.latitude || null); }
+        if (req.body.longitude !== undefined)  { fields.push('longitude = ?');   values.push(req.body.longitude || null); }
+        if (req.body.direction !== undefined)  { fields.push('direction = ?');   values.push(req.body.direction || null); }
+        if (req.body.district_id !== undefined){ fields.push('district_id = ?'); values.push(req.body.district_id ? parseInt(req.body.district_id) : null); }
 
         // Editing resets mod_status to pending (needs re-approval)
         fields.push('mod_status = ?'); values.push('pending');
@@ -146,7 +178,7 @@ exports.searchProperties = async (req, res) => {
         const {
             keyword, city_id, district_id, type_id,
             minPrice, maxPrice, direction, bedrooms, bathrooms,
-            currency, sort = 'newest'
+            listing_type, currency, sort = 'newest'
         } = req.query;
 
         // Pagination
@@ -214,6 +246,10 @@ exports.searchProperties = async (req, res) => {
         if (bathrooms) {
             queryStr += ` AND p.bathrooms >= ?`;
             params.push(bathrooms);
+        }
+        if (listing_type && ['sale', 'rent'].includes(listing_type)) {
+            queryStr += ` AND p.listing_type = ?`;
+            params.push(listing_type);
         }
 
         // Check if vip_tier column exists before using it (safe fallback)
@@ -319,6 +355,26 @@ exports.renewListing = async (req, res) => {
     }
 };
 
+// GET /api/properties/:id/images — Owner-only: get all images for their listing
+exports.getMyPropertyImages = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const owner_id = req.user.userId;
+        const [[prop]] = await pool.query(
+            'SELECT property_id FROM properties WHERE property_id = ? AND owner_id = ?',
+            [id, owner_id]
+        );
+        if (!prop) return res.status(403).json({ error: 'Not authorized' });
+        const [images] = await pool.query(
+            'SELECT image_id, image_url, sort_order FROM property_images WHERE property_id = ? ORDER BY sort_order ASC',
+            [id]
+        );
+        res.json(images);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // GET /api/properties/recently-viewed — last 10 properties the user visited
 exports.getRecentlyViewed = async (req, res) => {
     try {
@@ -347,10 +403,11 @@ exports.getRecentlyViewed = async (req, res) => {
 
 exports.getSearchMetadata = async (req, res) => {
     try {
-        const [cities] = await pool.query('SELECT city_id, name FROM cities WHERE is_active = TRUE');
-        const [districts] = await pool.query('SELECT district_id, city_id, name FROM districts WHERE is_active = TRUE');
-        const [types] = await pool.query('SELECT type_id, name FROM property_types WHERE is_active = TRUE');
-        res.json({ cities, districts, types });
+        const [cities]   = await pool.query('SELECT city_id, name FROM cities WHERE is_active = TRUE ORDER BY name');
+        const [districts] = await pool.query('SELECT district_id, city_id, name FROM districts WHERE is_active = TRUE ORDER BY name');
+        const [types]    = await pool.query('SELECT type_id, name FROM property_types WHERE is_active = TRUE ORDER BY name');
+        const [features] = await pool.query('SELECT feature_id, name, icon_name FROM features ORDER BY name');
+        res.json({ cities, districts, types, features });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
