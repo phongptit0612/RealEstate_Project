@@ -4,11 +4,13 @@ import { Heart, Search, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PropertyCard from '../../components/PropertyCard';
 import useFavoriteStore from '../../store/favoriteStore';
+import useLanguageStore from '../../store/languageStore';
 
 export default function Favorites() {
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);
     const { favoriteIds, loadFavorites } = useFavoriteStore();
+    const { t } = useLanguageStore();
 
     const fetchFavorites = async () => {
         setLoading(true);
@@ -50,17 +52,17 @@ export default function Favorites() {
                 <div>
                     <h1 className="text-2xl font-bold text-white flex items-center gap-2">
                         <Heart className="w-6 h-6 text-red-500 fill-current" />
-                        Saved Properties
+                        {t('favorites.title')}
                     </h1>
                     <p className="text-slate-500 mt-1">
-                        {properties.length} {properties.length === 1 ? 'property' : 'properties'} saved
+                        {properties.length} {properties.length === 1 ? t('favorites.count') : t('favorites.counts')}
                     </p>
                 </div>
                 <Link
                     to="/properties"
                     className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm rounded-xl transition-colors"
                 >
-                    <Search className="w-4 h-4" /> Browse More
+                    <Search className="w-4 h-4" /> {t('favorites.browseMore')}
                 </Link>
             </div>
 
@@ -92,7 +94,7 @@ export default function Favorites() {
 
                     {/* Tip */}
                     <p className="text-center text-xs text-slate-400 pt-2">
-                        Click ❤️ on any card to remove it from your saved list.
+                        {t('favorites.removeHint')}
                     </p>
                 </>
             )}

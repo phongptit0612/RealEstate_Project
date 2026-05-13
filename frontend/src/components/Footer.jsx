@@ -15,7 +15,7 @@ export default function Footer() {
                         Redefining luxury real estate worldwide. Discover exclusive properties and experience unparalleled service.
                     </p>
                 </div>
-                
+
                 <div>
                     <h4 className="text-slate-900 font-bold mb-4 uppercase tracking-widest text-sm">Quick Links</h4>
                     <ul className="space-y-2 text-sm text-slate-600">
@@ -31,15 +31,15 @@ export default function Footer() {
                     <ul className="space-y-3 text-sm text-slate-600">
                         <li className="flex items-start gap-2">
                             <MapPin className="w-4 h-4 text-brand-600 mt-0.5" />
-                            <span>123 Luxury Ave, Beverly Hills, CA 90210</span>
+                            <span>Long Thanh, Dong Nai, Vietnam</span>
                         </li>
                         <li className="flex items-center gap-2">
                             <Phone className="w-4 h-4 text-brand-600" />
-                            <span>+1 (800) 123-4567</span>
+                            <span>+84 0938773607</span>
                         </li>
                         <li className="flex items-center gap-2">
                             <Mail className="w-4 h-4 text-brand-600" />
-                            <span>contact@luxestates.com</span>
+                            <span>ptran4109@gmail.com</span>
                         </li>
                     </ul>
                 </div>
@@ -54,7 +54,7 @@ export default function Footer() {
                     </div>
                 </div>
             </div>
-            
+
             <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p className="text-xs text-slate-500 flex-shrink-0">
                     &copy; {new Date().getFullYear()} LuxEstates. All rights reserved.

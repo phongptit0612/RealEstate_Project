@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Plus, Trash2, MapPin, Building, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, MapPin, Building, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 
 function Section({ title, icon: Icon, children }) {
     const [open, setOpen] = useState(true);
@@ -25,20 +25,24 @@ export default function AdminCategories() {
     const [cities, setCities] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [types, setTypes] = useState([]);
+    const [features, setFeatures] = useState([]);
 
     const [newCity, setNewCity] = useState('');
     const [newDistrict, setNewDistrict] = useState({ city_id: '', name: '', zipcode: '' });
     const [newType, setNewType] = useState({ name: '', parent_id: '' });
+    const [newFeature, setNewFeature] = useState({ name: '', icon_name: '' });
 
     const load = async () => {
-        const [c, d, t] = await Promise.all([
+        const [c, d, t, f] = await Promise.all([
             axios.get('http://localhost:5000/api/admin/cities', { withCredentials: true }),
             axios.get('http://localhost:5000/api/admin/districts', { withCredentials: true }),
             axios.get('http://localhost:5000/api/admin/property-types', { withCredentials: true }),
+            axios.get('http://localhost:5000/api/admin/features', { withCredentials: true }),
         ]);
         setCities(c.data);
         setDistricts(d.data);
         setTypes(t.data);
+        setFeatures(f.data);
     };
 
     useEffect(() => { load(); }, []);
@@ -74,6 +78,21 @@ export default function AdminCategories() {
     };
     const deleteType = async (id) => {
         await axios.delete(`http://localhost:5000/api/admin/property-types/${id}`, { withCredentials: true });
+        load();
+    };
+
+    const addFeature = async (e) => {
+        e.preventDefault();
+        if (!newFeature.name.trim()) return;
+        await axios.post('http://localhost:5000/api/admin/features', {
+            name: newFeature.name,
+            icon_name: newFeature.icon_name || null,
+        }, { withCredentials: true });
+        setNewFeature({ name: '', icon_name: '' }); load();
+    };
+    const deleteFeature = async (id) => {
+        if (!window.confirm('Delete this amenity? It will be removed from all listings.')) return;
+        await axios.delete(`http://localhost:5000/api/admin/features/${id}`, { withCredentials: true });
         load();
     };
 
@@ -160,6 +179,44 @@ export default function AdminCategories() {
                                 {t.parent_name && <span className="ml-2 text-xs text-slate-400">under {t.parent_name}</span>}
                             </div>
                             <button onClick={() => deleteType(t.type_id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </Section>
+
+            {/* Features / Amenities */}
+            <Section title={`Amenities / Features (${features.length})`} icon={Sparkles}>
+                <p className="text-xs text-slate-400 mb-3">These appear as checkboxes when creating/editing a listing (e.g. Swimming Pool, Parking, Gym).</p>
+                <form onSubmit={addFeature} className="flex gap-3 mb-4 flex-wrap">
+                    <input
+                        value={newFeature.name}
+                        onChange={e => setNewFeature(f => ({ ...f, name: e.target.value }))}
+                        placeholder="Amenity name (e.g. Swimming Pool)"
+                        className={`flex-1 min-w-[160px] ${inputCls}`}
+                    />
+                    <input
+                        value={newFeature.icon_name}
+                        onChange={e => setNewFeature(f => ({ ...f, icon_name: e.target.value }))}
+                        placeholder="Icon name (optional, e.g. waves)"
+                        className={`w-44 ${inputCls}`}
+                    />
+                    <button type="submit" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
+                        <Plus className="w-4 h-4" /> Add
+                    </button>
+                </form>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {features.length === 0 ? (
+                        <p className="text-sm text-slate-400 py-4 text-center">No amenities yet. Add one above.</p>
+                    ) : features.map(f => (
+                        <div key={f.feature_id} className="flex items-center justify-between py-2 px-3 bg-surface rounded-xl">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="w-3.5 h-3.5 text-brand-600 flex-shrink-0" />
+                                <span className="text-sm font-medium text-slate-800">{f.name}</span>
+                                {f.icon_name && <span className="text-xs text-slate-400 ml-1">({f.icon_name})</span>}
+                            </div>
+                            <button onClick={() => deleteFeature(f.feature_id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         </div>

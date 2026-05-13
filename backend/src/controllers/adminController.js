@@ -343,3 +343,50 @@ exports.getAuditLog = async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 };
+
+// ─── FEATURES / AMENITIES MANAGEMENT ─────────────────────────
+// GET /api/admin/features
+exports.getFeatures = async (req, res) => {
+    try {
+        const [features] = await pool.query(`SELECT * FROM features ORDER BY name`);
+        res.json(features);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+// POST /api/admin/features
+exports.createFeature = async (req, res) => {
+    try {
+        const { name, icon_name } = req.body;
+        if (!name?.trim()) return res.status(400).json({ error: 'Feature name is required' });
+        const [r] = await pool.query(
+            `INSERT INTO features (name, icon_name) VALUES (?, ?)`,
+            [name.trim(), icon_name?.trim() || null]
+        );
+        await pool.query(
+            `INSERT INTO admin_logs (admin_id, action, target_type, target_id, note) VALUES (?, ?, ?, ?, ?)`,
+            [req.user.userId, 'create_feature', 'feature', r.insertId, `Created feature: ${name}`]
+        );
+        res.status(201).json({ feature_id: r.insertId, name: name.trim(), icon_name: icon_name?.trim() || null });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};
+
+// DELETE /api/admin/features/:id
+exports.deleteFeature = async (req, res) => {
+    try {
+        const { id } = req.params;
+        // Remove from property_features first (cascade safety)
+        await pool.query(`DELETE FROM property_features WHERE feature_id = ?`, [id]);
+        await pool.query(`DELETE FROM features WHERE feature_id = ?`, [id]);
+        await pool.query(
+            `INSERT INTO admin_logs (admin_id, action, target_type, target_id, note) VALUES (?, ?, ?, ?, ?)`,
+            [req.user.userId, 'delete_feature', 'feature', id, 'Deleted feature/amenity']
+        );
+        res.json({ message: 'Feature deleted.' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+};

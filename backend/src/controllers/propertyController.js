@@ -326,6 +326,33 @@ exports.deleteProperty = async (req, res) => {
     }
 };
 
+// PATCH /api/properties/:property_id/status — Owner: change listing_status (active/sold/rented/hidden/etc)
+exports.updatePropertyStatus = async (req, res) => {
+    try {
+        const { property_id } = req.params;
+        const owner_id = req.user.userId;
+        const { status } = req.body;
+
+        const VALID_STATUSES = ['active', 'negotiating', 'deposited', 'sold', 'rented', 'hidden'];
+        if (!VALID_STATUSES.includes(status)) {
+            return res.status(400).json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` });
+        }
+
+        const [result] = await pool.query(
+            'UPDATE properties SET listing_status = ?, updated_at = NOW() WHERE property_id = ? AND owner_id = ?',
+            [status, property_id, owner_id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Property not found or not owned by you' });
+        }
+
+        res.json({ message: `Listing status updated to "${status}"`, status });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // PATCH /api/properties/:property_id/renew — extend expires_at by 7 days
 exports.renewListing = async (req, res) => {
     try {

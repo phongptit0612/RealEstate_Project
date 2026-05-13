@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import Decimal from 'decimal.js';
 
 // ── Hardcoded fallback rates (approximate 2025 rates, USD base)
@@ -34,8 +35,10 @@ const CURRENCY_LABELS = {
   CAD: '🇨🇦 CAD – Canadian Dollar',
 };
 
-const useCurrencyStore = create((set, get) => ({
-  preferredCurrency: 'USD',
+const useCurrencyStore = create(
+  persist(
+    (set, get) => ({
+      preferredCurrency: 'USD',
   exchangeRates: FALLBACK_RATES,
   ratesLoaded: false,
   currencies: Object.keys(FALLBACK_RATES),
@@ -92,6 +95,9 @@ const useCurrencyStore = create((set, get) => ({
       minimumFractionDigits: 0,
     }).format(convertedAmount);
   },
+}), {
+  name: 'currency-storage',
+  partialize: (state) => ({ preferredCurrency: state.preferredCurrency })
 }));
 
 export default useCurrencyStore;

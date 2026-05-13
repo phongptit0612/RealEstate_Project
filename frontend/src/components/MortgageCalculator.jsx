@@ -3,21 +3,15 @@ import { Calculator, DollarSign, Percent, Calendar } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
 
 export default function MortgageCalculator({ basePriceUsd = 1000000 }) {
-    const { formatPrice, rates, currency, preferredCurrency } = useCurrencyStore();
-    
-    // Scale local base price
-    const localBasePrice = useMemo(() => {
-        if (preferredCurrency === 'USD') return basePriceUsd;
-        return basePriceUsd * (rates[preferredCurrency] || 1);
-    }, [basePriceUsd, preferredCurrency, rates]);
+    const { formatPrice, preferredCurrency } = useCurrencyStore();
 
     const [downPaymentPct, setDownPaymentPct] = useState(20);
     const [interestRate, setInterestRate] = useState(5.5); // 5.5% annual
     const [loanTerm, setLoanTerm] = useState(30); // 30 Years
 
-    // The magical math
+    // The magical math (done in USD)
     const calculateMortgage = () => {
-        const principal = localBasePrice - (localBasePrice * (downPaymentPct / 100));
+        const principal = basePriceUsd - (basePriceUsd * (downPaymentPct / 100));
         if (principal <= 0) return 0;
         
         const monthlyInterestRate = (interestRate / 100) / 12;
@@ -31,8 +25,8 @@ export default function MortgageCalculator({ basePriceUsd = 1000000 }) {
         return principal * (mathNumerator / mathDenominator);
     };
 
-    const monthlyPayment = calculateMortgage();
-    const principalAmount = localBasePrice - (localBasePrice * (downPaymentPct / 100));
+    const monthlyPaymentUsd = calculateMortgage();
+    const principalAmountUsd = basePriceUsd - (basePriceUsd * (downPaymentPct / 100));
 
     // Dynamic color gradient based on loan term
     const getTermGradient = () => {
@@ -73,7 +67,7 @@ export default function MortgageCalculator({ basePriceUsd = 1000000 }) {
                             className="w-full accent-ocean-500 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
                         />
                         <div className="text-right text-xs text-ocean-400 mt-1 font-mono">
-                            {formatPrice(localBasePrice * (downPaymentPct / 100), preferredCurrency)}
+                            {formatPrice(basePriceUsd * (downPaymentPct / 100))}
                         </div>
                     </div>
 
@@ -115,13 +109,13 @@ export default function MortgageCalculator({ basePriceUsd = 1000000 }) {
                         
                         <p className="text-sm text-gray-400 uppercase tracking-widest font-bold mb-3">Estimated Monthly Payment</p>
                         <div className="text-4xl lg:text-5xl font-bold text-white mb-6 drop-shadow-lg">
-                            {formatPrice(monthlyPayment, preferredCurrency)}
+                            {formatPrice(monthlyPaymentUsd)}
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-6 text-left">
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Principal Loan</p>
-                                <p className="text-sm text-white font-bold">{formatPrice(principalAmount, preferredCurrency)}</p>
+                                <p className="text-sm text-white font-bold">{formatPrice(principalAmountUsd)}</p>
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Target Currency</p>

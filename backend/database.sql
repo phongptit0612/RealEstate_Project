@@ -431,3 +431,10 @@ INSERT INTO `subscription_packages` (`package_id`, `name`, `price_usd`, `duratio
 (2, 'Gold VIP',   29.99, 30);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ==========================================
+-- FULLTEXT index for keyword search
+-- Run this once if not already applied:
+-- ALTER TABLE properties ADD FULLTEXT idx_ft_title_desc (title, description);
+-- ==========================================
+ALTER TABLE `properties` ADD FULLTEXT `idx_ft_title_desc` (`title`, `description`);

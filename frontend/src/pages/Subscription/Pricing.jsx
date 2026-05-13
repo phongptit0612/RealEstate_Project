@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Crown, Zap, Check, ArrowLeft, Loader2, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 import useUserStore from '../../store/userStore';
 import useCurrencyStore from '../../store/currencyStore';
+import useLanguageStore from '../../store/languageStore';
 
 const TIERS = {
     silver: {
@@ -42,11 +43,7 @@ const TIERS = {
     },
 };
 
-const CURRENCIES = [
-    { code: 'USD', symbol: '$', label: 'USD ($)' },
-    { code: 'EUR', symbol: '€', label: 'EUR (€)' },
-    { code: 'VND', symbol: '₫', label: 'VND (₫)' },
-];
+
 
 export default function Pricing() {
     const navigate = useNavigate();
@@ -54,36 +51,37 @@ export default function Pricing() {
     const propertyIdFromUrl = searchParams.get('property_id') || '';
 
     const { isAuthenticated, user } = useUserStore();
-    const { formatPrice, convertPrice, exchangeRates, preferredCurrency, setCurrency } = useCurrencyStore();
+    const { formatPrice, exchangeRates, preferredCurrency, currencies, currencyLabels } = useCurrencyStore();
+    const { t } = useLanguageStore();
 
     const [selectedCurrency, setSelectedCurrency] = useState(preferredCurrency || 'USD');
     const [propertyId, setPropertyId] = useState(propertyIdFromUrl);
+    const [myProperties, setMyProperties] = useState([]);
     const [loading, setLoading] = useState(null); // which tier is loading
     const [error, setError] = useState('');
     const [devMode, setDevMode] = useState(false);
 
+    // Fetch user's own properties for the dropdown
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        axios.get('http://localhost:5000/api/properties/me', { withCredentials: true })
+            .then(r => setMyProperties(r.data || []))
+            .catch(() => { });
+    }, [isAuthenticated]);
+
     const hasStripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY?.startsWith('pk_');
 
-    // Format price in the selected display currency
     const displayPrice = (usd) => {
-        const rates = exchangeRates;
-        const rate = rates[selectedCurrency];
+        const rate = exchangeRates[selectedCurrency];
         if (!rate) return `$${usd}`;
 
-        let converted;
-        if (selectedCurrency === 'VND') {
-            converted = Math.round(usd * rate);
-        } else if (selectedCurrency === 'USD') {
-            converted = usd;
-        } else {
-            // EUR: rate_to_usd = how many USD 1 EUR buys
-            converted = usd / rate;
-        }
+        // Frankfurter rates are FROM USD: 1 USD = rate units of target currency
+        const converted = selectedCurrency === 'USD' ? usd : usd * rate;
 
         return new Intl.NumberFormat(undefined, {
             style: 'currency',
             currency: selectedCurrency,
-            maximumFractionDigits: selectedCurrency === 'VND' ? 0 : 2,
+            maximumFractionDigits: ['VND', 'KRW', 'JPY'].includes(selectedCurrency) ? 0 : 2,
         }).format(converted);
     };
 
@@ -122,18 +120,18 @@ export default function Pricing() {
             {/* Header */}
             <div className="max-w-5xl mx-auto px-6 pt-12 pb-4">
                 <Link to="/properties" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition-colors text-sm mb-8">
-                    <ArrowLeft className="w-4 h-4" /> Back to Properties
+                    <ArrowLeft className="w-4 h-4" /> {t('pricing.back')}
                 </Link>
 
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-400/20 px-4 py-1.5 rounded-full text-amber-400 text-sm font-semibold mb-6">
-                        <Crown className="w-4 h-4" /> VIP Listing Boosts
+                        <Crown className="w-4 h-4" /> {t('pricing.vipBoosts')}
                     </div>
                     <h1 className="text-5xl font-extrabold text-white tracking-tight mb-4">
-                        Supercharge Your Listing
+                        {t('pricing.title')}
                     </h1>
                     <p className="text-slate-400 text-lg max-w-xl mx-auto">
-                        Stand out from the crowd. VIP listings get more eyes, more clicks, and sell faster.
+                        {t('pricing.subtitle')}
                     </p>
                 </div>
 
@@ -146,21 +144,39 @@ export default function Pricing() {
                             onChange={e => setSelectedCurrency(e.target.value)}
                             className="appearance-none bg-white/5 border border-white/10 text-white text-sm rounded-xl pl-4 pr-9 py-2.5 outline-none focus:border-brand-600 cursor-pointer"
                         >
-                            {CURRENCIES.map(c => (
-                                <option key={c.code} value={c.code}>{c.label}</option>
+                            {currencies.map(c => (
+                                <option key={c} value={c}>{currencyLabels[c] || c}</option>
                             ))}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
 
-                    {/* Property ID input */}
-                    <input
-                        type="number"
-                        value={propertyId}
-                        onChange={e => setPropertyId(e.target.value)}
-                        placeholder="Enter your Property ID to boost"
-                        className="bg-white/5 border border-white/10 text-white text-sm rounded-xl px-4 py-2.5 w-72 outline-none focus:border-brand-600 placeholder:text-slate-600"
-                    />
+                    {/* Property selector — dropdown if logged in with listings, else manual input */}
+                    {isAuthenticated && myProperties.length > 0 ? (
+                        <div className="relative">
+                            <select
+                                value={propertyId}
+                                onChange={e => setPropertyId(e.target.value)}
+                                className="appearance-none bg-white/5 border border-white/10 text-white text-sm rounded-xl pl-4 pr-9 py-2.5 w-72 outline-none focus:border-brand-600 cursor-pointer"
+                            >
+                                <option value="">{t('pricing.selectProperty')}</option>
+                                {myProperties.map(p => (
+                                    <option key={p.property_id} value={p.property_id}>
+                                        #{p.property_id} · {p.title.length > 40 ? p.title.slice(0, 40) + '…' : p.title}
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
+                    ) : (
+                        <input
+                            type="number"
+                            value={propertyId}
+                            onChange={e => setPropertyId(e.target.value)}
+                            placeholder={t('pricing.enterPropertyId')}
+                            className="bg-white/5 border border-white/10 text-white text-sm rounded-xl px-4 py-2.5 w-72 outline-none focus:border-brand-600 placeholder:text-slate-600"
+                        />
+                    )}
                 </div>
 
                 {error && (
@@ -171,10 +187,9 @@ export default function Pricing() {
 
                 {(!hasStripeKey) && (
                     <div className="text-center text-amber-400 bg-amber-500/10 border border-amber-400/20 rounded-xl px-4 py-3 mb-6 text-sm">
-                        ⚡ <strong>Dev Mode Active</strong> — No Stripe key detected. Payments will be simulated instantly.
                         <label className="ml-3 inline-flex items-center gap-1.5 cursor-pointer">
                             <input type="checkbox" checked={devMode} onChange={e => setDevMode(e.target.checked)} className="accent-amber-400" />
-                            Force simulation
+                            {t('pricing.forceSimulation')}
                         </label>
                     </div>
                 )}
@@ -191,7 +206,7 @@ export default function Pricing() {
                         >
                             {tier.highlight && (
                                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-yellow-500 text-black text-xs font-extrabold uppercase tracking-widest px-4 py-1 rounded-full shadow-lg">
-                                    Most Popular
+                                    {t('pricing.mostPopular')}
                                 </div>
                             )}
 
@@ -201,11 +216,11 @@ export default function Pricing() {
                                 <span className={`text-4xl font-black bg-gradient-to-r ${tier.color} bg-clip-text text-transparent`}>
                                     {displayPrice(tier.priceUsd)}
                                 </span>
-                                <span className="text-slate-400 text-sm ml-2">/ 30 days</span>
+                                <span className="text-slate-400 text-sm ml-2">{t('pricing.per30Days')}</span>
                             </div>
 
                             <ul className="space-y-3 mb-8">
-                                {tier.features.map(f => (
+                                {(t(`pricing.${tier.id}Features`) || tier.features).map(f => (
                                     <li key={f} className="flex items-center gap-2.5 text-sm text-slate-300">
                                         <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                                         {f}
@@ -224,8 +239,8 @@ export default function Pricing() {
                                     disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
                                 {loading === tier.id
-                                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>
-                                    : <><Zap className="w-4 h-4" /> Boost with {tier.name}</>
+                                    ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('pricing.processing')}</>
+                                    : <><Zap className="w-4 h-4" /> {t('pricing.boostWith')} {tier.name}</>
                                 }
                             </button>
                         </div>

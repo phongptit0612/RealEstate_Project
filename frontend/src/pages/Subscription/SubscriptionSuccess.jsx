@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle, Crown, ArrowRight, Sparkles } from 'lucide-react';
+import useLanguageStore from '../../store/languageStore';
 
 export default function SubscriptionSuccess() {
+    const { t } = useLanguageStore();
     const [searchParams] = useSearchParams();
     const simulated = searchParams.get('simulated') === 'true';
     const [count, setCount] = useState(5);
@@ -31,36 +33,36 @@ export default function SubscriptionSuccess() {
 
                 <div className="flex items-center justify-center gap-2 mb-4">
                     <Sparkles className="w-5 h-5 text-amber-400" />
-                    <span className="text-amber-400 font-bold text-sm uppercase tracking-widest">VIP Activated</span>
+                    <span className="text-amber-400 font-bold text-sm uppercase tracking-widest">{t('success.vipActivated')}</span>
                     <Sparkles className="w-5 h-5 text-amber-400" />
                 </div>
 
                 <h1 className="text-4xl font-extrabold text-white mb-4">
-                    You're now VIP! 🎉
+                    {t('success.title')}
                 </h1>
                 <p className="text-slate-400 mb-2">
                     {simulated
-                        ? 'Your VIP boost was simulated in dev mode.'
-                        : 'Payment confirmed! Your listing is now boosted.'
+                        ? t('success.simulated')
+                        : t('success.confirmed')
                     }
                 </p>
                 <p className="text-slate-500 text-sm mb-8">
-                    Your listing is now highlighted and prioritized in search results for the next 30 days.
+                    {t('success.desc')}
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link to="/dashboard/properties"
                         className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-bold px-6 py-3 rounded-2xl text-sm hover:brightness-110 transition-all shadow-lg">
-                        <Crown className="w-4 h-4" /> View My Listings
+                        <Crown className="w-4 h-4" /> {t('success.viewListings')}
                     </Link>
                     <Link to="/dashboard/subscriptions"
                         className="inline-flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-slate-300 font-semibold px-6 py-3 rounded-2xl text-sm hover:bg-white/10 transition-all">
-                        <ArrowRight className="w-4 h-4" /> My Subscriptions
+                        <ArrowRight className="w-4 h-4" /> {t('success.mySubscriptions')}
                     </Link>
                 </div>
 
                 <p className="text-slate-600 text-xs mt-8">
-                    Redirecting to your dashboard in {Math.max(count, 0)}s…
+                    {t('success.redirecting')} {Math.max(count, 0)}s…
                 </p>
             </div>
         </div>

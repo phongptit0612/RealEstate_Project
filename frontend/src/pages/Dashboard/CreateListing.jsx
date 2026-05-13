@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import useCurrencyStore from '../../store/currencyStore';
+import useLanguageStore from '../../store/languageStore';
 import { CheckCircle, UploadCloud, Building, MapPin, DollarSign, ListPlus, Home, Tag } from 'lucide-react';
 import LocationPicker from '../../components/LocationPicker';
 
@@ -11,6 +13,8 @@ const labelCls = "block text-gray-400 text-sm font-medium mb-2 uppercase trackin
 
 export default function CreateListing() {
     const navigate = useNavigate();
+    const { formatPrice } = useCurrencyStore();
+    const { t } = useLanguageStore();
     const [step, setStep] = useState(1);
     const [propertyId, setPropertyId] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -114,16 +118,16 @@ export default function CreateListing() {
     };
 
     const steps = [
-        { id: 1, icon: ListPlus, label: 'Basics' },
-        { id: 2, icon: DollarSign, label: 'Metrics' },
-        { id: 3, icon: MapPin, label: 'Location' },
-        { id: 4, icon: UploadCloud, label: 'Media' }
+        { id: 1, icon: ListPlus, label: t('create.tabBasics') },
+        { id: 2, icon: DollarSign, label: t('create.tabMetrics') },
+        { id: 3, icon: MapPin, label: t('create.tabLocation') },
+        { id: 4, icon: UploadCloud, label: t('create.tabMedia') }
     ];
 
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in zoom-in-95 duration-500">
-            <h1 className="text-3xl font-bold text-white mb-2">Create New Listing</h1>
-            <p className="text-gray-400 mb-8">List your property on the LuxEstates marketplace.</p>
+            <h1 className="text-3xl font-bold text-white mb-2">{t('create.title')}</h1>
+            <p className="text-gray-400 mb-8">{t('create.subtitle')}</p>
 
             {/* Step indicator */}
             <div className="flex gap-3 mb-10">
@@ -141,61 +145,61 @@ export default function CreateListing() {
                 {/* ── STEP 1: Basics + Listing Type + Features ── */}
                 {step === 1 && (
                     <div className="space-y-6 relative z-10 animate-in fade-in slide-in-from-right-4">
-                        <h2 className="text-2xl font-bold text-white mb-6 border-b border-white/5 pb-4">Property Details</h2>
+                        <h2 className="text-2xl font-bold text-white mb-6 border-b border-white/5 pb-4">{t('create.details')}</h2>
 
                         {/* Sale vs Rent toggle */}
                         <div>
-                            <label className={labelCls}>Listing For <span className="text-ocean-500">*</span></label>
+                            <label className={labelCls}>{t('create.listingFor')}</label>
                             <div className="flex gap-3">
                                 <button
                                     type="button"
                                     onClick={() => set('listing_type', 'sale')}
                                     className={`flex-1 py-3 rounded-xl font-bold text-sm uppercase tracking-wider border transition-all ${formData.listing_type === 'sale' ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg' : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20'}`}
                                 >
-                                    🏷️ For Sale
+                                    {t('create.forSale')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => set('listing_type', 'rent')}
                                     className={`flex-1 py-3 rounded-xl font-bold text-sm uppercase tracking-wider border transition-all ${formData.listing_type === 'rent' ? 'bg-blue-500 border-blue-500 text-white shadow-lg' : 'bg-black/40 border-white/10 text-gray-400 hover:border-white/20'}`}
                                 >
-                                    🔑 For Rent
+                                    {t('create.forRent')}
                                 </button>
                             </div>
                         </div>
 
                         {/* Title */}
                         <div>
-                            <label className={labelCls}>Title <span className="text-ocean-500">*</span></label>
+                            <label className={labelCls}>{t('create.titleLabel')}</label>
                             <input
                                 value={formData.title}
                                 onChange={e => set('title', e.target.value)}
                                 className={inputCls}
-                                placeholder="e.g. Modern Apartment with City View"
+                                placeholder={t('create.titlePlaceholder')}
                             />
                         </div>
 
                         {/* Description */}
                         <div>
-                            <label className={labelCls}>Description</label>
+                            <label className={labelCls}>{t('create.descLabel')}</label>
                             <textarea
                                 rows="4"
                                 value={formData.description}
                                 onChange={e => set('description', e.target.value)}
                                 className={inputCls}
-                                placeholder="Describe the property features, surroundings, and highlights..."
+                                placeholder={t('create.descPlaceholder')}
                             />
                         </div>
 
                         {/* Property Type */}
                         <div>
-                            <label className={labelCls}>Property Type <span className="text-ocean-500">*</span></label>
+                            <label className={labelCls}>{t('create.propType')}</label>
                             <select
                                 value={formData.type_id}
                                 onChange={e => set('type_id', e.target.value)}
                                 className={inputCls + ' cursor-pointer'}
                             >
-                                <option value="">Select type...</option>
+                                <option value="">{t('create.selectType')}</option>
                                 {metadata.types.map(t => (
                                     <option key={t.type_id} value={t.type_id}>{t.name}</option>
                                 ))}
@@ -244,7 +248,9 @@ export default function CreateListing() {
                         <h2 className="text-2xl font-bold text-white mb-8 border-b border-white/5 pb-4">Valuation & Metrics</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className={labelCls}>Price (USD) <span className="text-ocean-500">*</span></label>
+                                <label className={labelCls}>
+                                    {formData.listing_type === 'rent' ? 'Rent Price (USD) / month' : 'Sale Price (USD)'} <span className="text-ocean-500">*</span>
+                                </label>
                                 <input type="number" value={formData.price_usd} onChange={e => set('price_usd', e.target.value)} className={inputCls} placeholder="$0.00" />
                                 <p className="text-xs text-gray-500 mt-2">Will auto-convert to VND/EUR for buyers.</p>
                             </div>

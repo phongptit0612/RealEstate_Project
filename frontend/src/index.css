@@ -40,6 +40,27 @@
 }
 
 /* ── Utilities ───────────────────────────────────────────── */
+/* Custom Select Dropdowns globally */
+@layer base {
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.25rem;
+    padding-right: 2.5rem !important;
+    cursor: pointer;
+  }
+  
+  select:focus {
+    outline: none;
+    border-color: #0033ab;
+    box-shadow: 0 0 0 3px rgba(0, 51, 171, 0.2);
+  }
+}
+
 .glass-nav {
   @apply bg-white/5 backdrop-blur-lg border-b border-white/10;
 }
@@ -64,4 +85,45 @@
 @media print {
   nav, .no-print { display: none !important; }
   body { background: white; color: black; }
+}
+
+/* ── i18n / Overflow Protection ─────────────────────────── */
+
+/* Global: prevent any text from overflowing its container */
+body, p, h1, h2, h3, h4, h5, h6, span, a, button, label, li, td, th {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Flex/grid containers: children should never push width beyond parent */
+.flex    > * { min-width: 0; }
+.grid    > * { min-width: 0; }
+
+/* Sidebar & nav labels: allow multi-line for long translated text */
+.i18n-nav-label {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+/* Vietnamese-specific: tighten letter-spacing slightly for denser text */
+:lang(vi) {
+  letter-spacing: -0.01em;
+}
+
+/* Vietnamese card badges should allow wrapping, not clip */
+:lang(vi) .property-badge {
+  white-space: normal;
+  line-height: 1.2;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+/* Prevent select element text overflow in filter dropdowns */
+select {
+  text-overflow: ellipsis;
+  max-width: 100%;
 }

@@ -41,4 +41,9 @@ router.get('/property-types', adminController.getPropertyTypes);
 router.post('/property-types', adminController.createPropertyType);
 router.delete('/property-types/:id', adminController.deletePropertyType);
 
+// Category management — Features / Amenities
+router.get('/features', adminController.getFeatures);
+router.post('/features', adminController.createFeature);
+router.delete('/features/:id', adminController.deleteFeature);
+
 module.exports = router;

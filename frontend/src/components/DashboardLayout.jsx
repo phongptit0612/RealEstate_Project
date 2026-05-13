@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Building, PlusCircle, LogOut, MessageSquare, Heart, UserCircle, Crown, History, Bell, X, CheckCheck } from 'lucide-react';
 import useUserStore from '../store/userStore';
+import useLanguageStore from '../store/languageStore';
 import { connectSocket, disconnectSocket } from '../lib/socket';
 import axios from 'axios';
 
@@ -24,6 +25,7 @@ const NOTIF_ICONS = {
 
 export default function DashboardLayout() {
     const { logout, user } = useUserStore();
+    const { t } = useLanguageStore();
     const location = useLocation();
     const navigate = useNavigate();
     const [unreadCount, setUnreadCount] = useState(0);
@@ -99,13 +101,13 @@ export default function DashboardLayout() {
     };
 
     const menu = [
-        { path: '/dashboard/properties',     icon: Building,      label: 'My Properties' },
-        { path: '/dashboard/create',          icon: PlusCircle,    label: 'Create Listing' },
-        { path: '/dashboard/favorites',       icon: Heart,         label: 'Saved' },
-        { path: '/dashboard/inbox',           icon: MessageSquare, label: 'Inbox', badge: unreadCount },
-        { path: '/dashboard/subscriptions',   icon: Crown,         label: 'VIP Boosts' },
-        { path: '/dashboard/activity',        icon: History,       label: 'Activity' },
-        { path: '/dashboard/profile',         icon: UserCircle,    label: 'My Profile' },
+        { path: '/dashboard/properties',     icon: Building,      label: t('dashboard.myProperties') },
+        { path: '/dashboard/create',          icon: PlusCircle,    label: t('dashboard.createListing') },
+        { path: '/dashboard/favorites',       icon: Heart,         label: t('dashboard.saved') },
+        { path: '/dashboard/inbox',           icon: MessageSquare, label: t('dashboard.inbox'), badge: unreadCount },
+        { path: '/dashboard/subscriptions',   icon: Crown,         label: t('dashboard.vipBoosts') },
+        { path: '/dashboard/activity',        icon: History,       label: t('dashboard.activity') },
+        { path: '/dashboard/profile',         icon: UserCircle,    label: t('dashboard.myProfile') },
     ];
 
     return (
@@ -178,7 +180,7 @@ export default function DashboardLayout() {
                         <button
                             onClick={() => { setNotifOpen(o => !o); if (!notifOpen) fetchNotifications(); }}
                             className="relative w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all"
-                            title="Notifications"
+                            title={t('dashboard.notifications')}
                         >
                             <Bell className="w-4.5 h-4.5" />
                             {unreadNotifs > 0 && (
@@ -193,15 +195,15 @@ export default function DashboardLayout() {
                             <div className="absolute right-0 top-12 w-80 bg-[#051124] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
                                 {/* Header */}
                                 <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                                    <span className="text-white font-bold text-sm">Notifications</span>
+                                    <span className="text-white font-bold text-sm">{t('dashboard.notifications')}</span>
                                     <div className="flex items-center gap-2">
                                         {unreadNotifs > 0 && (
                                             <button
                                                 onClick={markAllRead}
                                                 className="flex items-center gap-1 text-xs text-[#4d88ff] hover:text-white transition-colors font-medium"
-                                                title="Mark all as read"
+                                                title={t('dashboard.markAllRead')}
                                             >
-                                                <CheckCheck className="w-3.5 h-3.5" /> All read
+                                                <CheckCheck className="w-3.5 h-3.5" /> {t('dashboard.markAllRead')}
                                             </button>
                                         )}
                                         <button onClick={() => setNotifOpen(false)} className="text-gray-500 hover:text-white transition-colors">
@@ -215,7 +217,7 @@ export default function DashboardLayout() {
                                     {notifs.length === 0 ? (
                                         <div className="px-4 py-8 text-center text-gray-500 text-sm">
                                             <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                                            No notifications yet
+                                            {t('dashboard.noNotifs')}
                                         </div>
                                     ) : notifs.map(n => (
                                         <div

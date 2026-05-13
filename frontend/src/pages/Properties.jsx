@@ -4,6 +4,7 @@ import { Search, MapPin, Building, DollarSign, Compass, FilterX, Map, LayoutGrid
 import { Link } from 'react-router-dom';
 import useCurrencyStore from '../store/currencyStore';
 import useUserStore from '../store/userStore';
+import useLanguageStore from '../store/languageStore';
 import PropertyCard from '../components/PropertyCard';
 import MapView from '../components/MapView';
 import Footer from '../components/Footer';
@@ -11,6 +12,7 @@ import Footer from '../components/Footer';
 export default function Properties() {
     const { preferredCurrency, setCurrency, currencies, currencyLabels } = useCurrencyStore();
     const { isAuthenticated, user, logout } = useUserStore();
+    const { t } = useLanguageStore();
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -129,10 +131,10 @@ export default function Properties() {
                     </Link>
 
                     <div className="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-600">
-                        <Link to="/properties" className="text-brand-600 transition-colors cursor-default">Properties</Link>
-                        <Link to="/agencies" className="hover:text-brand-600 transition-colors">Agencies</Link>
+                        <Link to="/properties" className="text-brand-600 transition-colors cursor-default">{t('nav.properties')}</Link>
+                        <Link to="/agencies" className="hover:text-brand-600 transition-colors">{t('nav.agencies')}</Link>
                         <Link to="/pricing" className="hover:text-brand-600 transition-colors">
-                            VIP Plans
+                            {t('nav.vipPlans')}
                         </Link>
                         
                         <div className="relative">
@@ -145,9 +147,6 @@ export default function Properties() {
                                     <option key={c} value={c}>{currencyLabels[c] || c}</option>
                                 ))}
                             </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
-                                <ChevronDown className="w-4 h-4" />
-                            </div>
                         </div>
                     </div>
 
@@ -155,16 +154,16 @@ export default function Properties() {
                         {isAuthenticated ? (
                             <div className="flex items-center gap-3">
                                 <Link to="/dashboard/properties" className="text-sm font-bold text-brand-600 hover:text-white transition-all bg-brand-50 hover:bg-brand-600 px-4 py-2 rounded-full border border-brand-200 hover:border-brand-600">
-                                    Dashboard
+                                    {t('nav.dashboard')}
                                 </Link>
                                 <button onClick={logout} className="hidden sm:flex items-center gap-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-full text-sm font-bold transition-all border border-red-100">
-                                    Logout
+                                    {t('nav.logout')}
                                 </button>
                             </div>
                         ) : (
                             <Link to="/login" className="flex items-center gap-2 bg-white text-slate-800 hover:bg-gray-50 px-5 py-2 rounded-full text-sm font-bold transition-all border border-gray-200 shadow-sm hover:shadow">
                                 <User className="w-4 h-4" />
-                                <span>Sign In</span>
+                                <span>{t('nav.login')}</span>
                             </Link>
                         )}
                     </div>
@@ -186,8 +185,8 @@ export default function Properties() {
                                 value={keyword}
                                 onChange={e => setKeyword(e.target.value)}
                                 onKeyDown={e => e.key === 'Enter' && applyFilters()}
-                                placeholder="Address, neighborhood, city, zip..." 
-                                className="w-full bg-surface-2 border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:ring-2 focus:ring-brand-500 outline-none placeholder:text-gray-400 transition-colors hover:border-gray-300"
+                                placeholder={t('search.placeholder')} 
+                                className="w-full bg-surface-2 border border-gray-200 rounded-xl py-2.5 pl-10 pr-4 text-slate-900 text-sm focus:ring-2 focus:ring-brand-500 outline-none placeholder:text-gray-400 transition-colors hover:border-gray-300 min-w-0"
                             />
                         </div>
 
@@ -196,7 +195,7 @@ export default function Properties() {
 
                             {/* Sale / Rent toggle */}
                             <div className="flex bg-surface-2 border border-gray-200 rounded-xl p-1 flex-shrink-0">
-                                {[['', 'All'], ['sale', 'For Sale'], ['rent', 'For Rent']].map(([val, label]) => (
+                                {[['', t('search.all')], ['sale', t('search.sale')], ['rent', t('search.rent')]].map(([val, label]) => (
                                     <button
                                         key={val}
                                         onClick={() => setFilters(f => ({ ...f, listing_type: val }))}
@@ -216,7 +215,7 @@ export default function Properties() {
                                 onChange={e => { setFilters({...filters, type_id: e.target.value}); }}
                                 className="bg-surface-2 border border-gray-200 text-slate-700 text-sm font-medium rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer flex-shrink-0"
                             >
-                                <option value="">All Types</option>
+                                <option value="">{t('search.allTypes')}</option>
                                 {metadata.types.map(t => <option key={t.type_id} value={t.type_id}>{t.name}</option>)}
                             </select>
 
@@ -225,7 +224,7 @@ export default function Properties() {
                                 onChange={e => { setFilters({...filters, city_id: e.target.value}); }}
                                 className="bg-surface-2 border border-gray-200 text-slate-700 text-sm font-medium rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer flex-shrink-0"
                             >
-                                <option value="">Any City</option>
+                                <option value="">{t('search.anyCity')}</option>
                                 {metadata.cities.map(c => <option key={c.city_id} value={c.city_id}>{c.name}</option>)}
                             </select>
 
@@ -234,14 +233,14 @@ export default function Properties() {
                                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors flex-shrink-0
                                     ${showAdvanced ? 'bg-brand-50 border-brand-200 text-brand-700' : 'bg-surface-2 border-gray-200 text-slate-700 hover:bg-gray-100'}`}
                             >
-                                <SlidersHorizontal className="w-4 h-4" /> Filters
+                                <SlidersHorizontal className="w-4 h-4" /> {showAdvanced ? t('search.hideFilters') : t('search.filters')}
                             </button>
 
                             <button 
                                 onClick={applyFilters}
                                 className="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm flex-shrink-0"
                             >
-                                Search
+                                {t('search.button')}
                             </button>
                         </div>
                     </div>
@@ -252,21 +251,21 @@ export default function Properties() {
                             <div>
                                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">Price Range</label>
                                 <div className="flex items-center gap-2">
-                                    <input type="number" placeholder="Min" value={filters.minPrice} onChange={e => setFilters({...filters, minPrice: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500" />
+                                    <input type="number" placeholder="Min" value={filters.minPrice} onChange={e => setFilters({...filters, minPrice: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 min-w-0" />
                                     <span className="text-gray-400">-</span>
-                                    <input type="number" placeholder="Max" value={filters.maxPrice} onChange={e => setFilters({...filters, maxPrice: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500" />
+                                    <input type="number" placeholder="Max" value={filters.maxPrice} onChange={e => setFilters({...filters, maxPrice: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 min-w-0" />
                                 </div>
                             </div>
                             
                             <div>
                                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">Bed & Bath</label>
                                 <div className="flex items-center gap-2">
-                                    <select value={filters.bedrooms} onChange={e => setFilters({...filters, bedrooms: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
-                                        <option value="">Any Beds</option>
+                                    <select value={filters.bedrooms} onChange={e => setFilters({...filters, bedrooms: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer min-w-0">
+                                        <option value="">{t('search.minBedrooms')}</option>
                                         {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}+ Beds</option>)}
                                     </select>
-                                    <select value={filters.bathrooms} onChange={e => setFilters({...filters, bathrooms: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
-                                        <option value="">Any Baths</option>
+                                    <select value={filters.bathrooms} onChange={e => setFilters({...filters, bathrooms: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer min-w-0">
+                                        <option value="">{t('search.minBathrooms')}</option>
                                         {[1,2,3,4].map(n => <option key={n} value={n}>{n}+ Baths</option>)}
                                     </select>
                                 </div>
@@ -274,19 +273,19 @@ export default function Properties() {
 
                             <div>
                                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">District</label>
-                                <select value={filters.district_id} onChange={e => setFilters({...filters, district_id: e.target.value})} disabled={!filters.city_id} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50 cursor-pointer">
-                                    <option value="">All Districts</option>
+                                <select value={filters.district_id} onChange={e => setFilters({...filters, district_id: e.target.value})} disabled={!filters.city_id} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50 cursor-pointer min-w-0">
+                                    <option value="">{t('search.anyDistrict')}</option>
                                     {activeDistricts.map(d => <option key={d.district_id} value={d.district_id}>{d.name}</option>)}
                                 </select>
                             </div>
 
                             <div>
                                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block flex justify-between">
-                                    <span>Direction</span>
+                                    <span>{t('search.direction')}</span>
                                     <button onClick={handleClear} className="text-brand-600 hover:text-brand-800 text-[10px] lowercase font-bold">clear all</button>
                                 </label>
-                                <select value={filters.direction} onChange={e => setFilters({...filters, direction: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer">
-                                    <option value="">Any Direction</option>
+                                <select value={filters.direction} onChange={e => setFilters({...filters, direction: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer min-w-0">
+                                    <option value="">{t('search.anyDirection')}</option>
                                     <option value="north">North</option><option value="south">South</option><option value="east">East</option><option value="west">West</option>
                                     <option value="northeast">North-East</option><option value="northwest">North-West</option><option value="southeast">South-East</option><option value="southwest">South-West</option>
                                 </select>
@@ -302,24 +301,24 @@ export default function Properties() {
                 {/* Results Header */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Real Estate & Homes For Sale</h1>
-                        <p className="text-sm text-slate-500 mt-1">{loading ? 'Loading results...' : `${totalResults} results found`}</p>
+                        <h1 className="text-2xl font-bold text-slate-900">{t('nav.properties')}</h1>
+                        <p className="text-sm text-slate-500 mt-1">{loading ? t('common.loading') : `${totalResults} ${t('search.results')}`}</p>
                     </div>
 
                     <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
                         <div className="flex items-center gap-2 whitespace-nowrap">
-                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sort:</span>
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t('search.sortBy')}:</span>
                             <select
                                 value={sort}
                                 onChange={e => { setSort(e.target.value); }}
                                 className="bg-transparent border-none text-brand-600 font-semibold text-sm outline-none cursor-pointer focus:ring-0 p-0 pr-4"
                             >
-                                <option value="newest">Newest</option>
-                                <option value="oldest">Oldest</option>
-                                <option value="price_asc">Price (Low to High)</option>
-                                <option value="price_desc">Price (High to Low)</option>
-                                <option value="area_asc">Area (Small to Large)</option>
-                                <option value="area_desc">Area (Large to Small)</option>
+                                <option value="newest">{t('search.newest')}</option>
+                                <option value="oldest">{t('search.oldest')}</option>
+                                <option value="price_asc">{t('search.priceLow')}</option>
+                                <option value="price_desc">{t('search.priceHigh')}</option>
+                                <option value="area_asc">{t('search.areaLow')}</option>
+                                <option value="area_desc">{t('search.areaHigh')}</option>
                             </select>
                         </div>
                         
@@ -330,13 +329,13 @@ export default function Properties() {
                                 onClick={() => setViewMode('list')}
                                 className={`px-3 py-1.5 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-brand-600' : 'text-slate-500 hover:text-slate-700'}`}
                             >
-                                <LayoutGrid className="w-4 h-4" /> <span className="hidden sm:inline">Grid</span>
+                                <LayoutGrid className="w-4 h-4" /> <span className="hidden sm:inline">{t('search.listView')}</span>
                             </button>
                             <button
                                 onClick={() => setViewMode('map')}
                                 className={`px-3 py-1.5 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${viewMode === 'map' ? 'bg-white shadow-sm text-brand-600' : 'text-slate-500 hover:text-slate-700'}`}
                             >
-                                <Map className="w-4 h-4" /> <span className="hidden sm:inline">Map</span>
+                                <Map className="w-4 h-4" /> <span className="hidden sm:inline">{t('search.mapView')}</span>
                             </button>
                         </div>
                     </div>
@@ -350,7 +349,7 @@ export default function Properties() {
                 ) : (
                     <>
                         {loading ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[1,2,3,4,5,6,7,8].map(i => (
                                     <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm animate-pulse">
                                         <div className="h-56 bg-slate-200"></div>
@@ -363,7 +362,7 @@ export default function Properties() {
                                 ))}
                             </div>
                         ) : properties.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 page-enter">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 page-enter">
                                 {properties.map(prop => (
                                     <PropertyCard key={prop.property_id} property={prop} />
                                 ))}
@@ -373,10 +372,10 @@ export default function Properties() {
                                 <div className="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mb-4">
                                     <FilterX className="w-10 h-10 text-brand-400" />
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-2">No matching properties</h3>
-                                <p className="text-slate-500 max-w-md text-center mb-6">We couldn't find any properties matching your current filters. Try adjusting your search criteria.</p>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2">{t('search.noResults')}</h3>
+                                <p className="text-slate-500 max-w-md text-center mb-6">{t('search.noResultsHint')}</p>
                                 <button onClick={handleClear} className="bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 px-6 rounded-xl transition-colors shadow-sm">
-                                    Clear All Filters
+                                    {t('search.clearFilters')}
                                 </button>
                             </div>
                         )}

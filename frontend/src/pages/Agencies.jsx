@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Building2, MapPin, Home, Users, ArrowRight, Eye } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
+import useLanguageStore from '../store/languageStore';
 
 export default function Agencies() {
     const [agents, setAgents] = useState([]);
     const [loading, setLoading] = useState(true);
     const { formatPrice } = useCurrencyStore();
+    const { t } = useLanguageStore();
 
     useEffect(() => {
         // Fetch users who have at least one approved listing
@@ -28,9 +30,9 @@ export default function Agencies() {
                     <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2 text-white/80 text-sm font-medium mb-6">
                         <Users className="w-4 h-4" /> Trusted Sellers & Agents
                     </div>
-                    <h1 className="text-5xl font-black text-white mb-4">Property Agents</h1>
+                    <h1 className="text-5xl font-black text-white mb-4">{t('agencies.title')}</h1>
                     <p className="text-white/70 text-lg max-w-xl mx-auto">
-                        Browse verified sellers and agents on our platform.
+                        {t('agencies.subtitle')}
                     </p>
                 </div>
             </div>
@@ -45,7 +47,7 @@ export default function Agencies() {
                 ) : agents.length === 0 ? (
                     <div className="text-center py-24">
                         <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-slate-700 mb-2">No agents found</h3>
+                        <h3 className="text-xl font-bold text-slate-700 mb-2">{t('agencies.noResults')}</h3>
                         <p className="text-slate-400">Check back soon as sellers join the platform.</p>
                     </div>
                 ) : (
@@ -83,7 +85,7 @@ export default function Agencies() {
                                     to={`/properties?seller=${agent.user_id}`}
                                     className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border border-brand-600/20 text-brand-600 hover:bg-brand-600 hover:text-white font-semibold text-sm transition-all group-hover:border-brand-600"
                                 >
-                                    <Eye className="w-4 h-4" /> View Listings <ArrowRight className="w-3.5 h-3.5" />
+                                    <Eye className="w-4 h-4" /> {t('agencies.viewListings')} <ArrowRight className="w-3.5 h-3.5" />
                                 </Link>
                             </div>
                         ))}

@@ -3,12 +3,14 @@ import { Bed, Bath, Square, MapPin, Heart } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
 import useFavoriteStore from '../store/favoriteStore';
 import useUserStore from '../store/userStore';
+import useLanguageStore from '../store/languageStore';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function PropertyCard({ property }) {
     const { formatPrice } = useCurrencyStore();
     const { isFavorited, toggleFavorite } = useFavoriteStore();
     const { isAuthenticated } = useUserStore();
+    const { t } = useLanguageStore();
     const navigate = useNavigate();
 
     const favorited = isFavorited(property.property_id);
@@ -29,15 +31,15 @@ export default function PropertyCard({ property }) {
 
             {/* Top Badges */}
             <div className="absolute top-4 left-4 z-10 flex gap-2">
-                <span className="bg-white/95 backdrop-blur-md border border-gray-200 text-slate-800 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm">
-                    {property.type_name || 'Estate'}
+                <span className="property-badge bg-white/95 backdrop-blur-md border border-gray-200 text-slate-800 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm">
+                    {property.type_name || t('card.estate')}
                 </span>
                 {property.listing_type && (
-                    <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm ${property.listing_type === 'rent'
+                    <span className={`property-badge text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm ${property.listing_type === 'rent'
                             ? 'bg-violet-100 text-violet-700 border border-violet-200'
                             : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                         }`}>
-                        {property.listing_type === 'sale' ? 'For Sale' : 'For Rent'}
+                        {property.listing_type === 'sale' ? t('card.forSale') : t('card.forRent')}
                     </span>
                 )}
             </div>
@@ -45,7 +47,7 @@ export default function PropertyCard({ property }) {
             {/* ❤️ Favorite Button */}
             <button
                 onClick={handleFavorite}
-                title={favorited ? 'Remove from favorites' : 'Save to favorites'}
+                title={favorited ? t('card.saved') : t('card.save')}
                 className={`absolute top-4 right-4 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-md
                     ${favorited
                         ? 'bg-red-500 text-white scale-110'
@@ -86,21 +88,21 @@ export default function PropertyCard({ property }) {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-1.5">
-                        <Bed className="w-4 h-4 text-slate-400" />
-                        <span className="text-sm text-slate-700 font-semibold">{property.bedrooms ?? '—'}</span>
-                        <span className="text-xs text-slate-400">bd</span>
+                <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-100 whitespace-nowrap">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        <Bed className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                        <span className="text-sm text-slate-700 font-semibold truncate">{property.bedrooms ?? '—'}</span>
+                        <span className="text-xs text-slate-400 flex-shrink-0">{t('card.beds')}</span>
                     </div>
-                    <div className="flex items-center justify-center gap-1.5 border-x border-gray-100">
-                        <Bath className="w-4 h-4 text-slate-400" />
-                        <span className="text-sm text-slate-700 font-semibold">{property.bathrooms ?? '—'}</span>
-                        <span className="text-xs text-slate-400">ba</span>
+                    <div className="flex items-center justify-center gap-1.5 border-x border-gray-100 min-w-0">
+                        <Bath className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                        <span className="text-sm text-slate-700 font-semibold truncate">{property.bathrooms ?? '—'}</span>
+                        <span className="text-xs text-slate-400 flex-shrink-0">{t('card.baths')}</span>
                     </div>
-                    <div className="flex items-center justify-end gap-1.5">
-                        <Square className="w-4 h-4 text-slate-400" />
-                        <span className="text-sm text-slate-700 font-semibold">{property.area_m2 ? `${property.area_m2}` : '—'}</span>
-                        <span className="text-xs text-slate-400">m²</span>
+                    <div className="flex items-center justify-end gap-1.5 min-w-0">
+                        <Square className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                        <span className="text-sm text-slate-700 font-semibold truncate">{property.area_m2 ? `${property.area_m2}` : '—'}</span>
+                        <span className="text-xs text-slate-400 flex-shrink-0">{t('card.sqm')}</span>
                     </div>
                 </div>
             </div>

@@ -3,11 +3,13 @@ import axios from 'axios';
 import { Edit, Trash2, Crown, Zap, RefreshCw, Eye, Heart, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useCurrencyStore from '../../store/currencyStore';
+import useLanguageStore from '../../store/languageStore';
 
 export default function ManageListings() {
     const [properties, setProperties] = useState([]);
     const [loading, setLoading] = useState(true);
     const { formatPrice } = useCurrencyStore();
+    const { t } = useLanguageStore();
 
     useEffect(() => {
         const fetchProperties = async () => {
@@ -59,8 +61,8 @@ export default function ManageListings() {
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">My Properties</h1>
-                    <p className="text-gray-400">Manage your active, rented, and sold listings globally.</p>
+                    <h1 className="text-3xl font-bold text-white mb-2">{t('manage.title')}</h1>
+                    <p className="text-gray-400">{t('manage.subtitle')}</p>
                 </div>
             </div>
 
@@ -69,14 +71,14 @@ export default function ManageListings() {
                     <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead>
                             <tr className="border-b border-white/10 bg-black/40 text-gray-400 text-sm tracking-wide">
-                                <th className="p-5 font-medium pl-8">Property Matrix</th>
-                                <th className="p-5 font-medium">Original Val (USD)</th>
-                                <th className="p-5 font-medium">Live Converted Val</th>
-                                <th className="p-5 font-medium">VIP Status</th>
-                                <th className="p-5 font-medium">Approval</th>
-                                <th className="p-5 font-medium">Stats</th>
-                                <th className="p-5 font-medium">Expiry</th>
-                                <th className="p-5 font-medium">Asset Status</th>
+                                <th className="p-5 font-medium pl-8">{t('manage.propMatrix')}</th>
+                                <th className="p-5 font-medium">{t('manage.origVal')}</th>
+                                <th className="p-5 font-medium">{t('manage.liveVal')}</th>
+                                <th className="p-5 font-medium">{t('manage.vipStatus')}</th>
+                                <th className="p-5 font-medium">{t('manage.approval')}</th>
+                                <th className="p-5 font-medium">{t('manage.stats')}</th>
+                                <th className="p-5 font-medium">{t('manage.expiry')}</th>
+                                <th className="p-5 font-medium">{t('manage.assetStatus')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -128,7 +130,7 @@ export default function ManageListings() {
                                                 to={`/pricing?property_id=${prop.property_id}`}
                                                 className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 border border-amber-400/25 hover:border-amber-400/50 px-3 py-1.5 rounded-lg hover:bg-amber-400/10 transition-all"
                                             >
-                                                <Zap className="w-3 h-3" /> Boost
+                                                <Zap className="w-3 h-3" /> {t('manage.btnBoost')}
                                             </Link>
                                         )}
                                     </td>
@@ -142,15 +144,15 @@ export default function ManageListings() {
                                         <div className="flex flex-col gap-1 text-xs text-gray-400 min-w-[80px]">
                                             <span className="flex items-center gap-1.5">
                                                 <Eye className="w-3 h-3 text-sky-400" />
-                                                {Number(prop.view_count || 0).toLocaleString()} views
+                                                {Number(prop.view_count || 0).toLocaleString()} {t('manage.views')}
                                             </span>
                                             <span className="flex items-center gap-1.5">
                                                 <Heart className="w-3 h-3 text-red-400" />
-                                                {Number(prop.favorites_count || 0)} saved
+                                                {Number(prop.favorites_count || 0)} {t('manage.saved')}
                                             </span>
                                             <span className="flex items-center gap-1.5">
                                                 <MessageSquare className="w-3 h-3 text-emerald-400" />
-                                                {Number(prop.inquiry_count || 0)} inquiries
+                                                {Number(prop.inquiry_count || 0)} {t('manage.inquiries')}
                                             </span>
                                         </div>
                                     </td>
@@ -170,7 +172,7 @@ export default function ManageListings() {
                                                 className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-white border border-emerald-500/25 hover:bg-emerald-500 px-2.5 py-1 rounded-lg transition-all w-fit"
                                                 title="Extend listing by 7 days"
                                             >
-                                                <RefreshCw className="w-3 h-3" /> Renew
+                                                <RefreshCw className="w-3 h-3" /> {t('manage.btnRenew')}
                                             </button>
                                         </div>
                                     </td>
@@ -181,12 +183,12 @@ export default function ManageListings() {
                                                 onChange={(e) => updateStatus(prop.property_id, e.target.value)}
                                                 className="bg-black/50 border border-white/10 text-white font-medium rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-600 outline-none text-sm cursor-pointer"
                                             >
-                                                <option value="active">✅ Active</option>
+                                                <option value="active">✅ {t('manage.statusActive')}</option>
                                                 <option value="negotiating">💬 Negotiating</option>
                                                 <option value="deposited">📋 Deposited</option>
-                                                <option value="sold">🛑 Sold</option>
-                                                <option value="rented">🔑 Rented</option>
-                                                <option value="hidden">👁 Hidden</option>
+                                                <option value="sold">🛑 {t('manage.statusSold')}</option>
+                                                <option value="rented">🔑 {t('manage.statusRented')}</option>
+                                                <option value="hidden">👁 {t('manage.statusInactive')}</option>
                                             </select>
                                             <Link
                                                 to={`/dashboard/edit/${prop.property_id}`}

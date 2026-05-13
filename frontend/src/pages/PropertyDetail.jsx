@@ -8,22 +8,20 @@ import {
     Printer, Eye, Video
 } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
+import useLanguageStore from '../store/languageStore';
 import useUserStore from '../store/userStore';
 import useFavoriteStore from '../store/favoriteStore';
 import MortgageCalculator from '../components/MortgageCalculator';
 import MapView from '../components/MapView';
 import Footer from '../components/Footer';
 
-const DIRECTION_MAP = {
-    north: 'North', south: 'South', east: 'East', west: 'West',
-    northeast: 'North-East', northwest: 'North-West',
-    southeast: 'South-East', southwest: 'South-West',
-};
+
 
 export default function PropertyDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { formatPrice } = useCurrencyStore();
+    const { t } = useLanguageStore();
     const { isAuthenticated, user } = useUserStore();
     const { isFavorited, toggleFavorite } = useFavoriteStore();
 
@@ -104,7 +102,7 @@ export default function PropertyDetail() {
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-600 hover:text-brand-600 font-semibold transition-colors">
-                        <ArrowLeft className="w-5 h-5" /> Back
+                        <ArrowLeft className="w-5 h-5" /> {t('common.back')}
                     </button>
                     <Link to="/" className="text-lg font-bold text-slate-900">LuxEstates</Link>
                     <div className="flex items-center gap-2">
@@ -156,7 +154,7 @@ export default function PropertyDetail() {
                         <span className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-sm ${
                             property.listing_type === 'rent' ? 'bg-violet-100 text-violet-700' : 'bg-emerald-100 text-emerald-700'
                         }`}>
-                            For {property.listing_type === 'sale' ? 'Sale' : 'Rent'}
+                            {property.listing_type === 'sale' ? t('card.forSale') : t('card.forRent')}
                         </span>
                     </div>
 
@@ -247,12 +245,12 @@ export default function PropertyDetail() {
                             <div className="flex items-center gap-4 mt-3 text-sm text-slate-400">
                                 {property.view_count > 0 && (
                                     <span className="flex items-center gap-1">
-                                        <Eye className="w-3.5 h-3.5" /> {Number(property.view_count).toLocaleString()} views
+                                        <Eye className="w-3.5 h-3.5" /> {Number(property.view_count).toLocaleString()} {t('detail.views')}
                                     </span>
                                 )}
                                 {property.favorites_count > 0 && (
                                     <span className="flex items-center gap-1">
-                                        <Heart className="w-3.5 h-3.5 text-red-400 fill-current" /> {Number(property.favorites_count).toLocaleString()} saved
+                                        <Heart className="w-3.5 h-3.5 text-red-400 fill-current" /> {Number(property.favorites_count).toLocaleString()} {t('detail.savedCount')}
                                     </span>
                                 )}
                             </div>
@@ -261,10 +259,10 @@ export default function PropertyDetail() {
                         {/* Key Stats */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             {[
-                                { icon: Bed, label: 'Bedrooms', value: property.bedrooms ?? '—' },
-                                { icon: Bath, label: 'Bathrooms', value: property.bathrooms ?? '—' },
-                                { icon: Square, label: 'Area', value: property.area_m2 ? `${property.area_m2} m²` : '—' },
-                                { icon: Compass, label: 'Direction', value: DIRECTION_MAP[property.direction] || '—' },
+                                { icon: Bed, label: t('detail.bedrooms'), value: property.bedrooms ?? '—' },
+                                { icon: Bath, label: t('detail.bathrooms'), value: property.bathrooms ?? '—' },
+                                { icon: Square, label: t('detail.area'), value: property.area_m2 ? `${property.area_m2} m²` : '—' },
+                                { icon: Compass, label: t('detail.direction'), value: property.direction ? t(`directionMap.${property.direction}`) : '—' },
                             ].map(({ icon: Icon, label, value }) => (
                                 <div key={label} className="bg-white rounded-2xl p-4 text-center border border-gray-100 shadow-sm">
                                     <Icon className="w-5 h-5 text-brand-600 mx-auto mb-2" />
@@ -278,7 +276,7 @@ export default function PropertyDetail() {
                         {property.video_url && (
                             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                                 <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <Video className="w-5 h-5 text-brand-600" /> Video Tour
+                                    <Video className="w-5 h-5 text-brand-600" /> {t('detail.videoTour')}
                                 </h2>
                                 <div className="aspect-video rounded-xl overflow-hidden bg-slate-100">
                                     {property.video_url.includes('youtube.com') || property.video_url.includes('youtu.be') ? (
@@ -299,7 +297,7 @@ export default function PropertyDetail() {
                         {property.features?.length > 0 && (
                             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                                 <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <Tag className="w-5 h-5 text-brand-600" /> Features & Amenities
+                                    <Tag className="w-5 h-5 text-brand-600" /> {t('detail.featuresAmenities')}
                                 </h2>
                                 <div className="flex flex-wrap gap-2">
                                     {property.features.map(f => (
@@ -314,7 +312,7 @@ export default function PropertyDetail() {
                         {/* Description */}
                         {property.description && (
                             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                                <h2 className="text-lg font-bold text-slate-900 mb-4">About This Property</h2>
+                                <h2 className="text-lg font-bold text-slate-900 mb-4">{t('detail.aboutProperty')}</h2>
                                 <p className="text-slate-600 leading-relaxed whitespace-pre-line">{property.description}</p>
                             </div>
                         )}
@@ -322,7 +320,7 @@ export default function PropertyDetail() {
                         {/* Location */}
                         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                             <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                <MapPin className="w-5 h-5 text-brand-600" /> Location
+                                <MapPin className="w-5 h-5 text-brand-600" /> {t('detail.location')}
                             </h2>
                             <p className="text-slate-600 text-sm mb-4">{fullAddress}</p>
                             <MapView
@@ -341,7 +339,7 @@ export default function PropertyDetail() {
                         {property.priceHistory?.length > 0 && (
                             <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                                 <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <TrendingDown className="w-5 h-5 text-brand-600" /> Price History
+                                    <TrendingDown className="w-5 h-5 text-brand-600" /> {t('detail.priceHistory')}
                                 </h2>
                                 <div className="space-y-3">
                                     {property.priceHistory.map((h, i) => {
@@ -367,12 +365,22 @@ export default function PropertyDetail() {
 
                         {/* Report */}
                         <div className="text-center pt-2">
-                            <button
-                                onClick={() => setReportModal(true)}
-                                className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-red-500 transition-colors font-medium"
-                            >
-                                <Flag className="w-4 h-4" /> Report this listing
-                            </button>
+                            {isAuthenticated ? (
+                                <button
+                                    onClick={() => setReportModal(true)}
+                                    className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-red-500 transition-colors font-medium"
+                                >
+                                    <Flag className="w-4 h-4" /> {t('detail.reportListing')}
+                                </button>
+                            ) : (
+                                <Link
+                                    to="/login"
+                                    state={{ from: `/properties/${id}` }}
+                                    className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-brand-600 transition-colors font-medium"
+                                >
+                                    <Flag className="w-4 h-4" /> {t('detail.loginToReport')}
+                                </Link>
+                            )}
                         </div>
                     </div>
 
@@ -381,7 +389,7 @@ export default function PropertyDetail() {
                         <div className="sticky top-24 space-y-4">
                             {/* Price Summary */}
                             <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm text-center">
-                                <p className="text-sm text-slate-400 uppercase tracking-widest font-semibold mb-1">Asking Price</p>
+                                <p className="text-sm text-slate-400 uppercase tracking-widest font-semibold mb-1">{t('detail.askingPrice')}</p>
                                 <p className="text-3xl font-bold text-brand-600">{formatPrice(property.price_usd)}</p>
                                 {property.area_m2 && (
                                     <p className="text-xs text-slate-400 mt-1">
@@ -393,7 +401,7 @@ export default function PropertyDetail() {
                             {/* Seller Card */}
                             <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
                                 <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <User className="w-4 h-4 text-brand-600" /> Listed By
+                                    <User className="w-4 h-4 text-brand-600" /> {t('detail.listedBy')}
                                 </h3>
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-12 h-12 rounded-full bg-brand-600/10 flex items-center justify-center text-brand-600 font-bold text-lg flex-shrink-0 overflow-hidden">
@@ -405,7 +413,7 @@ export default function PropertyDetail() {
                                     <div>
                                         <p className="font-bold text-slate-800">{property.seller_name}</p>
                                         <p className="text-xs text-slate-400 flex items-center gap-1">
-                                            <CheckCircle className="w-3 h-3 text-emerald-500" /> Verified Member
+                                            <CheckCircle className="w-3 h-3 text-emerald-500" /> {t('detail.verifiedMember')}
                                         </p>
                                     </div>
                                 </div>
@@ -444,7 +452,7 @@ export default function PropertyDetail() {
                                             }}
                                             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm transition-colors shadow-md"
                                         >
-                                            <Mail className="w-4 h-4" /> Send Message
+                                            <Mail className="w-4 h-4" /> {t('detail.sendMessage')}
                                         </button>
                                     ) : (
                                         <div className="w-full py-3 rounded-xl bg-surface border border-slate-200 text-slate-400 text-sm font-semibold text-center">
@@ -457,18 +465,18 @@ export default function PropertyDetail() {
                                         state={{ from: `/properties/${id}` }}
                                         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm transition-colors shadow-md"
                                     >
-                                        <Mail className="w-4 h-4" /> Login to Send Message
+                                        <Mail className="w-4 h-4" /> {t('detail.loginToSendMessage')}
                                     </Link>
                                 )}
                             </div>
 
                             {/* Quick info card */}
                             <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-3">
-                                <h3 className="font-bold text-slate-900 text-sm">Property Details</h3>
+                                <h3 className="font-bold text-slate-900 text-sm">{t('detail.propertyDetails')}</h3>
                                 {[
-                                    { label: 'Status', value: property.listing_status },
-                                    { label: 'Listing Type', value: property.listing_type },
-                                    { label: 'Posted', value: new Date(property.created_at).toLocaleDateString() },
+                                    { label: t('detail.status'), value: property.listing_status },
+                                    { label: t('detail.listingType'), value: property.listing_type === 'sale' ? t('search.sale') : t('search.rent') },
+                                    { label: t('detail.posted'), value: new Date(property.created_at).toLocaleDateString() },
                                     { label: 'ID', value: `#${property.property_id}` },
                                 ].map(({ label, value }) => (
                                     <div key={label} className="flex justify-between text-sm">
@@ -547,7 +555,7 @@ export default function PropertyDetail() {
             {/* ── SIMILAR LISTINGS ── */}
             {similar.length > 0 && (
                 <div className="max-w-6xl mx-auto px-4 pb-16">
-                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Similar Properties</h2>
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">{t('detail.similarProperties')}</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                         {similar.map(p => {
                             const img = p.primary_image

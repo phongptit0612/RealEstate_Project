@@ -4,12 +4,14 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import useCurrencyStore from '../store/currencyStore';
 import useUserStore from '../store/userStore';
+import useLanguageStore from '../store/languageStore';
 import PropertyCard from '../components/PropertyCard';
 import Footer from '../components/Footer';
 
 export default function Home() {
   const { preferredCurrency, setCurrency, formatPrice, currencies, currencyLabels } = useCurrencyStore();
   const { isAuthenticated, user, logout } = useUserStore();
+  const { t } = useLanguageStore();
   const [scrollY, setScrollY] = useState(0);
   const [featuredProperties, setFeaturedProperties] = useState([]);
 
@@ -42,9 +44,9 @@ export default function Home() {
           </div>
 
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-700">
-            <Link to="/properties" className="hover:text-brand-600 transition-colors">Properties</Link>
-            <Link to="/agencies" className="hover:text-brand-600 transition-colors">Agencies</Link>
-            <a href="#" className="hover:text-brand-600 transition-colors">About Us</a>
+            <Link to="/properties" className="hover:text-brand-600 transition-colors">{t('nav.properties')}</Link>
+            <Link to="/agencies" className="hover:text-brand-600 transition-colors">{t('nav.agencies')}</Link>
+            <a href="#" className="hover:text-brand-600 transition-colors">{t('nav.aboutUs')}</a>
             <div className="relative">
               <select
                 className="appearance-none bg-gray-100 border border-gray-200 rounded-lg pl-4 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-600 transition-all cursor-pointer font-medium hover:bg-gray-200 text-slate-700"
@@ -55,9 +57,6 @@ export default function Home() {
                   <option key={c} value={c}>{currencyLabels[c] || c}</option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
-              </div>
             </div>
           </div>
 
@@ -73,16 +72,16 @@ export default function Home() {
                     className="flex items-center gap-2 text-sm font-bold bg-brand-600 text-white hover:bg-brand-700 px-4 py-2 rounded-full transition-all shadow-md"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                    Admin Panel
+                    {t('nav.adminPanel')}
                   </Link>
                 ) : (
                   <Link to="/dashboard/properties" className="text-sm font-bold text-brand-600 hover:text-white transition-all hover:bg-brand-600 px-4 py-2 rounded-full border border-brand-600">
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                 )}
-                <span className="font-medium text-sm text-slate-600">Hi, {user?.name?.split(' ')[0]}</span>
+                <span className="font-medium text-sm text-slate-600">{t('nav.hi')}, {user?.name?.split(' ')[0]}</span>
                 <button onClick={logout} className="flex items-center gap-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-full font-medium transition-all border border-red-100">
-                  Logout
+                  {t('nav.logout')}
                 </button>
               </div>
             ) : (
@@ -108,55 +107,55 @@ export default function Home() {
           <div className="absolute inset-0 bg-slate-900/40"></div>
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-20">
-          <span className="inline-block py-1.5 px-4 rounded-full bg-white/20 border border-white/30 text-white text-sm font-medium mb-6 uppercase tracking-wider backdrop-blur-md shadow-lg">
-            Discover Your Dream Home
-          </span>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight drop-shadow-2xl text-white">
-            Find the Perfect Place to <span className="text-[#ffffff]">Call Your Own</span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-100 mb-10 max-w-2xl mx-auto font-medium drop-shadow-md">
-            Explore our curated selection of premium real estate properties across the globe. Seamlessly switch currencies below to fit your needs.
-          </p>
+          {/* Hero Content */}
+          <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-20">
+            <span className="inline-block py-1.5 px-4 rounded-full bg-white/20 border border-white/30 text-white text-sm font-medium mb-6 uppercase tracking-wider backdrop-blur-md shadow-lg">
+              {t('hero.subtitle')}
+            </span>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight drop-shadow-2xl text-white">
+              {t('hero.tagline')}
+            </h1>
+            <p className="text-lg md:text-xl text-gray-100 mb-10 max-w-2xl mx-auto font-medium drop-shadow-md">
+              {t('hero.subtitle')}
+            </p>
 
-          {/* Search Bar - Zillow Style */}
-          <div className="bg-white p-2 md:p-3 rounded-full flex flex-col md:flex-row items-center gap-2 max-w-3xl mx-auto transition-all shadow-2xl group">
-            <div className="flex-1 flex items-center gap-3 px-4 w-full md:w-auto h-12 md:border-r border-gray-200 transition-colors">
-              <MapPin className="w-5 h-5 text-brand-600" />
-              <input
-                type="text"
-                placeholder="City, Neighborhood, or Address"
-                className="bg-transparent border-none outline-none text-slate-900 w-full placeholder:text-gray-500 font-medium"
-              />
+            {/* Search Bar */}
+            <div className="bg-white p-2.5 rounded-full flex flex-col md:flex-row items-center gap-2 max-w-4xl mx-auto transition-all shadow-2xl hover:shadow-brand-600/20 group border border-white/50 backdrop-blur-sm">
+              <div className="flex-1 flex items-center gap-3 px-5 w-full md:w-auto h-14 md:border-r border-gray-200 transition-colors hover:bg-slate-50 rounded-full md:rounded-r-none">
+                <MapPin className="w-5 h-5 text-brand-500 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder={t('hero.searchPlaceholder')}
+                  className="bg-transparent border-none outline-none text-slate-900 w-full placeholder:text-gray-400 font-medium min-w-0 text-base"
+                />
+              </div>
+              <div className="flex-1 flex items-center gap-3 px-5 w-full md:w-auto h-14 transition-colors hover:bg-slate-50 rounded-full md:rounded-l-none">
+                <Building className="w-5 h-5 text-brand-500 flex-shrink-0" />
+                <select className="bg-transparent border-none outline-none text-slate-900 w-full cursor-pointer font-medium min-w-0 text-base">
+                  <option value="">{t('search.allTypes')}</option>
+                  <option value="villa">Villa</option>
+                  <option value="apartment">{t('search.all')} Apartment</option>
+                  <option value="penthouse">Penthouse</option>
+                </select>
+              </div>
+              <Link to="/properties" className="w-full md:w-auto bg-brand-600 hover:bg-brand-500 text-white px-10 h-14 rounded-full font-bold flex items-center justify-center gap-2 outline-none border-none shadow-lg hover:shadow-brand-500/30 transition-all ml-1 text-base">
+                <Search className="w-5 h-5" />
+                {t('hero.search')}
+              </Link>
             </div>
-            <div className="flex-1 flex items-center gap-3 px-4 w-full md:w-auto h-12">
-              <Building className="w-5 h-5 text-brand-600" />
-              <select className="bg-transparent border-none outline-none text-slate-900 w-full cursor-pointer appearance-none font-medium">
-                <option value="">Property Type</option>
-                <option value="villa">Villa</option>
-                <option value="apartment">Luxury Apartment</option>
-                <option value="penthouse">Penthouse</option>
-              </select>
-            </div>
-            <button className="w-full md:w-auto bg-brand-600 hover:bg-[#009dff] text-white px-8 h-12 rounded-full font-bold flex items-center justify-center gap-2 outline-none border-none shadow-none">
-              <Search className="w-4 h-4" />
-              Search
-            </button>
           </div>
         </div>
-      </div>
 
       {/* Featured Properties Demo Section */}
       <div className="bg-surface py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900">Featured <span className="font-light text-slate-500">Listings</span></h2>
-              <p className="text-slate-600 max-w-xl font-medium">Curated estates selected for their exceptional quality, design, and location.</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-slate-900">{t('common.featuredProperties')}</h2>
+              <p className="text-slate-600 max-w-xl font-medium">{t('hero.subtitle')}</p>
             </div>
             <Link to="/properties" className="flex items-center gap-2 text-brand-600 hover:text-brand-700 font-bold transition-colors mt-4 md:mt-0 group">
-              View all listings
+              {t('common.viewAll')}
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import useCurrencyStore from '../../store/currencyStore';
+import useLanguageStore from '../../store/languageStore';
 import { ArrowLeft, Save, AlertCircle, CheckCircle, Loader2, MapPin, X, UploadCloud, Trash2, Compass } from 'lucide-react';
 import LocationPicker from '../../components/LocationPicker';
 
@@ -12,6 +14,8 @@ const labelClass = "text-xs font-semibold text-slate-400 uppercase tracking-wide
 export default function EditListing() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { formatPrice } = useCurrencyStore();
+    const { t } = useLanguageStore();
 
     const [loading, setLoading]     = useState(true);
     const [saving, setSaving]       = useState(false);
@@ -167,7 +171,7 @@ export default function EditListing() {
         <div className="text-center py-20 text-slate-400">
             <AlertCircle className="w-10 h-10 mx-auto mb-3 text-red-400" />
             <p>{error}</p>
-            <Link to="/dashboard/properties" className="mt-4 inline-block text-[#4d88ff] hover:text-white text-sm">← Back to My Listings</Link>
+            <Link to="/dashboard/properties" className="mt-4 inline-block text-[#4d88ff] hover:text-white text-sm">{t('create.backToListings')}</Link>
         </div>
     );
 
@@ -179,8 +183,8 @@ export default function EditListing() {
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Edit Listing</h1>
-                    <p className="text-slate-400 text-sm mt-0.5">Changes will require admin re-approval before going live.</p>
+                    <h1 className="text-2xl font-bold text-white">{t('create.editTitle')}</h1>
+                    <p className="text-slate-400 text-sm mt-0.5">{t('create.editWarning')}</p>
                 </div>
             </div>
 
@@ -199,7 +203,7 @@ export default function EditListing() {
 
             {/* ── Photo Management ── */}
             <div className="bg-[#051124] border border-white/8 rounded-2xl p-6 space-y-4">
-                <h2 className="text-sm font-bold text-white uppercase tracking-wider">Photos</h2>
+                <h2 className="text-sm font-bold text-white uppercase tracking-wider">{t('create.photos')}</h2>
 
                 {/* Existing images grid */}
                 {existingImages.length > 0 ? (
@@ -225,7 +229,7 @@ export default function EditListing() {
                         ))}
                     </div>
                 ) : (
-                    <p className="text-slate-500 text-sm">No photos uploaded yet.</p>
+                    <p className="text-slate-500 text-sm">{t('create.noPhotos')}</p>
                 )}
 
                 {/* Add new photos */}
@@ -237,7 +241,7 @@ export default function EditListing() {
                         <span className="text-sm">
                             {newImages && newImages.length > 0
                                 ? `${newImages.length} file${newImages.length > 1 ? 's' : ''} selected — `
-                                : 'Click to add more photos — '}
+                                : t('create.addPhotos')}
                             <span className="text-slate-500 text-xs">JPG, PNG, WebP</span>
                         </span>
                     </label>
@@ -247,7 +251,7 @@ export default function EditListing() {
                             disabled={uploadingImg}
                             className="mt-3 flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
                         >
-                            {uploadingImg ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</> : <><UploadCloud className="w-4 h-4" /> Upload Photos</>}
+                            {uploadingImg ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('create.uploading')}</> : <><UploadCloud className="w-4 h-4" /> {t('create.uploadPhotos')}</>}
                         </button>
                     )}
                 </div>
@@ -287,7 +291,7 @@ export default function EditListing() {
                         </div>
                     </div>
                     <div>
-                        <label className={labelClass}>Price (USD) *</label>
+                        <label className={labelClass}>{form.listing_type === 'rent' ? 'Rent Price (USD) / month' : 'Sale Price (USD)'} *</label>
                         <input type="number" required min="0" step="0.01" value={form.price_usd} onChange={set('price_usd')} placeholder="250000" className={inputClass} />
                     </div>
                 </div>
@@ -367,13 +371,13 @@ export default function EditListing() {
                 {/* Actions */}
                 <div className="flex gap-3 pt-2">
                     <Link to="/dashboard/properties" className="flex-1 py-3 border border-white/10 text-slate-300 hover:bg-white/5 hover:text-white font-semibold rounded-xl text-sm transition-all text-center">
-                        Cancel
+                        {t('common.cancel')}
                     </Link>
                     <button
                         type="submit" disabled={saving || success}
                         className="flex-1 flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-colors text-sm"
                     >
-                        {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Changes</>}
+                        {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('create.saving')}</> : <><Save className="w-4 h-4" /> {t('create.saveChanges')}</>}
                     </button>
                 </div>
             </form>
