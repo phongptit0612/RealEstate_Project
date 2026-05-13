@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Building2, MapPin, Home, Users, ArrowRight, Eye } from 'lucide-react';
+import { Building2, MapPin, Home, Users, ArrowRight, Eye, ArrowLeft } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
 import useLanguageStore from '../store/languageStore';
+import useUserStore from '../store/userStore';
 
 export default function Agencies() {
+    const { isAuthenticated } = useUserStore();
     const [agents, setAgents] = useState([]);
     const [loading, setLoading] = useState(true);
     const { formatPrice } = useCurrencyStore();
@@ -25,7 +27,12 @@ export default function Agencies() {
     return (
         <div className="min-h-screen bg-surface">
             {/* Hero */}
-            <div className="bg-gradient-to-br from-[#0033ab] to-[#001f7a] pt-28 pb-16 px-4">
+            <div className="bg-gradient-to-br from-[#0033ab] to-[#001f7a] pt-12 pb-16 px-4">
+                <div className="max-w-6xl mx-auto mb-8">
+                    <Link to={isAuthenticated ? "/dashboard/properties" : "/"} className="inline-flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm font-medium">
+                        <ArrowLeft className="w-4 h-4" /> {t('pricing.back')}
+                    </Link>
+                </div>
                 <div className="max-w-6xl mx-auto text-center">
                     <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2 text-white/80 text-sm font-medium mb-6">
                         <Users className="w-4 h-4" /> Trusted Sellers & Agents

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { CheckCircle, XCircle, Trash2, Pencil, Save, X, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, Pencil, Save, X, Loader2, Eye, MapPin, Bed, Bath, Square, Compass, Video, Hash } from 'lucide-react';
 
 const STATUS_TABS = ['all', 'pending', 'approved', 'rejected'];
 const API = 'http://localhost:5000/api';
@@ -16,6 +16,11 @@ export default function AdminListings() {
     const [editForm, setEditForm] = useState({});
     const [editSaving, setEditSaving] = useState(false);
     const [editError, setEditError] = useState('');
+    
+    // View Modal
+    const [viewModal, setViewModal] = useState(null);
+    const [viewData, setViewData] = useState(null);
+    const [viewLoading, setViewLoading] = useState(false);
 
     const fetchListings = async (status) => {
         setLoading(true);
@@ -71,6 +76,19 @@ export default function AdminListings() {
             setEditError(err.response?.data?.error || 'Failed to save');
         }
         setEditSaving(false);
+    };
+
+    const openView = async (id) => {
+        setViewModal(id);
+        setViewLoading(true);
+        try {
+            const r = await axios.get(`${API}/admin/listings/${id}`, { withCredentials: true });
+            setViewData(r.data);
+        } catch (e) {
+            console.error('Failed to load full listing', e);
+        } finally {
+            setViewLoading(false);
+        }
     };
 
     const statusBadge = (status) => {
@@ -158,6 +176,11 @@ export default function AdminListings() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-1.5 justify-end">
+                                            {/* View */}
+                                            <button onClick={() => openView(l.property_id)} title="View full details"
+                                                className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
+                                                <Eye className="w-4 h-4" />
+                                            </button>
                                             {/* Edit */}
                                             <button onClick={() => openEdit(l)} title="Edit content"
                                                 className="p-2 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">
@@ -282,6 +305,143 @@ export default function AdminListings() {
                                 Confirm Reject
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* ── View Modal ── */}
+            {viewModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between mb-5">
+                            <h2 className="text-xl font-bold text-slate-900">Listing Details</h2>
+                            <button onClick={() => { setViewModal(null); setViewData(null); }} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        
+                        {viewLoading ? (
+                            <div className="flex flex-col items-center justify-center py-12">
+                                <Loader2 className="w-8 h-8 text-brand-600 animate-spin mb-4" />
+                                <p className="text-slate-500">Loading details...</p>
+                            </div>
+                        ) : viewData ? (
+                            <div className="space-y-6">
+                                {/* Header Info */}
+                                <div>
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        <h3 className="text-2xl font-bold text-slate-900">{viewData.title}</h3>
+                                        {/* Status Badges */}
+                                        <span className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider ${
+                                            viewData.mod_status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                                            viewData.mod_status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                                            'bg-red-100 text-red-700'
+                                        }`}>
+                                            {viewData.mod_status}
+                                        </span>
+                                        <span className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider ${
+                                            viewData.listing_status === 'active' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
+                                        }`}>
+                                            {viewData.listing_status}
+                                        </span>
+                                    </div>
+                                    <p className="flex items-center gap-1.5 text-slate-500 mt-2 text-sm">
+                                        <MapPin className="w-4 h-4" /> {viewData.address}, {viewData.district_name}, {viewData.city_name}
+                                    </p>
+                                </div>
+                                
+                                {/* Metrics Grid */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    <div className="bg-surface p-4 rounded-xl border border-gray-100">
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Price</div>
+                                        <div className="text-lg font-bold text-brand-600">${Number(viewData.price_usd).toLocaleString()}</div>
+                                    </div>
+                                    <div className="bg-surface p-4 rounded-xl border border-gray-100">
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Type</div>
+                                        <div className="text-lg font-bold text-slate-800 capitalize">{viewData.listing_type}</div>
+                                    </div>
+                                    <div className="bg-surface p-4 rounded-xl border border-gray-100">
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Bedrooms</div>
+                                        <div className="flex items-center gap-1.5 text-lg font-bold text-slate-800">
+                                            <Bed className="w-4 h-4 text-slate-400" /> {viewData.bedrooms || '—'}
+                                        </div>
+                                    </div>
+                                    <div className="bg-surface p-4 rounded-xl border border-gray-100">
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Bathrooms</div>
+                                        <div className="flex items-center gap-1.5 text-lg font-bold text-slate-800">
+                                            <Bath className="w-4 h-4 text-slate-400" /> {viewData.bathrooms || '—'}
+                                        </div>
+                                    </div>
+                                    <div className="bg-surface p-4 rounded-xl border border-gray-100">
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Area</div>
+                                        <div className="flex items-center gap-1.5 text-lg font-bold text-slate-800">
+                                            <Square className="w-4 h-4 text-slate-400" /> {viewData.area_m2 || '—'} m²
+                                        </div>
+                                    </div>
+                                    <div className="bg-surface p-4 rounded-xl border border-gray-100">
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Direction</div>
+                                        <div className="flex items-center gap-1.5 text-lg font-bold text-slate-800 capitalize">
+                                            <Compass className="w-4 h-4 text-slate-400" /> {viewData.direction || '—'}
+                                        </div>
+                                    </div>
+                                    <div className="bg-surface p-4 rounded-xl border border-gray-100">
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Zipcode</div>
+                                        <div className="flex items-center gap-1.5 text-lg font-bold text-slate-800">
+                                            <Hash className="w-4 h-4 text-slate-400" /> {viewData.zipcode || '—'}
+                                        </div>
+                                    </div>
+                                    <div className="bg-surface p-4 rounded-xl border border-gray-100 flex flex-col justify-center">
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Video URL</div>
+                                        {viewData.video_url ? (
+                                            <a href={viewData.video_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm font-bold text-brand-600 hover:underline">
+                                                <Video className="w-4 h-4" /> View Video
+                                            </a>
+                                        ) : (
+                                            <div className="text-sm text-slate-500">—</div>
+                                        )}
+                                    </div>
+                                </div>
+                                
+                                {/* Description */}
+                                <div>
+                                    <h4 className="font-bold text-slate-900 mb-2">Description</h4>
+                                    <p className="text-slate-600 text-sm whitespace-pre-wrap">{viewData.description || 'No description provided.'}</p>
+                                </div>
+                                
+                                {/* Features */}
+                                {viewData.features && viewData.features.length > 0 && (
+                                    <div>
+                                        <h4 className="font-bold text-slate-900 mb-2">Features</h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {viewData.features.map(f => (
+                                                <span key={f.feature_id} className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium">
+                                                    {f.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Images */}
+                                {viewData.images && viewData.images.length > 0 && (
+                                    <div>
+                                        <h4 className="font-bold text-slate-900 mb-2">Images ({viewData.images.length})</h4>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {viewData.images.map((img, i) => (
+                                                <img key={i} src={img.image_url.startsWith('http') ? img.image_url : `http://localhost:5000${img.image_url.startsWith('/') ? '' : '/'}${img.image_url}`} alt="Property" className="w-full h-24 object-cover rounded-lg" />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {/* Seller Info */}
+                                <div className="p-4 bg-slate-50 rounded-xl border border-gray-100 flex flex-col gap-1">
+                                    <h4 className="font-bold text-slate-900 mb-1">Seller Information</h4>
+                                    <p className="text-sm text-slate-600"><span className="font-medium text-slate-800">Name:</span> {viewData.seller_name}</p>
+                                    <p className="text-sm text-slate-600"><span className="font-medium text-slate-800">Email:</span> {viewData.seller_email}</p>
+                                    <p className="text-sm text-slate-600"><span className="font-medium text-slate-800">Phone:</span> {viewData.seller_phone || '—'}</p>
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
             )}

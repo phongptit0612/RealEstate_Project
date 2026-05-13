@@ -16,7 +16,7 @@ export default function SubscriptionSuccess() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-[#020813] flex items-center justify-center px-6">
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
             {/* Glow */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-400/10 rounded-full blur-[120px]" />
@@ -37,10 +37,10 @@ export default function SubscriptionSuccess() {
                     <Sparkles className="w-5 h-5 text-amber-400" />
                 </div>
 
-                <h1 className="text-4xl font-extrabold text-white mb-4">
+                <h1 className="text-4xl font-extrabold text-slate-900 mb-4">
                     {t('success.title')}
                 </h1>
-                <p className="text-slate-400 mb-2">
+                <p className="text-slate-600 mb-2">
                     {simulated
                         ? t('success.simulated')
                         : t('success.confirmed')
@@ -56,12 +56,12 @@ export default function SubscriptionSuccess() {
                         <Crown className="w-4 h-4" /> {t('success.viewListings')}
                     </Link>
                     <Link to="/dashboard/subscriptions"
-                        className="inline-flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-slate-300 font-semibold px-6 py-3 rounded-2xl text-sm hover:bg-white/10 transition-all">
+                        className="inline-flex items-center justify-center gap-2 bg-white border border-gray-200 text-slate-700 font-semibold px-6 py-3 rounded-2xl text-sm hover:bg-gray-50 transition-all shadow-sm">
                         <ArrowRight className="w-4 h-4" /> {t('success.mySubscriptions')}
                     </Link>
                 </div>
 
-                <p className="text-slate-600 text-xs mt-8">
+                <p className="text-slate-400 text-xs mt-8">
                     {t('success.redirecting')} {Math.max(count, 0)}s…
                 </p>
             </div>

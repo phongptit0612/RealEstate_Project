@@ -20,7 +20,16 @@ exports.getStats = async (req, res) => {
             ORDER BY day ASC
         `);
 
-        res.json({ total_users, total_listings, pending_listings, approved_listings, total_reports, new_users_today, trend });
+        // Recent 7-day user trend
+        const [userTrend] = await pool.query(`
+            SELECT DATE(created_at) as day, COUNT(*) as count
+            FROM users
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY DATE(created_at)
+            ORDER BY day ASC
+        `);
+
+        res.json({ total_users, total_listings, pending_listings, approved_listings, total_reports, new_users_today, trend, userTrend });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -52,6 +61,42 @@ exports.getListings = async (req, res) => {
         const [[{ total }]] = await pool.query(`SELECT COUNT(*) as total FROM properties p ${where}`, params);
 
         res.json({ listings, total, page: parseInt(page), limit: parseInt(limit) });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// GET /api/admin/listings/:id — Full admin view (ignores mod_status)
+exports.getListingById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [rows] = await pool.query(`
+            SELECT p.*,
+                   pt.name as type_name,
+                   d.name as district_name, d.zipcode,
+                   c.name as city_name, c.country,
+                   u.user_id as seller_id, u.full_name as seller_name,
+                   u.email as seller_email, u.phone as seller_phone
+            FROM properties p
+            LEFT JOIN property_types pt ON p.type_id = pt.type_id
+            LEFT JOIN districts d ON p.district_id = d.district_id
+            LEFT JOIN cities c ON d.city_id = c.city_id
+            JOIN users u ON p.owner_id = u.user_id
+            WHERE p.property_id = ?
+        `, [id]);
+
+        if (rows.length === 0) return res.status(404).json({ error: 'Property not found' });
+        const property = rows[0];
+
+        const [images] = await pool.query('SELECT image_url, sort_order FROM property_images WHERE property_id = ? ORDER BY sort_order ASC', [id]);
+        const [features] = await pool.query(`
+            SELECT f.feature_id, f.name, f.icon_name
+            FROM property_features pf
+            JOIN features f ON pf.feature_id = f.feature_id
+            WHERE pf.property_id = ?
+        `, [id]);
+
+        res.json({ ...property, images, features });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

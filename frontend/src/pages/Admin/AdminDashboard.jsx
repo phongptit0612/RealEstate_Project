@@ -50,33 +50,80 @@ export default function AdminDashboard() {
                 <StatCard icon={UserPlus} label="New Users Today" value={stats?.new_users_today} color="bg-violet-500" />
             </div>
 
-            {/* 7-day Trend */}
-            {stats?.trend?.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-2 mb-6">
-                        <TrendingUp className="w-5 h-5 text-brand-600" />
-                        <h2 className="font-bold text-slate-800">Listings Created — Last 7 Days</h2>
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* 7-day Listing Trend */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-2">
+                                <TrendingUp className="w-5 h-5 text-brand-600" />
+                                <h2 className="font-bold text-slate-800">Listings Created</h2>
+                            </div>
+                            <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">Last 7 Days</span>
+                        </div>
+                        <div className="flex items-end gap-2 h-40 mt-auto">
+                            {stats.trend.map(({ day, count }) => {
+                                const max = Math.max(...stats.trend.map(t => t.count), 1);
+                                const heightPct = Math.round((count / max) * 100);
+                                return (
+                                    <div key={day} className="flex-1 flex flex-col items-center gap-2 group">
+                                        <span className="text-xs font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-100 px-2 py-0.5 rounded-md">
+                                            {count}
+                                        </span>
+                                        <div className="w-full relative flex justify-center items-end flex-1 bg-slate-50 rounded-t-xl overflow-hidden">
+                                            <div
+                                                className="w-full bg-gradient-to-t from-brand-600 to-brand-400 rounded-t-xl transition-all duration-500 hover:brightness-110"
+                                                style={{ height: `${Math.max(heightPct, 5)}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-[10px] sm:text-xs text-slate-400 font-medium">
+                                            {new Date(day).toLocaleDateString('en', { weekday: 'short' })}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                            {(!stats?.trend || stats.trend.length === 0) && (
+                                <div className="w-full flex items-center justify-center text-slate-400 text-sm pb-4">No listings in the last 7 days</div>
+                            )}
+                        </div>
                     </div>
-                    <div className="flex items-end gap-3 h-28">
-                        {stats.trend.map(({ day, count }) => {
-                            const max = Math.max(...stats.trend.map(t => t.count), 1);
-                            const heightPct = Math.round((count / max) * 100);
-                            return (
-                                <div key={day} className="flex-1 flex flex-col items-center gap-1">
-                                    <span className="text-xs text-slate-500 font-semibold">{count}</span>
-                                    <div
-                                        className="w-full bg-brand-600 rounded-t-lg transition-all"
-                                        style={{ height: `${Math.max(heightPct, 8)}%` }}
-                                    />
-                                    <span className="text-[10px] text-slate-400">
-                                        {new Date(day).toLocaleDateString('en', { weekday: 'short' })}
-                                    </span>
-                                </div>
-                            );
-                        })}
+
+                {/* 7-day User Trend */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-2">
+                                <Users className="w-5 h-5 text-violet-600" />
+                                <h2 className="font-bold text-slate-800">New User Registrations</h2>
+                            </div>
+                            <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">Last 7 Days</span>
+                        </div>
+                        <div className="flex items-end gap-2 h-40 mt-auto">
+                            {stats.userTrend.map(({ day, count }) => {
+                                const max = Math.max(...stats.userTrend.map(t => t.count), 1);
+                                const heightPct = Math.round((count / max) * 100);
+                                return (
+                                    <div key={day} className="flex-1 flex flex-col items-center gap-2 group">
+                                        <span className="text-xs font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-100 px-2 py-0.5 rounded-md">
+                                            {count}
+                                        </span>
+                                        <div className="w-full relative flex justify-center items-end flex-1 bg-slate-50 rounded-t-xl overflow-hidden">
+                                            <div
+                                                className="w-full bg-gradient-to-t from-violet-600 to-violet-400 rounded-t-xl transition-all duration-500 hover:brightness-110"
+                                                style={{ height: `${Math.max(heightPct, 5)}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-[10px] sm:text-xs text-slate-400 font-medium">
+                                            {new Date(day).toLocaleDateString('en', { weekday: 'short' })}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                            {(!stats?.userTrend || stats.userTrend.length === 0) && (
+                                <div className="w-full flex items-center justify-center text-slate-400 text-sm pb-4">No users joined in the last 7 days</div>
+                            )}
+                        </div>
                     </div>
-                </div>
-            )}
+            </div>
         </div>
     );
 }

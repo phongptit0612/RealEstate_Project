@@ -12,6 +12,7 @@ router.get('/audit-log', adminController.getAuditLog);
 
 // Listings moderation
 router.get('/listings', adminController.getListings);
+router.get('/listings/:id', adminController.getListingById);
 router.patch('/listings/:id/approve', adminController.approveListing);
 router.patch('/listings/:id/reject', adminController.rejectListing);
 router.patch('/listings/:id', adminController.updateListing);
