@@ -21,8 +21,8 @@ function Toast({ msg, type }) {
 // ── Section Wrapper ──────────────────────────────────────────
 function Section({ title, children }) {
     return (
-        <div className="bg-[#051124] border border-white/8 rounded-2xl p-6">
-            <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2">{title}</h2>
+        <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6">
+            <h2 className="text-base font-bold text-slate-900 mb-5 flex items-center gap-2">{title}</h2>
             {children}
         </div>
     );
@@ -119,8 +119,8 @@ export default function Profile() {
             <Toast msg={toast.msg} type={toast.type} />
 
             <div>
-                <h1 className="text-2xl font-bold text-white">My Profile</h1>
-                <p className="text-slate-400 text-sm mt-1">Manage your personal information and security settings.</p>
+                <h1 className="text-2xl font-bold text-slate-900">My Profile</h1>
+                <p className="text-slate-500 text-sm mt-1">Manage your personal information and security settings.</p>
             </div>
 
             {/* ── Profile Info ── */}
@@ -141,7 +141,7 @@ export default function Profile() {
                             </label>
                         </div>
                         <div>
-                            <p className="text-sm font-semibold text-white">{user?.name}</p>
+                            <p className="text-sm font-semibold text-slate-900">{user?.name}</p>
                             <p className="text-xs text-slate-500 mt-0.5">{user?.email}</p>
                             <p className="text-xs text-slate-600 mt-1">Email cannot be changed after registration.</p>
                         </div>
@@ -149,7 +149,7 @@ export default function Profile() {
 
                     {/* Name */}
                     <div>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Full Name</label>
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">Full Name</label>
                         <div className="relative">
                             <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
                             <input
@@ -157,14 +157,14 @@ export default function Profile() {
                                 value={name}
                                 onChange={e => setName(e.target.value)}
                                 placeholder="Your full name"
-                                className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-3 pl-11 pr-4 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                             />
                         </div>
                     </div>
 
                     {/* Phone */}
                     <div>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Phone Number</label>
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">Phone Number</label>
                         <div className="relative">
                             <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
                             <input
@@ -172,20 +172,20 @@ export default function Profile() {
                                 value={phone}
                                 onChange={e => setPhone(e.target.value)}
                                 placeholder="+84 xxx xxx xxxx"
-                                className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-3 pl-11 pr-4 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                             />
                         </div>
                     </div>
 
                     {/* Avatar URL fallback */}
                     <div>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Avatar URL <span className="normal-case font-normal text-slate-600">(or use photo upload above)</span></label>
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">Avatar URL <span className="normal-case font-normal text-slate-600">(or use photo upload above)</span></label>
                         <input
                             type="url"
                             value={avatarUrl}
                             onChange={e => setAvatarUrl(e.target.value)}
                             placeholder="https://..."
-                            className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
+                            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                         />
                     </div>
 
@@ -202,40 +202,40 @@ export default function Profile() {
             <Section title={<><Lock className="w-4 h-4 text-[#4d88ff]" /> Change Password</>}>
                 <form onSubmit={handleChangePassword} className="space-y-4">
                     <div>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Current Password</label>
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">Current Password</label>
                         <div className="relative">
                             <input
                                 type={showPw ? 'text' : 'password'} required
                                 value={currentPw}
                                 onChange={e => setCurrentPw(e.target.value)}
                                 placeholder="Your current password"
-                                className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 pl-4 pr-12 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
+                                className="w-full bg-white border border-gray-200 rounded-xl py-3 pl-4 pr-12 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                             />
-                            <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">
+                            <button type="button" onClick={() => setShowPw(v => !v)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900 transition-colors">
                                 {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                         </div>
                     </div>
 
                     <div>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">New Password</label>
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">New Password</label>
                         <input
                             type={showPw ? 'text' : 'password'} required minLength={6}
                             value={newPw}
                             onChange={e => setNewPw(e.target.value)}
                             placeholder="At least 6 characters"
-                            className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
+                            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                         />
                     </div>
 
                     <div>
-                        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Confirm New Password</label>
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block">Confirm New Password</label>
                         <input
                             type={showPw ? 'text' : 'password'} required
                             value={confirmPw}
                             onChange={e => setConfirmPw(e.target.value)}
                             placeholder="Repeat new password"
-                            className="w-full bg-[#020813] border border-white/10 rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
+                            className="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all"
                         />
                     </div>
 
@@ -256,9 +256,9 @@ export default function Profile() {
                         { label: 'Role', value: user?.role },
                         { label: 'Status', value: 'Active' },
                     ].map(({ label, value }) => (
-                        <div key={label} className="flex justify-between py-2 border-b border-white/5 last:border-0">
+                        <div key={label} className="flex justify-between py-2 border-b border-gray-100 last:border-0">
                             <span className="text-slate-500">{label}</span>
-                            <span className="text-white font-medium capitalize">{value}</span>
+                            <span className="text-slate-900 font-medium capitalize">{value}</span>
                         </div>
                     ))}
                 </div>

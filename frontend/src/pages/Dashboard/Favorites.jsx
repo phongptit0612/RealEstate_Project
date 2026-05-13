@@ -50,7 +50,7 @@ export default function Favorites() {
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
                         <Heart className="w-6 h-6 text-red-500 fill-current" />
                         {t('favorites.title')}
                     </h1>

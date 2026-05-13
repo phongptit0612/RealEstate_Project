@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Building, PlusCircle, LogOut, MessageSquare, Heart, UserCircle, Crown, History, Bell, X, CheckCheck } from 'lucide-react';
+import { Building, PlusCircle, LogOut, MessageSquare, Heart, UserCircle, Crown, History, Bell, X, CheckCheck, ArrowLeft } from 'lucide-react';
 import useUserStore from '../store/userStore';
 import useLanguageStore from '../store/languageStore';
 import { connectSocket, disconnectSocket } from '../lib/socket';
@@ -111,13 +111,13 @@ export default function DashboardLayout() {
     ];
 
     return (
-        <div className="min-h-screen bg-black flex">
+        <div className="min-h-screen bg-slate-50 flex font-sans">
             {/* Sidebar */}
-            <aside className="w-64 bg-[#051124] border-r border-white/10 flex-col hidden md:flex">
+            <aside className="w-64 bg-white border-r border-gray-200 flex-col hidden md:flex">
                 <div className="p-6">
-                    <Link to="/" className="text-2xl font-bold text-white tracking-tight flex items-center gap-2 group">
+                    <Link to="/" className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2 group">
                         <div className="group-hover:scale-110 transition-transform">
-                            <img src="/logo.png" alt="LuxEstates" className="w-8 h-8 object-contain brightness-0 invert" />
+                            <img src="/logo.png" alt="LuxEstates" className="w-8 h-8 object-contain invert" />
                         </div>
                         LuxEstates
                     </Link>
@@ -132,8 +132,8 @@ export default function DashboardLayout() {
                                 key={item.path}
                                 to={item.path}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${isActive
-                                    ? 'bg-brand-600/20 text-[#4d88ff] border border-brand-600/30'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                                    ? 'bg-brand-50 text-brand-700 border border-brand-100 shadow-sm'
+                                    : 'text-slate-600 hover:text-brand-600 hover:bg-slate-50 border border-transparent'
                                     }`}
                             >
                                 <Icon className="w-5 h-5" />
@@ -148,22 +148,29 @@ export default function DashboardLayout() {
                     })}
                 </div>
 
-                <div className="p-4 border-t border-white/10">
+                <div className="p-4 border-t border-gray-100">
                     <div className="flex items-center gap-3 mb-4 px-2">
-                        <div className="w-10 h-10 rounded-full bg-brand-600/30 flex items-center justify-center text-white font-bold uppercase border border-brand-600/50 shadow-md overflow-hidden">
+                        <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold uppercase border border-brand-200 shadow-sm overflow-hidden">
                             {user?.avatar
                                 ? <img src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`} alt="" className="w-full h-full object-cover" />
                                 : user?.name?.[0] || 'U'
                             }
                         </div>
                         <div>
-                            <div className="text-sm font-medium text-white">{user?.name}</div>
-                            <div className="text-xs text-gray-400 capitalize">{user?.role}</div>
+                            <div className="text-sm font-bold text-slate-900">{user?.name}</div>
+                            <div className="text-xs text-slate-500 font-medium capitalize">{user?.role}</div>
                         </div>
                     </div>
+                    <Link
+                        to="/"
+                        className="flex items-center gap-3 px-4 py-2 w-full text-left text-slate-600 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all font-medium mb-1"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        Back to Main Site
+                    </Link>
                     <button
                         onClick={handleLogout}
-                        className="flex items-center gap-3 px-4 py-2 w-full text-left text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
+                        className="flex items-center gap-3 px-4 py-2 w-full text-left text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all font-medium"
                     >
                         <LogOut className="w-5 h-5" />
                         Logout
@@ -172,19 +179,19 @@ export default function DashboardLayout() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#020813]">
+            <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50">
                 {/* Top bar with notification bell */}
-                <div className="sticky top-0 z-30 bg-[#020813]/90 backdrop-blur-md border-b border-white/5 flex items-center justify-end px-8 py-3">
+                <div className="sticky top-0 z-30 bg-slate-50/90 backdrop-blur-md border-b border-gray-200 flex items-center justify-end px-8 py-3">
                     {/* Notification Bell */}
                     <div className="relative" ref={bellRef}>
                         <button
                             onClick={() => { setNotifOpen(o => !o); if (!notifOpen) fetchNotifications(); }}
-                            className="relative w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-all"
+                            className="relative w-9 h-9 rounded-xl bg-white hover:bg-slate-100 border border-gray-200 shadow-sm flex items-center justify-center text-slate-500 hover:text-brand-600 transition-all"
                             title={t('dashboard.notifications')}
                         >
                             <Bell className="w-4.5 h-4.5" />
                             {unreadNotifs > 0 && (
-                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-white">
                                     {unreadNotifs > 9 ? '9+' : unreadNotifs}
                                 </span>
                             )}
@@ -192,48 +199,48 @@ export default function DashboardLayout() {
 
                         {/* Dropdown panel */}
                         {notifOpen && (
-                            <div className="absolute right-0 top-12 w-80 bg-[#051124] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
+                            <div className="absolute right-0 top-12 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-50">
                                 {/* Header */}
-                                <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                                    <span className="text-white font-bold text-sm">{t('dashboard.notifications')}</span>
+                                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-slate-50">
+                                    <span className="text-slate-900 font-bold text-sm">{t('dashboard.notifications')}</span>
                                     <div className="flex items-center gap-2">
                                         {unreadNotifs > 0 && (
                                             <button
                                                 onClick={markAllRead}
-                                                className="flex items-center gap-1 text-xs text-[#4d88ff] hover:text-white transition-colors font-medium"
+                                                className="flex items-center gap-1 text-xs text-brand-600 hover:text-brand-800 transition-colors font-semibold"
                                                 title={t('dashboard.markAllRead')}
                                             >
                                                 <CheckCheck className="w-3.5 h-3.5" /> {t('dashboard.markAllRead')}
                                             </button>
                                         )}
-                                        <button onClick={() => setNotifOpen(false)} className="text-gray-500 hover:text-white transition-colors">
+                                        <button onClick={() => setNotifOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
                                             <X className="w-4 h-4" />
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* List */}
-                                <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
+                                <div className="max-h-80 overflow-y-auto divide-y divide-gray-100">
                                     {notifs.length === 0 ? (
-                                        <div className="px-4 py-8 text-center text-gray-500 text-sm">
+                                        <div className="px-4 py-8 text-center text-slate-500 text-sm">
                                             <Bell className="w-8 h-8 mx-auto mb-2 opacity-30" />
                                             {t('dashboard.noNotifs')}
                                         </div>
                                     ) : notifs.map(n => (
                                         <div
                                             key={n.notification_id}
-                                            className={`flex gap-3 px-4 py-3 transition-colors ${n.is_read ? 'opacity-60' : 'bg-brand-600/5'}`}
+                                            className={`flex gap-3 px-4 py-3 transition-colors ${n.is_read ? 'opacity-60 bg-white' : 'bg-brand-50'}`}
                                         >
                                             <span className="text-lg flex-shrink-0 mt-0.5">
                                                 {NOTIF_ICONS[n.type] || NOTIF_ICONS.default}
                                             </span>
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-white text-xs font-semibold">{n.title}</div>
-                                                <div className="text-gray-400 text-xs mt-0.5 line-clamp-2">{n.body}</div>
-                                                <div className="text-gray-600 text-[10px] mt-1">{timeAgo(n.created_at)}</div>
+                                                <div className="text-slate-900 text-xs font-bold">{n.title}</div>
+                                                <div className="text-slate-600 text-xs mt-0.5 line-clamp-2">{n.body}</div>
+                                                <div className="text-slate-400 text-[10px] mt-1 font-medium">{timeAgo(n.created_at)}</div>
                                             </div>
                                             {!n.is_read && (
-                                                <div className="w-2 h-2 bg-[#4d88ff] rounded-full flex-shrink-0 mt-1" />
+                                                <div className="w-2 h-2 bg-brand-600 rounded-full flex-shrink-0 mt-1" />
                                             )}
                                         </div>
                                     ))}

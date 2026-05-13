@@ -32,10 +32,10 @@ export default function MySubscriptions() {
         <div>
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-white flex items-center gap-3">
+                    <h1 className="text-3xl font-extrabold text-slate-900 flex items-center gap-3">
                         <Crown className="w-8 h-8 text-amber-400" /> My VIP Boosts
                     </h1>
-                    <p className="text-slate-400 text-sm mt-1">Manage your listing boosts and subscription history</p>
+                    <p className="text-slate-500 text-sm mt-1">Manage your listing boosts and subscription history</p>
                 </div>
                 <Link to="/pricing"
                     className="flex items-center gap-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-bold text-sm px-5 py-2.5 rounded-xl hover:brightness-110 transition-all shadow-lg">
@@ -50,10 +50,10 @@ export default function MySubscriptions() {
             ) : error ? (
                 <div className="text-red-400 text-sm py-8 text-center">{error}</div>
             ) : subs.length === 0 ? (
-                <div className="text-center py-24 border border-white/5 rounded-3xl bg-white/2">
+                <div className="text-center py-24 border border-gray-200 rounded-3xl bg-white shadow-sm">
                     <div className="text-5xl mb-4">🥈</div>
-                    <h3 className="text-lg font-bold text-white mb-2">No VIP boosts yet</h3>
-                    <p className="text-slate-400 text-sm mb-6">Boost a listing to get more visibility and sell faster.</p>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">No VIP boosts yet</h3>
+                    <p className="text-slate-500 text-sm mb-6">Boost a listing to get more visibility and sell faster.</p>
                     <Link to="/pricing"
                         className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-bold text-sm px-6 py-3 rounded-xl hover:brightness-110 transition-all">
                         <Zap className="w-4 h-4" /> View Pricing Plans
@@ -68,7 +68,7 @@ export default function MySubscriptions() {
 
                         return (
                             <div key={sub.sub_id}
-                                className="bg-[#051124] border border-white/8 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                                className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                                 {/* Tier badge */}
                                 <div className={`inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border self-start ${tier.bg} ${tier.color}`}>
                                     {tier.icon} {tier.label}
@@ -76,10 +76,10 @@ export default function MySubscriptions() {
 
                                 {/* Property title */}
                                 <div className="flex-1 min-w-0">
-                                    <Link to={`/properties/${sub.property_id}`} className="font-bold text-white hover:text-[#4d88ff] transition-colors truncate block">
+                                    <Link to={`/properties/${sub.property_id}`} className="font-bold text-slate-900 hover:text-brand-600 transition-colors truncate block">
                                         {sub.property_title || `Property #${sub.property_id}`}
                                     </Link>
-                                    <div className="flex flex-wrap gap-4 mt-1 text-xs text-slate-400">
+                                    <div className="flex flex-wrap gap-4 mt-1 text-xs text-slate-500">
                                         <span>Purchased: {new Date(sub.created_at).toLocaleDateString()}</span>
                                         {sub.expires_at && (
                                             <span>Expires: {new Date(sub.expires_at).toLocaleDateString()}</span>
