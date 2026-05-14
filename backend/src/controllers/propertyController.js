@@ -251,6 +251,13 @@ exports.searchProperties = async (req, res) => {
             queryStr += ` AND p.listing_type = ?`;
             params.push(listing_type);
         }
+        if (req.query.features) {
+            const featureIds = req.query.features.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+            if (featureIds.length > 0) {
+                queryStr += ` AND EXISTS (SELECT 1 FROM property_features pf WHERE pf.property_id = p.property_id AND pf.feature_id IN (?))`;
+                params.push(featureIds);
+            }
+        }
 
         // Check if vip_tier column exists before using it (safe fallback)
         const [cols] = await pool.query(
@@ -519,7 +526,10 @@ exports.getSimilarProperties = async (req, res) => {
     try {
         const { id } = req.params;
         const [[base]] = await pool.query(
-            'SELECT type_id, district_id FROM properties WHERE property_id = ?', [id]
+            `SELECT p.type_id, d.city_id 
+             FROM properties p 
+             LEFT JOIN districts d ON p.district_id = d.district_id 
+             WHERE p.property_id = ?`, [id]
         );
         if (!base) return res.json([]);
 
@@ -534,10 +544,14 @@ exports.getSimilarProperties = async (req, res) => {
             LEFT JOIN cities c ON d.city_id = c.city_id
             WHERE p.property_id != ?
               AND p.mod_status = 'approved'
-              AND p.type_id = ?
-            ORDER BY p.vip_tier = 'gold' DESC, p.vip_tier = 'silver' DESC, p.created_at DESC
+              AND (p.type_id = ? OR d.city_id <=> ?)
+            ORDER BY 
+              (p.type_id = ? AND d.city_id <=> ?) DESC,
+              p.vip_tier = 'gold' DESC, 
+              p.vip_tier = 'silver' DESC, 
+              p.created_at DESC
             LIMIT 4
-        `, [id, base.type_id]);
+        `, [id, base.type_id, base.city_id, base.type_id, base.city_id]);
 
         res.json(similar);
     } catch (error) {

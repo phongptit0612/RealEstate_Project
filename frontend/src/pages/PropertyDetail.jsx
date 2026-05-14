@@ -5,7 +5,7 @@ import {
     Bed, Bath, Square, MapPin, Compass, Home, Phone, Mail,
     ChevronLeft, ChevronRight, Tag, TrendingDown, Flag,
     Calendar, User, CheckCircle, Heart, Share2, ArrowLeft, Crown, Zap,
-    Printer, Eye, Video
+    Printer, Eye, Video, Sparkles, ZoomIn, ZoomOut, Maximize, X
 } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
 import useLanguageStore from '../store/languageStore';
@@ -31,9 +31,11 @@ export default function PropertyDetail() {
     const [activeImg, setActiveImg] = useState(0);
     const [reportModal, setReportModal] = useState(false);
     const [reportData, setReportData] = useState({ reason: '', details: '' });
+    const [imgZoom, setImgZoom] = useState(1);
     const [reportSent, setReportSent] = useState(false);
     const [similar, setSimilar] = useState([]);
     const [copiedLink, setCopiedLink] = useState(false);
+    const [enlargedImage, setEnlargedImage] = useState(null);
 
     useEffect(() => {
         setLoading(true);
@@ -140,11 +142,12 @@ export default function PropertyDetail() {
                     <img
                         src={images[activeImg]}
                         alt={property.title}
-                        className="w-full h-[480px] object-cover transition-all duration-500"
+                        onClick={() => setEnlargedImage(images[activeImg])}
+                        className="w-full h-[480px] object-cover transition-all duration-500 cursor-pointer"
                     />
 
                     {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-black/20" />
+                    <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
                     {/* Type + Status badges */}
                     <div className="absolute top-5 left-5 flex gap-2 z-10">
@@ -176,8 +179,11 @@ export default function PropertyDetail() {
                             {images.map((img, i) => (
                                 <button
                                     key={i}
-                                    onClick={() => setActiveImg(i)}
-                                    className={`w-12 h-12 rounded-xl overflow-hidden border-2 transition-all ${i === activeImg ? 'border-white scale-110' : 'border-white/40 opacity-70'}`}
+                                    onClick={() => {
+                                        if (i === activeImg) setEnlargedImage(img);
+                                        else setActiveImg(i);
+                                    }}
+                                    className={`w-12 h-12 rounded-xl overflow-hidden border-2 transition-all ${i === activeImg ? 'border-white scale-110 cursor-zoom-in' : 'border-white/40 opacity-70 cursor-pointer'}`}
                                 >
                                     <img src={img} alt="" className="w-full h-full object-cover" />
                                 </button>
@@ -301,9 +307,13 @@ export default function PropertyDetail() {
                                 </h2>
                                 <div className="flex flex-wrap gap-2">
                                     {property.features.map(f => (
-                                        <span key={f.feature_id} className="bg-brand-600/8 text-brand-600 text-sm font-semibold px-4 py-2 rounded-full border border-brand-600/15">
+                                        <Link
+                                            key={f.feature_id}
+                                            to={`/properties?features=${f.feature_id}`}
+                                            className="bg-brand-600/8 hover:bg-brand-600 hover:text-white text-brand-600 text-sm font-semibold px-4 py-2 rounded-full border border-brand-600/15 transition-colors cursor-pointer"
+                                        >
                                             {f.name}
-                                        </span>
+                                        </Link>
                                     ))}
                                 </div>
                             </div>
@@ -360,8 +370,59 @@ export default function PropertyDetail() {
                             </div>
                         )}
 
-                        {/* Mortgage Calculator */}
-                        <MortgageCalculator basePriceUsd={parseFloat(property.price_usd)} />
+                        {/* ── SIMILAR LISTINGS ── */}
+                        {similar.length > 0 && (
+                            <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 border border-gray-100 shadow-sm mt-10 relative overflow-hidden">
+                                {/* Decorative blob */}
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 blur-[50px] pointer-events-none" />
+                                
+                                <div className="flex items-center gap-3 mb-6 relative z-10">
+                                    <div className="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center">
+                                        <Sparkles className="w-5 h-5" />
+                                    </div>
+                                    <h2 className="text-xl font-bold text-slate-900">{t('detail.similarProperties')}</h2>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+                                    {similar.map(p => {
+                                        const img = p.primary_image
+                                            ? (p.primary_image.startsWith('http') ? p.primary_image : `http://localhost:5000${p.primary_image}`)
+                                            : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop';
+                                        return (
+                                            <Link
+                                                key={p.property_id}
+                                                to={`/properties/${p.property_id}`}
+                                                className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-md hover:shadow-xl hover:border-brand-600/30 transition-all duration-300 flex flex-col"
+                                            >
+                                                <div className="h-44 overflow-hidden relative">
+                                                    <img src={img} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                                    {/* VIP Badge */}
+                                                    {p.vip_tier === 'gold' && (
+                                                        <span className="absolute top-3 left-3 bg-amber-400 text-black text-[10px] font-extrabold px-2 py-1 rounded-md shadow-sm flex items-center gap-1 z-10">
+                                                            <Crown className="w-3 h-3" /> GOLD
+                                                        </span>
+                                                    )}
+                                                    {p.vip_tier === 'silver' && (
+                                                        <span className="absolute top-3 left-3 bg-slate-200 text-slate-800 text-[10px] font-extrabold px-2 py-1 rounded-md shadow-sm flex items-center gap-1 z-10">
+                                                            <Crown className="w-3 h-3" /> SILVER
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="p-4 flex flex-col flex-grow">
+                                                    <p className="text-sm font-bold text-slate-900 line-clamp-1 mb-1 group-hover:text-brand-600 transition-colors">{p.title}</p>
+                                                    <p className="text-brand-600 font-extrabold text-base mb-2">{formatPrice(p.price_usd)}</p>
+                                                    <div className="flex items-center gap-3 text-xs text-slate-400 mt-auto pt-2 border-t border-gray-50">
+                                                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {p.district_name || p.city_name || 'N/A'}</span>
+                                                        <span className="flex items-center gap-1"><Home className="w-3 h-3" /> {p.type_name}</span>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Report */}
                         <div className="text-center pt-2">
@@ -498,50 +559,50 @@ export default function PropertyDetail() {
                         {reportSent ? (
                             <div className="text-center py-4">
                                 <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-                                <h3 className="font-bold text-slate-900 text-lg mb-1">Report Submitted</h3>
-                                <p className="text-slate-500 text-sm mb-4">Our team will review this listing shortly.</p>
+                                <h3 className="font-bold text-slate-900 text-lg mb-1">{t('detail.reportSubmitted')}</h3>
+                                <p className="text-slate-500 text-sm mb-4">{t('detail.teamReview')}</p>
                                 <button onClick={() => { setReportModal(false); setReportSent(false); }}
-                                    className="px-6 py-2.5 bg-brand-600 text-white font-semibold rounded-xl">Close</button>
+                                    className="px-6 py-2.5 bg-brand-600 text-white font-semibold rounded-xl">{t('detail.close')}</button>
                             </div>
                         ) : (
                             <>
                                 <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                                    <Flag className="w-5 h-5 text-red-500" /> Report Listing
+                                    <Flag className="w-5 h-5 text-red-500" /> {t('detail.reportListing')}
                                 </h2>
                                 {!isAuthenticated ? (
                                     <div className="text-center py-4">
-                                        <p className="text-slate-500 mb-4">You must be logged in to report a listing.</p>
-                                        <Link to="/login" className="px-6 py-2.5 bg-brand-600 text-white font-semibold rounded-xl">Login</Link>
+                                        <p className="text-slate-500 mb-4">{t('detail.loginToReportHint')}</p>
+                                        <Link to="/login" className="px-6 py-2.5 bg-brand-600 text-white font-semibold rounded-xl">{t('detail.login')}</Link>
                                     </div>
                                 ) : (
                                     <form onSubmit={submitReport} className="space-y-4">
                                         <div>
-                                            <label className="text-sm font-semibold text-slate-700 mb-1 block">Reason</label>
+                                            <label className="text-sm font-semibold text-slate-700 mb-1 block">{t('detail.reportReason')}</label>
                                             <select value={reportData.reason} onChange={e => setReportData(d => ({ ...d, reason: e.target.value }))} required
                                                 className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-brand-600">
-                                                <option value="">Select a reason</option>
-                                                <option value="spam">Spam or duplicate</option>
-                                                <option value="fraud">Fraud or scam</option>
-                                                <option value="wrong_info">Wrong information</option>
-                                                <option value="offensive">Offensive content</option>
-                                                <option value="other">Other</option>
+                                                <option value="">{t('detail.selectReason')}</option>
+                                                <option value="spam">{t('detail.spam')}</option>
+                                                <option value="fraud">{t('detail.fraud')}</option>
+                                                <option value="wrong_info">{t('detail.wrongInfo')}</option>
+                                                <option value="offensive">{t('detail.offensive')}</option>
+                                                <option value="other">{t('detail.other')}</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="text-sm font-semibold text-slate-700 mb-1 block">Details (optional)</label>
+                                            <label className="text-sm font-semibold text-slate-700 mb-1 block">{t('detail.detailsOptional')}</label>
                                             <textarea rows={3} value={reportData.details}
                                                 onChange={e => setReportData(d => ({ ...d, details: e.target.value }))}
-                                                placeholder="Describe the issue..."
+                                                placeholder={t('detail.describeIssue')}
                                                 className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-brand-600 resize-none" />
                                         </div>
                                         <div className="flex gap-3 pt-1">
                                             <button type="button" onClick={() => setReportModal(false)}
                                                 className="flex-1 py-2.5 border border-gray-200 rounded-xl text-slate-600 text-sm font-semibold hover:bg-surface">
-                                                Cancel
+                                                {t('detail.cancel')}
                                             </button>
                                             <button type="submit"
                                                 className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-xl transition-colors">
-                                                Submit Report
+                                                {t('detail.submitReport')}
                                             </button>
                                         </div>
                                     </form>
@@ -552,32 +613,69 @@ export default function PropertyDetail() {
                 </div>
             )}
 
-            {/* ── SIMILAR LISTINGS ── */}
-            {similar.length > 0 && (
-                <div className="max-w-6xl mx-auto px-4 pb-16">
-                    <h2 className="text-2xl font-bold text-slate-900 mb-6">{t('detail.similarProperties')}</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                        {similar.map(p => {
-                            const img = p.primary_image
-                                ? (p.primary_image.startsWith('http') ? p.primary_image : `http://localhost:5000${p.primary_image}`)
-                                : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop';
-                            return (
-                                <Link
-                                    key={p.property_id}
-                                    to={`/properties/${p.property_id}`}
-                                    className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg hover:border-brand-600/30 transition-all duration-300"
-                                >
-                                    <div className="h-40 overflow-hidden">
-                                        <img src={img} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                    </div>
-                                    <div className="p-4">
-                                        <p className="text-sm font-bold text-slate-900 line-clamp-1">{p.title}</p>
-                                        <p className="text-brand-600 font-bold text-sm mt-1">{formatPrice(p.price_usd)}</p>
-                                        <p className="text-xs text-slate-400 mt-1">{p.district_name || p.city_name || 'N/A'}</p>
-                                    </div>
-                                </Link>
-                            );
-                        })}
+            {/* Similar properties moved up */}
+
+            {/* Image Lightbox Modal with Tech Bar */}
+            {enlargedImage && (
+                <div 
+                    className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-sm flex flex-col items-center justify-center p-4 transition-all"
+                >
+                    {/* Top Tech Bar */}
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md border border-white/10 px-6 py-3 rounded-full flex items-center gap-6 shadow-2xl z-50">
+                        <button 
+                            onClick={() => setImgZoom(z => Math.max(0.5, z - 0.25))}
+                            className="text-white/70 hover:text-white transition-colors"
+                            title="Zoom Out"
+                        >
+                            <ZoomOut className="w-6 h-6" />
+                        </button>
+                        <div className="w-px h-6 bg-white/20"></div>
+                        <button 
+                            onClick={() => setImgZoom(1)}
+                            className="text-white/70 hover:text-white text-sm font-bold tracking-wider transition-colors"
+                            title="Reset Zoom"
+                        >
+                            {Math.round(imgZoom * 100)}%
+                        </button>
+                        <div className="w-px h-6 bg-white/20"></div>
+                        <button 
+                            onClick={() => setImgZoom(z => Math.min(4, z + 0.25))}
+                            className="text-white/70 hover:text-white transition-colors"
+                            title="Zoom In"
+                        >
+                            <ZoomIn className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    {/* Close Button */}
+                    <button 
+                        className="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors z-50"
+                        onClick={() => { setEnlargedImage(null); setImgZoom(1); }}
+                        title="Close"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+
+                    {/* Image Container with Scroll/Zoom */}
+                    <div 
+                        className="w-full h-full overflow-auto flex items-center justify-center hide-scrollbar cursor-zoom-in"
+                        onClick={() => setImgZoom(z => Math.min(4, z + 0.5))}
+                    >
+                        <img 
+                            src={enlargedImage} 
+                            alt="Enlarged view" 
+                            className="max-w-none transition-transform duration-300 ease-out shadow-2xl rounded-lg"
+                            style={{ 
+                                transform: `scale(${imgZoom})`,
+                                maxHeight: imgZoom <= 1 ? '90vh' : 'none',
+                                maxWidth: imgZoom <= 1 ? '100%' : 'none'
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if(imgZoom > 1) setImgZoom(1);
+                                else setImgZoom(2);
+                            }} 
+                        />
                     </div>
                 </div>
             )}

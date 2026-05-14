@@ -31,6 +31,7 @@ import SubscriptionCancel from './pages/Subscription/SubscriptionCancel';
 import MySubscriptions from './pages/Dashboard/MySubscriptions';
 import ActivityHistory from './pages/Dashboard/ActivityHistory';
 import Agencies from './pages/Agencies';
+import Guidelines from './pages/Guidelines';
 
 // Guard: requires login
 const PrivateRoute = ({ children }) => {
@@ -86,6 +87,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/guidelines" element={<Guidelines />} />
         <Route path="/subscription/success" element={<SubscriptionSuccess />} />
         <Route path="/subscription/cancel" element={<SubscriptionCancel />} />
 

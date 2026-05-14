@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import useCurrencyStore from '../../store/currencyStore';
 import useLanguageStore from '../../store/languageStore';
 import { CheckCircle, UploadCloud, Building, MapPin, DollarSign, ListPlus, Home, Tag } from 'lucide-react';
@@ -13,14 +13,16 @@ const labelCls = "block text-slate-500 text-sm font-bold mb-2 uppercase tracking
 
 export default function CreateListing() {
     const navigate = useNavigate();
-    const { formatPrice } = useCurrencyStore();
+    const { formatPrice, preferredCurrency, exchangeRates } = useCurrencyStore();
     const { t } = useLanguageStore();
     const [step, setStep] = useState(1);
     const [propertyId, setPropertyId] = useState(null);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [loading, setLoading] = useState(false);
     const [metadata, setMetadata] = useState({ cities: [], districts: [], types: [], features: [] });
     const [activeDistricts, setActiveDistricts] = useState([]);
     const [images, setImages] = useState([]);
+    const [localPriceInput, setLocalPriceInput] = useState('');
 
     const [formData, setFormData] = useState({
         title: '',
@@ -69,27 +71,55 @@ export default function CreateListing() {
 
     const set = (key, val) => setFormData(prev => ({ ...prev, [key]: val }));
 
-    const handleNext = async () => {
+    const handlePriceChange = (e) => {
+        // Strip everything except digits
+        const rawValue = e.target.value.replace(/\D/g, '');
+        
+        if (!rawValue) {
+            setLocalPriceInput('');
+            set('price_usd', '');
+            return;
+        }
+        
+        const num = parseInt(rawValue, 10);
+        
+        // Format appropriately: VND gets dots (vi-VN), others get commas (en-US)
+        const formatted = preferredCurrency === 'VND' 
+            ? num.toLocaleString('vi-VN') 
+            : num.toLocaleString('en-US');
+            
+        setLocalPriceInput(formatted);
+        
+        const rate = exchangeRates[preferredCurrency] || 1;
+        set('price_usd', num / rate);
+    };
+
+    const handleNext = () => {
         if (step === 3) {
-            setLoading(true);
-            try {
-                // Find property_type name from type_id for backwards-compat
-                const selectedType = metadata.types.find(t => t.type_id === parseInt(formData.type_id));
-                const payload = {
-                    ...formData,
-                    property_type: selectedType?.name || 'Apartment',
-                    area_sqm: formData.area_sqm || null,
-                };
-                const res = await axios.post(`${API}/properties`, payload, { withCredentials: true });
-                setPropertyId(res.data.property_id);
-                setStep(4);
-            } catch (error) {
-                alert(error.response?.data?.error || 'Failed to create property');
-            }
-            setLoading(false);
+            setShowConfirm(true);
         } else {
             setStep(step + 1);
         }
+    };
+
+    const submitListing = async () => {
+        setShowConfirm(false);
+        setLoading(true);
+        try {
+            // Find property_type name from type_id for backwards-compat
+            const selectedType = metadata.types.find(t => t.type_id === parseInt(formData.type_id));
+            const payload = {
+                ...formData,
+                property_type: selectedType?.name || 'Apartment',
+                area_sqm: formData.area_sqm || null,
+            };
+            const res = await axios.post(`${API}/properties`, payload, { withCredentials: true });
+            setPropertyId(res.data.property_id);
+            setStep(4);
+        } catch (error) {
+            alert(error.response?.data?.error || 'Failed to create property');
+        }
+        setLoading(false);
     };
 
     const handleUploadMedia = async () => {
@@ -112,7 +142,7 @@ export default function CreateListing() {
 
     const canAdvance = () => {
         if (step === 1) return formData.title && formData.type_id;
-        if (step === 2) return formData.price_usd;
+        if (step === 2) return formData.price_usd !== '' && formData.price_usd !== null && !isNaN(formData.price_usd) && Number(formData.price_usd) > 0;
         if (step === 3) return formData.city_id && formData.district_id;
         return true;
     };
@@ -245,39 +275,49 @@ export default function CreateListing() {
                 {/* ── STEP 2: Metrics ── */}
                 {step === 2 && (
                     <div className="space-y-6 relative z-10 animate-in fade-in slide-in-from-right-4">
-                        <h2 className="text-2xl font-bold text-slate-900 mb-8 border-b border-gray-100 pb-4">Valuation & Metrics</h2>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-8 border-b border-gray-100 pb-4">{t('create.metricsTitle')}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className={labelCls}>
-                                    {formData.listing_type === 'rent' ? 'Rent Price (USD) / month' : 'Sale Price (USD)'} <span className="text-ocean-500">*</span>
+                                    {formData.listing_type === 'rent' ? t('create.rentPrice') : t('create.salePrice')} ({preferredCurrency}) <span className="text-ocean-500">*</span>
                                 </label>
-                                <input type="number" value={formData.price_usd} onChange={e => set('price_usd', e.target.value)} className={inputCls} placeholder="$0.00" />
-                                <p className="text-xs text-slate-500 mt-2">Will auto-convert to VND/EUR for buyers.</p>
+                                <input 
+                                    type="text" 
+                                    value={localPriceInput} 
+                                    onChange={handlePriceChange} 
+                                    className={inputCls} 
+                                    placeholder="0" 
+                                />
+                                {formData.price_usd && preferredCurrency !== 'USD' && (
+                                    <p className="text-xs text-slate-500 mt-2">
+                                        {t('create.savedToDb')}: <strong className="text-slate-700">${parseFloat(formData.price_usd).toLocaleString(undefined, {maximumFractionDigits: 2})} USD</strong>
+                                    </p>
+                                )}
                             </div>
                             <div>
-                                <label className={labelCls}>Total Area</label>
+                                <label className={labelCls}>{t('create.totalArea')}</label>
                                 <input type="number" value={formData.area_sqm} onChange={e => set('area_sqm', e.target.value)} className={inputCls} placeholder="m²" />
                             </div>
                             <div>
-                                <label className={labelCls}>Bedrooms</label>
+                                <label className={labelCls}>{t('create.bedrooms')}</label>
                                 <input type="number" min="0" value={formData.bedrooms} onChange={e => set('bedrooms', e.target.value)} className={inputCls} placeholder="0" />
                             </div>
                             <div>
-                                <label className={labelCls}>Bathrooms</label>
+                                <label className={labelCls}>{t('create.bathrooms')}</label>
                                 <input type="number" min="0" value={formData.bathrooms} onChange={e => set('bathrooms', e.target.value)} className={inputCls} placeholder="0" />
                             </div>
                             <div className="md:col-span-2">
-                                <label className={labelCls}>Facing Direction</label>
+                                <label className={labelCls}>{t('create.facingDir')}</label>
                                 <select value={formData.direction} onChange={e => set('direction', e.target.value)} className={inputCls + ' cursor-pointer'}>
-                                    <option value="">Not specified</option>
-                                    <option value="north">North</option>
-                                    <option value="south">South</option>
-                                    <option value="east">East</option>
-                                    <option value="west">West</option>
-                                    <option value="northeast">North-East</option>
-                                    <option value="northwest">North-West</option>
-                                    <option value="southeast">South-East</option>
-                                    <option value="southwest">South-West</option>
+                                    <option value="">{t('create.notSpecified')}</option>
+                                    <option value="north">{t('create.dirNorth')}</option>
+                                    <option value="south">{t('create.dirSouth')}</option>
+                                    <option value="east">{t('create.dirEast')}</option>
+                                    <option value="west">{t('create.dirWest')}</option>
+                                    <option value="northeast">{t('create.dirNE')}</option>
+                                    <option value="northwest">{t('create.dirNW')}</option>
+                                    <option value="southeast">{t('create.dirSE')}</option>
+                                    <option value="southwest">{t('create.dirSW')}</option>
                                 </select>
                             </div>
                         </div>
@@ -287,20 +327,20 @@ export default function CreateListing() {
                 {/* ── STEP 3: Location (Cascading City → District) ── */}
                 {step === 3 && (
                     <div className="space-y-6 relative z-10 animate-in fade-in slide-in-from-right-4">
-                        <h2 className="text-2xl font-bold text-slate-900 mb-6 border-b border-gray-100 pb-4">Location</h2>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-6 border-b border-gray-100 pb-4">{t('create.locationTitle')}</h2>
 
                         <div className="grid grid-cols-2 gap-4">
                             {/* City dropdown — linked to structured cities table */}
                             <div>
                                 <label className={labelCls + ' flex items-center gap-1'}>
-                                    <MapPin className="w-3 h-3 text-brand-400" /> City <span className="text-ocean-500">*</span>
+                                    <MapPin className="w-3 h-3 text-brand-400" /> {t('create.city')} <span className="text-ocean-500">*</span>
                                 </label>
                                 <select
                                     value={formData.city_id}
                                     onChange={e => set('city_id', e.target.value)}
                                     className={inputCls + ' cursor-pointer'}
                                 >
-                                    <option value="">Select city...</option>
+                                    <option value="">{t('create.selectType')}</option>
                                     {metadata.cities.map(c => (
                                         <option key={c.city_id} value={c.city_id}>{c.name}</option>
                                     ))}
@@ -310,7 +350,7 @@ export default function CreateListing() {
                             {/* District dropdown — cascades from selected city */}
                             <div>
                                 <label className={labelCls + ' flex items-center gap-1'}>
-                                    <MapPin className="w-3 h-3 text-slate-400" /> District <span className="text-ocean-500">*</span>
+                                    <MapPin className="w-3 h-3 text-slate-400" /> {t('create.district')} <span className="text-ocean-500">*</span>
                                 </label>
                                 <select
                                     value={formData.district_id}
@@ -318,7 +358,7 @@ export default function CreateListing() {
                                     disabled={!formData.city_id}
                                     className={inputCls + ' cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed'}
                                 >
-                                    <option value="">{formData.city_id ? 'Select district...' : 'Select city first'}</option>
+                                    <option value="">{formData.city_id ? t('create.selectDistrict') : t('create.selectCityFirst')}</option>
                                     {activeDistricts.map(d => (
                                         <option key={d.district_id} value={d.district_id}>{d.name}</option>
                                     ))}
@@ -328,18 +368,18 @@ export default function CreateListing() {
 
                         {/* Street Address */}
                         <div>
-                            <label className={labelCls}>Street Address</label>
+                            <label className={labelCls}>{t('create.streetAddress')}</label>
                             <input
                                 value={formData.address}
                                 onChange={e => set('address', e.target.value)}
                                 className={inputCls}
-                                placeholder="Auto-filled from map pin, or type manually"
+                                placeholder={t('create.autoFillMap')}
                             />
                         </div>
 
                         {/* YouTube Video URL */}
                         <div>
-                            <label className={labelCls}>Video Tour URL (YouTube)</label>
+                            <label className={labelCls}>{t('create.videoUrl')}</label>
                             <input
                                 value={formData.video_url}
                                 onChange={e => set('video_url', e.target.value)}
@@ -381,7 +421,7 @@ export default function CreateListing() {
                         </div>
 
                         <div className="border-2 border-dashed border-gray-300 hover:border-brand-400 rounded-3xl p-12 text-center transition-all bg-slate-50 hover:bg-brand-50 group">
-                            <input type="file" multiple id="imageUpload" className="hidden" onChange={e => setImages(e.target.files)} accept="image/*" />
+                            <input type="file" multiple id="imageUpload" className="hidden" onChange={e => setImages(prev => [...prev, ...Array.from(e.target.files)])} accept="image/*" />
                             <label htmlFor="imageUpload" className="cursor-pointer flex flex-col items-center">
                                 <div className="w-20 h-20 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                     <UploadCloud className="w-10 h-10" />
@@ -427,6 +467,37 @@ export default function CreateListing() {
                     )}
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {showConfirm && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95">
+                        <div className="flex justify-center mb-6">
+                            <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center">
+                                <CheckCircle className="w-8 h-8" />
+                            </div>
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-900 text-center mb-4">{t('create.confirmListing')}</h3>
+                        <p className="text-slate-600 text-center mb-8">
+                            {t('create.confirmDesc')} <Link to="/guidelines" target="_blank" className="text-brand-600 font-bold hover:underline">{t('create.guidelines')}</Link>{t('create.confirmReview')}
+                        </p>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setShowConfirm(false)}
+                                className="flex-1 px-6 py-3 border border-gray-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors"
+                            >
+                                {t('common.back')}
+                            </button>
+                            <button
+                                onClick={submitListing}
+                                className="flex-1 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-brand-600/30"
+                            >
+                                {t('create.createListingBtn')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

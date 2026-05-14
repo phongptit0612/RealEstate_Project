@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Search, MapPin, Building, DollarSign, Compass, FilterX, Map, LayoutGrid, Heart, User, ArrowUpDown, SlidersHorizontal, ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import useCurrencyStore from '../store/currencyStore';
 import useUserStore from '../store/userStore';
 import useLanguageStore from '../store/languageStore';
@@ -24,17 +24,21 @@ export default function Properties() {
     const [sort, setSort] = useState('newest');
 
     // Filter States
-    const [keyword, setKeyword] = useState('');
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+
+    const [keyword, setKeyword] = useState(queryParams.get('keyword') || '');
     const [filters, setFilters] = useState({
-        city_id: '',
-        district_id: '',
-        type_id: '',
-        listing_type: '',
-        minPrice: '',
-        maxPrice: '',
-        direction: '',
-        bedrooms: '',
-        bathrooms: ''
+        city_id: queryParams.get('city_id') || '',
+        district_id: queryParams.get('district_id') || '',
+        type_id: queryParams.get('type_id') || '',
+        listing_type: queryParams.get('listing_type') || '',
+        minPrice: queryParams.get('minPrice') || '',
+        maxPrice: queryParams.get('maxPrice') || '',
+        direction: queryParams.get('direction') || '',
+        bedrooms: queryParams.get('bedrooms') || '',
+        bathrooms: queryParams.get('bathrooms') || '',
+        features: queryParams.get('features') || ''
     });
 
     const [activeDistricts, setActiveDistricts] = useState([]);
@@ -107,7 +111,7 @@ export default function Properties() {
 
     const handleClear = () => {
         setKeyword('');
-        setFilters({ city_id: '', district_id: '', type_id: '', listing_type: '', minPrice: '', maxPrice: '', direction: '', bedrooms: '', bathrooms: '' });
+        setFilters({ city_id: '', district_id: '', type_id: '', listing_type: '', minPrice: '', maxPrice: '', direction: '', bedrooms: '', bathrooms: '', features: '' });
         setSort('newest');
         setPage(1);
         setTimeout(() => fetchProperties(1, false), 0);

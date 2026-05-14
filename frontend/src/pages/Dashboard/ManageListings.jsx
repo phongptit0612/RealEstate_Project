@@ -200,7 +200,13 @@ export default function ManageListings() {
                                         ) : (
                                             <Link
                                                 to={`/pricing?property_id=${prop.property_id}`}
-                                                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 border border-amber-400/25 hover:border-amber-400/50 px-3 py-1.5 rounded-lg hover:bg-amber-400/10 transition-all"
+                                                onClick={(e) => {
+                                                    if (prop.mod_status !== 'approved') {
+                                                        e.preventDefault();
+                                                        alert(t('manage.boostNotApproved') || 'You can only boost listings that have been approved by admin.');
+                                                    }
+                                                }}
+                                                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-500 hover:text-amber-600 border border-amber-200 hover:border-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-all bg-white"
                                             >
                                                 <Zap className="w-3 h-3" /> {t('manage.btnBoost')}
                                             </Link>
