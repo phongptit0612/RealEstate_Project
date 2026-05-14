@@ -3,7 +3,7 @@ node_modules/
 backend/node_modules/
 frontend/node_modules/
 
-# ─── Environment Variables (NEVER commit these!) ──────
+# ─── Environment Variables ──────
 .env
 .env.*
 !.env.example
@@ -14,7 +14,7 @@ backend/.env.*
 /frontend/dist/
 /frontend/dist-ssr/
 
-# ─── Uploaded Media (stored locally, not in git) ──────
+# ─── Uploaded Media──────
 /backend/public/uploads/
 
 # ─── Logs ─────────────────────────────────────────────
