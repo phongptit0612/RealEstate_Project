@@ -7,13 +7,18 @@ export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const login = useUserStore(state => state.login);
     const navigate = useNavigate();
+    const location = useLocation();
+    const successMessage = location.state?.message;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
         const res = await login(email, password);
+        setLoading(false);
         if (res.success) {
             // Redirect based on role from the store after login
             const user = useUserStore.getState().user;
@@ -42,6 +47,7 @@ export default function Login() {
                     <p className="text-gray-400 font-light">Sign in to unlock exclusive luxury estates</p>
                 </div>
 
+                {successMessage && <div className="mb-6 p-4 bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 rounded-xl text-sm font-medium text-center shadow-lg">{successMessage}</div>}
                 {error && <div className="mb-6 p-4 bg-red-500/20 border border-red-500/40 text-red-200 rounded-xl text-sm font-medium text-center shadow-lg">{error}</div>}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -72,9 +78,9 @@ export default function Login() {
                         <Link to="/forgot-password" className="text-sm text-ocean-400 hover:text-ocean-200 font-medium transition-colors">Forgot Password?</Link>
                     </div>
 
-                    <button type="submit" className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 rounded-xl flex justify-center items-center gap-2 group outline-none border-none shadow-none filter-none">
-                        Sign In
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <button type="submit" disabled={loading} className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl flex justify-center items-center gap-2 group outline-none border-none shadow-none filter-none">
+                        {loading ? 'Signing In...' : 'Sign In'}
+                        {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                     </button>
                 </form>
 

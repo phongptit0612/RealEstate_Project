@@ -19,7 +19,7 @@ const generateToken = (res, user) => {
     });
 };
 
-// ─── REGISTER ──────────────────────────────────────────────
+// ─── REGISTER ────────────────────────────────────────────────
 exports.register = async (req, res) => {
     try {
         const { email, password, full_name, phone } = req.body;
