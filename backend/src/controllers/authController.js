@@ -63,8 +63,8 @@ exports.verifyOTP = async (req, res) => {
         const userId = users[0].user_id;
 
         const [otps] = await pool.query(
-            'SELECT * FROM otp_tokens WHERE user_id = ? AND token = ? AND purpose = "email_verify" AND is_used = FALSE AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1',
-            [userId, token]
+            'SELECT * FROM otp_tokens WHERE user_id = ? AND token = ? AND purpose = ? AND is_used = FALSE AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1',
+            [userId, token, 'email_verify']
         );
 
         if (otps.length === 0) return res.status(400).json({ error: 'Invalid or expired OTP' });
