@@ -1,14 +1,9 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: process.env.SMTP_PORT || 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Sender — use your verified Resend domain, or the default sandbox domain for testing
+const FROM_ADDRESS = process.env.EMAIL_FROM || 'LuxEstates <onboarding@resend.dev>';
 
 /**
  * @param {string} email - Recipient email address
@@ -16,10 +11,16 @@ const transporter = nodemailer.createTransport({
  * @param {'verify'|'reset'} type - Purpose of the OTP
  */
 exports.sendOTP = async (email, otp, type = 'verify') => {
-  // Always log in dev for easy testing
+  // Always log OTP to console for debugging
   console.log(`\n========================================`);
-  console.log(`[DEV] OTP for ${email} (${type}): ${otp}`);
+  console.log(`[OTP] For ${email} (${type}): ${otp}`);
   console.log(`========================================\n`);
+
+  // Skip real send if no Resend API key configured
+  if (!process.env.RESEND_API_KEY) {
+    console.log('[emailService] Skipping send — RESEND_API_KEY not set.');
+    return;
+  }
 
   const isVerify = type === 'verify';
   const subject = isVerify ? 'LuxEstates — Verify Your Email' : 'LuxEstates — Password Reset Code';
@@ -46,24 +47,21 @@ exports.sendOTP = async (email, otp, type = 'verify') => {
       </div>
     </div>`;
 
-  // Skip real send if no valid SMTP credentials configured
-  if (!process.env.SMTP_USER || process.env.SMTP_USER === 'your_gmail_address') {
-    console.log('[emailService] Skipping real send — no SMTP credentials configured.');
-    return;
-  }
+  try {
+    const { data, error } = await resend.emails.send({
+      from: FROM_ADDRESS,
+      to: [email],
+      subject,
+      html,
+      text: `Your ${isVerify ? 'verification' : 'password reset'} code is: ${otp}. Expires in 15 minutes.`,
+    });
 
-  // Send email asynchronously in the background so it doesn't block the API request
-  transporter.sendMail({
-    from: `"LuxEstates" <${process.env.SMTP_USER}>`,
-    to: email,
-    subject,
-    text: `Your ${isVerify ? 'verification' : 'password reset'} code is: ${otp}. Expires in 15 minutes.`,
-    html
-  })
-  .then(() => {
-    console.log(`[emailService] OTP email sent to ${email}`);
-  })
-  .catch((error) => {
-    console.error('[emailService] Send failed:', error.message);
-  });
+    if (error) {
+      console.error('[emailService] Resend error:', error);
+    } else {
+      console.log(`[emailService] Email sent to ${email}, id: ${data?.id}`);
+    }
+  } catch (err) {
+    console.error('[emailService] Failed to send email:', err.message);
+  }
 };
