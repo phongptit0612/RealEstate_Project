@@ -39,11 +39,11 @@ export default function PropertyDetail() {
 
     useEffect(() => {
         setLoading(true);
-        axios.get(`http://localhost:5000/api/properties/${id}`, { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${id}`, { withCredentials: true })
             .then(r => { setProperty(r.data); setLoading(false); })
             .catch(() => { setError('Property not found or not approved.'); setLoading(false); });
         // Fetch similar listings
-        axios.get(`http://localhost:5000/api/properties/${id}/similar`)
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${id}/similar`)
             .then(r => setSimilar(r.data || []))
             .catch(() => {});
     }, [id]);
@@ -58,7 +58,7 @@ export default function PropertyDetail() {
     const submitReport = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/api/reports', {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/reports`, {
                 property_id: id, ...reportData
             }, { withCredentials: true });
             setReportSent(true);
@@ -93,7 +93,7 @@ export default function PropertyDetail() {
     );
 
     const images = property.images?.length > 0
-        ? property.images.map(i => i.image_url.startsWith('http') ? i.image_url : `http://localhost:5000${i.image_url}`)
+        ? property.images.map(i => i.image_url.startsWith('http') ? i.image_url : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${i.image_url}`)
         : ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2675&auto=format&fit=crop'];
 
     const fullAddress = [property.address, property.district_name, property.city_name, property.country].filter(Boolean).join(', ');
@@ -386,7 +386,7 @@ export default function PropertyDetail() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
                                     {similar.map(p => {
                                         const img = p.primary_image
-                                            ? (p.primary_image.startsWith('http') ? p.primary_image : `http://localhost:5000${p.primary_image}`)
+                                            ? (p.primary_image.startsWith('http') ? p.primary_image : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${p.primary_image}`)
                                             : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop';
                                         return (
                                             <Link
@@ -467,7 +467,7 @@ export default function PropertyDetail() {
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-12 h-12 rounded-full bg-brand-600/10 flex items-center justify-center text-brand-600 font-bold text-lg flex-shrink-0 overflow-hidden">
                                         {property.seller_avatar
-                                            ? <img src={property.seller_avatar.startsWith('http') ? property.seller_avatar : `http://localhost:5000${property.seller_avatar}`} alt="" className="w-full h-full object-cover" />
+                                            ? <img src={property.seller_avatar.startsWith('http') ? property.seller_avatar : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${property.seller_avatar}`} alt="" className="w-full h-full object-cover" />
                                             : property.seller_name?.[0]?.toUpperCase()
                                         }
                                     </div>
@@ -493,7 +493,7 @@ export default function PropertyDetail() {
                                         <button
                                             onClick={async () => {
                                                 try {
-                                                    await axios.post('http://localhost:5000/api/conversations', {
+                                                    await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/conversations`, {
                                                         property_id: property.property_id,
                                                         seller_id: property.seller_id,
                                                     }, { withCredentials: true });

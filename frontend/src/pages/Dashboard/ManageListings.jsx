@@ -14,7 +14,7 @@ export default function ManageListings() {
     useEffect(() => {
         const fetchProperties = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/properties/me', { withCredentials: true });
+                const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/me`, { withCredentials: true });
                 setProperties(res.data);
             } catch (error) {
                 console.error('Failed to load properties', error);
@@ -27,7 +27,7 @@ export default function ManageListings() {
 
     const updateStatus = async (id, newStatus) => {
         try {
-            await axios.patch(`http://localhost:5000/api/properties/${id}/status`, { status: newStatus }, { withCredentials: true });
+            await axios.patch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${id}/status`, { status: newStatus }, { withCredentials: true });
             setProperties(properties.map(p => p.property_id === id ? { ...p, status: newStatus } : p));
         } catch (error) {
             alert('Failed to update status');
@@ -37,7 +37,7 @@ export default function ManageListings() {
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to permanently delete this listing?")) return;
         try {
-            await axios.delete(`http://localhost:5000/api/properties/${id}`, { withCredentials: true });
+            await axios.delete(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${id}`, { withCredentials: true });
             setProperties(properties.filter(p => p.property_id !== id));
         } catch (error) {
             alert('Failed to delete listing');
@@ -46,7 +46,7 @@ export default function ManageListings() {
 
     const handleRenew = async (id) => {
         try {
-            const res = await axios.patch(`http://localhost:5000/api/properties/${id}/renew`, {}, { withCredentials: true });
+            const res = await axios.patch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${id}/renew`, {}, { withCredentials: true });
             const newExpiry = res.data.expires_at;
             setProperties(properties.map(p => p.property_id === id ? { ...p, expires_at: newExpiry } : p));
             alert(`✅ Listing renewed! New expiry: ${new Date(newExpiry).toLocaleDateString()}`);
@@ -160,7 +160,7 @@ export default function ManageListings() {
                                         <div className="flex items-center gap-4">
                                             <div className="w-16 h-16 rounded-xl bg-slate-100 border border-gray-200 overflow-hidden flex-shrink-0 shadow-inner">
                                                 {prop.primary_image ? (
-                                                    <img src={prop.primary_image.startsWith('http') ? prop.primary_image : `http://localhost:5000${prop.primary_image}`} alt={prop.title} className="w-full h-full object-cover" />
+                                                    <img src={prop.primary_image.startsWith('http') ? prop.primary_image : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${prop.primary_image}`} alt={prop.title} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 bg-slate-100">No Media</div>
                                                 )}

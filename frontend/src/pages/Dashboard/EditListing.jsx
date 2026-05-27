@@ -6,7 +6,7 @@ import useLanguageStore from '../../store/languageStore';
 import { ArrowLeft, Save, AlertCircle, CheckCircle, Loader2, MapPin, X, UploadCloud, Trash2, Compass } from 'lucide-react';
 import LocationPicker from '../../components/LocationPicker';
 
-const API = 'http://localhost:5000/api';
+const API = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api`;
 
 const inputClass = "w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600 transition-all";
 const labelClass = "text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5 block";
@@ -211,7 +211,7 @@ export default function EditListing() {
                         {existingImages.map(img => (
                             <div key={img.image_id} className="relative group aspect-square rounded-xl overflow-hidden bg-slate-100 border border-gray-200">
                                 <img
-                                    src={img.image_url.startsWith('http') ? img.image_url : `http://localhost:5000${img.image_url}`}
+                                    src={img.image_url.startsWith('http') ? img.image_url : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${img.image_url}`}
                                     alt=""
                                     className="w-full h-full object-cover"
                                 />

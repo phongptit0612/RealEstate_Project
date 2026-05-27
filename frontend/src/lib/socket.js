@@ -24,7 +24,7 @@ export function connectSocket(userId) {
         socket = null;
     }
 
-    socket = io('http://localhost:5000', {
+    socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000', {
         withCredentials: true,
         auth: { userId: id },
         // Start with polling (reliable), upgrade to WebSocket after handshake

@@ -97,7 +97,7 @@ export default function MapView({ properties = [], center, zoom = 12, height = '
                             <div className="text-slate-900 min-w-[200px]">
                                 {prop.primary_image && (
                                     <img
-                                        src={prop.primary_image.startsWith('http') ? prop.primary_image : `http://localhost:5000${prop.primary_image}`}
+                                        src={prop.primary_image.startsWith('http') ? prop.primary_image : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${prop.primary_image}`}
                                         alt={prop.title}
                                         className="w-full h-28 object-cover rounded-t-lg -mt-3 -mx-3 mb-2"
                                         style={{ width: 'calc(100% + 24px)' }}

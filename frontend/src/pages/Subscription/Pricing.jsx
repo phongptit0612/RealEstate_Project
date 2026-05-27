@@ -68,7 +68,7 @@ export default function Pricing() {
     // Fetch user's own properties for the dropdown
     useEffect(() => {
         if (!isAuthenticated) return;
-        axios.get('http://localhost:5000/api/properties/me', { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/me`, { withCredentials: true })
             .then(r => setMyProperties(r.data || []))
             .catch(() => { });
     }, [isAuthenticated]);
@@ -103,7 +103,7 @@ export default function Pricing() {
 
         setLoading(tierId);
         try {
-            const { data } = await axios.post('http://localhost:5000/api/subscriptions/checkout',
+            const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/subscriptions/checkout`,
                 { property_id: propertyId, tier: tierId, currency: selectedCurrency.toLowerCase() },
                 { withCredentials: true }
             );
@@ -122,7 +122,7 @@ export default function Pricing() {
             // Fake delay to simulate processing
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            await axios.post('http://localhost:5000/api/subscriptions/simulate',
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/subscriptions/simulate`,
                 { property_id: propertyId, tier: showCheckout },
                 { withCredentials: true }
             );

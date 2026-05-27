@@ -6,7 +6,7 @@ import useLanguageStore from '../../store/languageStore';
 import { CheckCircle, UploadCloud, Building, MapPin, DollarSign, ListPlus, Home, Tag } from 'lucide-react';
 import LocationPicker from '../../components/LocationPicker';
 
-const API = 'http://localhost:5000/api';
+const API = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api`;
 
 const inputCls = "w-full bg-white border border-gray-200 rounded-xl py-3.5 px-4 text-slate-900 focus:ring-2 focus:ring-brand-500 outline-none transition-all hover:border-gray-300 placeholder:text-slate-400";
 const labelCls = "block text-slate-500 text-sm font-bold mb-2 uppercase tracking-wider";

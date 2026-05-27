@@ -38,7 +38,7 @@ export default function DashboardLayout() {
 
     const fetchNotifications = async () => {
         try {
-            const r = await axios.get('http://localhost:5000/api/notifications', { withCredentials: true });
+            const r = await axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/notifications`, { withCredentials: true });
             setNotifs(r.data.notifications || []);
             setUnreadNotifs(Number(r.data.unread_count) || 0);
         } catch { /* silent */ }
@@ -46,7 +46,7 @@ export default function DashboardLayout() {
 
     const markAllRead = async () => {
         try {
-            await axios.patch('http://localhost:5000/api/notifications/read-all', {}, { withCredentials: true });
+            await axios.patch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/notifications/read-all`, {}, { withCredentials: true });
             setNotifs(prev => prev.map(n => ({ ...n, is_read: 1 })));
             setUnreadNotifs(0);
         } catch { /* silent */ }
@@ -64,7 +64,7 @@ export default function DashboardLayout() {
     // ── Chat unread count ──────────────────────────────────────
     const fetchUnread = async () => {
         try {
-            const r = await axios.get('http://localhost:5000/api/conversations/unread-count', { withCredentials: true });
+            const r = await axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/conversations/unread-count`, { withCredentials: true });
             setUnreadCount(Number(r.data.count) || 0);
         } catch { /* silent */ }
     };
@@ -152,7 +152,7 @@ export default function DashboardLayout() {
                     <div className="flex items-center gap-3 mb-4 px-2">
                         <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold uppercase border border-brand-200 shadow-sm overflow-hidden">
                             {user?.avatar
-                                ? <img src={user.avatar.startsWith('http') ? user.avatar : `http://localhost:5000${user.avatar}`} alt="" className="w-full h-full object-cover" />
+                                ? <img src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${user.avatar}`} alt="" className="w-full h-full object-cover" />
                                 : user?.name?.[0] || 'U'
                             }
                         </div>

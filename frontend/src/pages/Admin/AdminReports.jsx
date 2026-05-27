@@ -13,7 +13,7 @@ export default function AdminReports() {
     const fetchReports = async (status) => {
         setLoading(true);
         try {
-            const r = await axios.get(`http://localhost:5000/api/admin/reports?status=${status}`, { withCredentials: true });
+            const r = await axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/reports?status=${status}`, { withCredentials: true });
             setReports(r.data.reports);
             setTotal(r.data.total);
         } catch (e) { console.error(e); }
@@ -23,7 +23,7 @@ export default function AdminReports() {
     useEffect(() => { fetchReports(tab); }, [tab]);
 
     const updateStatus = async (id, status) => {
-        await axios.patch(`http://localhost:5000/api/admin/reports/${id}`, { status }, { withCredentials: true });
+        await axios.patch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/reports/${id}`, { status }, { withCredentials: true });
         fetchReports(tab);
     };
 

@@ -21,7 +21,7 @@ export default function ActivityHistory() {
     const { formatPrice } = useCurrencyStore();
 
     useEffect(() => {
-        axios.get('http://localhost:5000/api/properties/recently-viewed', { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/recently-viewed`, { withCredentials: true })
             .then(res => setHistory(res.data))
             .catch(err => console.error('Failed to load activity', err))
             .finally(() => setLoading(false));
@@ -73,7 +73,7 @@ export default function ActivityHistory() {
                             <div className="w-20 h-16 rounded-xl bg-slate-100 border border-gray-200 overflow-hidden flex-shrink-0">
                                 {prop.primary_image ? (
                                     <img
-                                        src={prop.primary_image.startsWith('http') ? prop.primary_image : `http://localhost:5000${prop.primary_image}`}
+                                        src={prop.primary_image.startsWith('http') ? prop.primary_image : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${prop.primary_image}`}
                                         alt={prop.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     />

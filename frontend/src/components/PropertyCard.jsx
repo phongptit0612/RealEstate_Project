@@ -16,7 +16,7 @@ export default function PropertyCard({ property }) {
     const favorited = isFavorited(property.property_id);
 
     const imageUrl = property.primary_image
-        ? (property.primary_image.startsWith('http') ? property.primary_image : `http://localhost:5000${property.primary_image}`)
+        ? (property.primary_image.startsWith('http') ? property.primary_image : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${property.primary_image}`)
         : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop';
 
     const handleFavorite = (e) => {

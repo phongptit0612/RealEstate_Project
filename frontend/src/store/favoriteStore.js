@@ -8,7 +8,7 @@ const useFavoriteStore = create((set, get) => ({
     // Load all favorited IDs for the current user (called on login / mount)
     loadFavorites: async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/favorites/ids', { withCredentials: true });
+            const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/favorites/ids`, { withCredentials: true });
             set({ favoriteIds: new Set(res.data.map(Number)) });
         } catch {
             set({ favoriteIds: new Set() });
@@ -27,7 +27,7 @@ const useFavoriteStore = create((set, get) => ({
         set({ favoriteIds: newSet });
 
         try {
-            await axios.post(`http://localhost:5000/api/favorites/${id}`, {}, { withCredentials: true });
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/favorites/${id}`, {}, { withCredentials: true });
         } catch {
             // Revert on failure
             set({ favoriteIds });

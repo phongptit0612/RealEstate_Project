@@ -34,10 +34,10 @@ export default function AdminCategories() {
 
     const load = async () => {
         const [c, d, t, f] = await Promise.all([
-            axios.get('http://localhost:5000/api/admin/cities', { withCredentials: true }),
-            axios.get('http://localhost:5000/api/admin/districts', { withCredentials: true }),
-            axios.get('http://localhost:5000/api/admin/property-types', { withCredentials: true }),
-            axios.get('http://localhost:5000/api/admin/features', { withCredentials: true }),
+            axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/cities`, { withCredentials: true }),
+            axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/districts`, { withCredentials: true }),
+            axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/property-types`, { withCredentials: true }),
+            axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/features`, { withCredentials: true }),
         ]);
         setCities(c.data);
         setDistricts(d.data);
@@ -50,41 +50,41 @@ export default function AdminCategories() {
     const addCity = async (e) => {
         e.preventDefault();
         if (!newCity.trim()) return;
-        await axios.post('http://localhost:5000/api/admin/cities', { name: newCity }, { withCredentials: true });
+        await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/cities`, { name: newCity }, { withCredentials: true });
         setNewCity(''); load();
     };
     const deleteCity = async (id) => {
         if (!window.confirm('Delete this city? This will also delete all its districts.')) return;
-        await axios.delete(`http://localhost:5000/api/admin/cities/${id}`, { withCredentials: true });
+        await axios.delete(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/cities/${id}`, { withCredentials: true });
         load();
     };
 
     const addDistrict = async (e) => {
         e.preventDefault();
         if (!newDistrict.city_id || !newDistrict.name.trim()) return;
-        await axios.post('http://localhost:5000/api/admin/districts', newDistrict, { withCredentials: true });
+        await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/districts`, newDistrict, { withCredentials: true });
         setNewDistrict({ city_id: '', name: '', zipcode: '' }); load();
     };
     const deleteDistrict = async (id) => {
-        await axios.delete(`http://localhost:5000/api/admin/districts/${id}`, { withCredentials: true });
+        await axios.delete(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/districts/${id}`, { withCredentials: true });
         load();
     };
 
     const addType = async (e) => {
         e.preventDefault();
         if (!newType.name.trim()) return;
-        await axios.post('http://localhost:5000/api/admin/property-types', { name: newType.name, parent_id: newType.parent_id || null }, { withCredentials: true });
+        await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/property-types`, { name: newType.name, parent_id: newType.parent_id || null }, { withCredentials: true });
         setNewType({ name: '', parent_id: '' }); load();
     };
     const deleteType = async (id) => {
-        await axios.delete(`http://localhost:5000/api/admin/property-types/${id}`, { withCredentials: true });
+        await axios.delete(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/property-types/${id}`, { withCredentials: true });
         load();
     };
 
     const addFeature = async (e) => {
         e.preventDefault();
         if (!newFeature.name.trim()) return;
-        await axios.post('http://localhost:5000/api/admin/features', {
+        await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/features`, {
             name: newFeature.name,
             icon_name: newFeature.icon_name || null,
         }, { withCredentials: true });
@@ -92,7 +92,7 @@ export default function AdminCategories() {
     };
     const deleteFeature = async (id) => {
         if (!window.confirm('Delete this amenity? It will be removed from all listings.')) return;
-        await axios.delete(`http://localhost:5000/api/admin/features/${id}`, { withCredentials: true });
+        await axios.delete(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/features/${id}`, { withCredentials: true });
         load();
     };
 

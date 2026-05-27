@@ -8,7 +8,7 @@ import {
 import useUserStore from '../../store/userStore';
 import { connectSocket } from '../../lib/socket';
 
-const API = 'http://localhost:5000/api';
+const API = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api`;
 
 function timeAgo(dateStr) {
     if (!dateStr) return '';
@@ -26,7 +26,7 @@ function Avatar({ name, src, size = 10, online }) {
         <div className="relative flex-shrink-0">
             <div className={`w-${size} h-${size} rounded-full bg-brand-600/10 overflow-hidden flex items-center justify-center text-brand-600 font-bold`}>
                 {src
-                    ? <img src={src.startsWith('http') ? src : `http://localhost:5000${src}`} alt="" className="w-full h-full object-cover" />
+                    ? <img src={src.startsWith('http') ? src : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${src}`} alt="" className="w-full h-full object-cover" />
                     : <span className={size >= 10 ? 'text-base' : 'text-sm'}>{name?.[0]?.toUpperCase() || '?'}</span>
                 }
             </div>

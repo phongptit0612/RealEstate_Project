@@ -3,7 +3,7 @@ import { User, Phone, Camera, Lock, Eye, EyeOff, CheckCircle, AlertCircle } from
 import axios from 'axios';
 import useUserStore from '../../store/userStore';
 
-const API = 'http://localhost:5000/api';
+const API = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api`;
 
 // ── Toast notification ───────────────────────────────────────
 function Toast({ msg, type }) {
@@ -111,7 +111,7 @@ export default function Profile() {
     };
 
     const avatarSrc = avatarUrl
-        ? (avatarUrl.startsWith('http') ? avatarUrl : `http://localhost:5000${avatarUrl}`)
+        ? (avatarUrl.startsWith('http') ? avatarUrl : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${avatarUrl}`)
         : null;
 
     return (

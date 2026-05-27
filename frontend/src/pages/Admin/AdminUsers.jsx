@@ -11,7 +11,7 @@ export default function AdminUsers() {
     const fetchUsers = async (q = '') => {
         setLoading(true);
         try {
-            const r = await axios.get(`http://localhost:5000/api/admin/users${q ? `?search=${q}` : ''}`, { withCredentials: true });
+            const r = await axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/users${q ? `?search=${q}` : ''}`, { withCredentials: true });
             setUsers(r.data.users);
             setTotal(r.data.total);
         } catch (e) { console.error(e); }
@@ -21,13 +21,13 @@ export default function AdminUsers() {
     useEffect(() => { fetchUsers(); }, []);
 
     const toggle = async (id) => {
-        await axios.patch(`http://localhost:5000/api/admin/users/${id}/toggle`, {}, { withCredentials: true });
+        await axios.patch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/users/${id}/toggle`, {}, { withCredentials: true });
         fetchUsers(search);
     };
 
     const remove = async (id) => {
         if (!window.confirm('Permanently delete this user and all their data?')) return;
-        await axios.delete(`http://localhost:5000/api/admin/users/${id}`, { withCredentials: true });
+        await axios.delete(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/users/${id}`, { withCredentials: true });
         fetchUsers(search);
     };
 

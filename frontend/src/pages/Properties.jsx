@@ -46,7 +46,7 @@ export default function Properties() {
 
     // Fetch Metadata (Cities, Districts, Types)
     useEffect(() => {
-        axios.get('http://localhost:5000/api/properties/metadata').then(res => {
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/metadata`).then(res => {
             setMetadata(res.data);
         }).catch(err => console.error("Metadata fetch error:", err));
     }, []);
@@ -77,7 +77,7 @@ export default function Properties() {
                 if (val) params.append(key, val);
             });
 
-            const res = await axios.get(`http://localhost:5000/api/properties/search?${params.toString()}`);
+            const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/search?${params.toString()}`);
             const data = res.data;
 
             // Support both old array response and new paginated response

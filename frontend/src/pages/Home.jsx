@@ -44,7 +44,7 @@ export default function Home() {
     window.addEventListener('scroll', handleScroll);
 
     // Fetch live featured properties (limit=6 for homepage)
-    axios.get('http://localhost:5000/api/properties/search?limit=6')
+    axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/search?limit=6`)
       .then(res => {
         const data = res.data;
         const list = Array.isArray(data) ? data : (data.properties || []);

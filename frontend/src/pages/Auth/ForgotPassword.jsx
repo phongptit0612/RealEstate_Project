@@ -14,7 +14,7 @@ export default function ForgotPassword() {
         setError('');
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/auth/forgot-password`, { email });
             setSent(true);
         } catch (err) {
             setError(err.response?.data?.error || 'Something went wrong. Please try again.');

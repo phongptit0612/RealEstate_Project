@@ -15,7 +15,7 @@ export default function Favorites() {
     const fetchFavorites = async () => {
         setLoading(true);
         try {
-            const res = await axios.get('http://localhost:5000/api/favorites', { withCredentials: true });
+            const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/favorites`, { withCredentials: true });
             setProperties(res.data);
         } catch (e) {
             console.error(e);

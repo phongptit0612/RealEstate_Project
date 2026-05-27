@@ -23,7 +23,7 @@ export default function ResetPassword() {
 
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/auth/reset-password', {
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/auth/reset-password`, {
                 email, token: token.trim(), new_password: newPassword,
             });
             setSuccess(true);

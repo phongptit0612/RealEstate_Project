@@ -3,7 +3,7 @@ import axios from 'axios';
 import { CheckCircle, XCircle, Trash2, Pencil, Save, X, Loader2, Eye, MapPin, Bed, Bath, Square, Compass, Video, Hash } from 'lucide-react';
 
 const STATUS_TABS = ['all', 'pending', 'approved', 'rejected'];
-const API = 'http://localhost:5000/api';
+const API = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api`;
 
 export default function AdminListings() {
     const [listings, setListings] = useState([]);
@@ -427,7 +427,7 @@ export default function AdminListings() {
                                         <h4 className="font-bold text-slate-900 mb-2">Images ({viewData.images.length})</h4>
                                         <div className="grid grid-cols-3 gap-2">
                                             {viewData.images.map((img, i) => (
-                                                <img key={i} src={img.image_url.startsWith('http') ? img.image_url : `http://localhost:5000${img.image_url.startsWith('/') ? '' : '/'}${img.image_url}`} alt="Property" className="w-full h-24 object-cover rounded-lg" />
+                                                <img key={i} src={img.image_url.startsWith('http') ? img.image_url : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${img.image_url.startsWith('/') ? '' : '/'}${img.image_url}`} alt="Property" className="w-full h-24 object-cover rounded-lg" />
                                             ))}
                                         </div>
                                     </div>

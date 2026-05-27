@@ -15,7 +15,7 @@ export default function Agencies() {
 
     useEffect(() => {
         // Fetch users who have at least one approved listing
-        axios.get('http://localhost:5000/api/auth/agents')
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/auth/agents`)
             .then(res => setAgents(res.data))
             .catch(err => {
                 console.error(err);
@@ -65,7 +65,7 @@ export default function Agencies() {
                                 <div className="flex items-start gap-4 mb-5">
                                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0033ab] to-[#4d88ff] flex items-center justify-center text-white text-xl font-black overflow-hidden flex-shrink-0">
                                         {agent.avatar_url
-                                            ? <img src={agent.avatar_url.startsWith('http') ? agent.avatar_url : `http://localhost:5000${agent.avatar_url}`} alt="" className="w-full h-full object-cover" />
+                                            ? <img src={agent.avatar_url.startsWith('http') ? agent.avatar_url : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${agent.avatar_url}`} alt="" className="w-full h-full object-cover" />
                                             : agent.full_name?.[0]?.toUpperCase() || 'A'
                                         }
                                     </div>

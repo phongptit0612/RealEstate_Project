@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Critical Security Fix: Ensure all Axios requests pass HttpOnly Cookies
 axios.defaults.withCredentials = true;
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/auth`;
 
 const useUserStore = create((set) => ({
     user: null,

@@ -19,7 +19,7 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get('http://localhost:5000/api/admin/stats', { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/stats`, { withCredentials: true })
             .then(r => setStats(r.data))
             .catch(e => console.error(e))
             .finally(() => setLoading(false));

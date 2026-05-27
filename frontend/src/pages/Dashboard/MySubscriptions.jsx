@@ -22,7 +22,7 @@ export default function MySubscriptions() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        axios.get('http://localhost:5000/api/subscriptions/mine', { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/subscriptions/mine`, { withCredentials: true })
             .then(r => setSubs(r.data))
             .catch(() => setError('Failed to load subscriptions.'))
             .finally(() => setLoading(false));
