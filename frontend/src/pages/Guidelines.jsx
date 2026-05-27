@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, CheckCircle, AlertTriangle, Image as ImageIcon, FileText, Ban } from 'lucide-react';
 import Footer from '../components/Footer';
+import Navbar from '../components/Navbar';
 
 export default function Guidelines() {
     useEffect(() => {
@@ -10,15 +11,8 @@ export default function Guidelines() {
 
     return (
         <div className="min-h-screen bg-surface font-sans flex flex-col">
-            {/* Slim Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <Link to="/" className="text-xl font-bold text-slate-900 tracking-tight">LuxEstates</Link>
-                    <Link to="/properties" className="text-sm font-semibold text-brand-600 hover:underline">
-                        Explore Properties
-                    </Link>
-                </div>
-            </nav>
+            {/* Reusable Premium Navbar */}
+            <Navbar />
 
             <div className="flex-grow pt-24 pb-20 px-4 sm:px-6">
                 <div className="max-w-4xl mx-auto">
