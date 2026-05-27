@@ -1,26 +1,28 @@
-const { Resend } = require('resend');
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// Sender — use your verified Resend domain, or the default sandbox domain for testing
-const FROM_ADDRESS = process.env.EMAIL_FROM || 'LuxEstates <onboarding@resend.dev>';
+const https = require('https');
 
 /**
+ * Send an OTP code via Brevo's Transactional Email API.
+ * Uses native HTTPS module to avoid external dependencies like axios or nodemailer.
+ * 
  * @param {string} email - Recipient email address
  * @param {string} otp   - 6-digit OTP code
  * @param {'verify'|'reset'} type - Purpose of the OTP
  */
 exports.sendOTP = async (email, otp, type = 'verify') => {
-  // Always log OTP to console for debugging
+  // Always log OTP to console for debugging/fallback
   console.log(`\n========================================`);
   console.log(`[OTP] For ${email} (${type}): ${otp}`);
   console.log(`========================================\n`);
 
-  // Skip real send if no Resend API key configured
-  if (!process.env.RESEND_API_KEY) {
-    console.log('[emailService] Skipping send — RESEND_API_KEY not set.');
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) {
+    console.log('[emailService] Skipping send — BREVO_API_KEY not set.');
     return;
   }
+
+  // Fallback chain for sender email: env config -> user's registered gmail -> fallback
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.SMTP_USER || 'ptran4109@gmail.com';
+  const senderName = process.env.BREVO_SENDER_NAME || 'LuxEstates';
 
   const isVerify = type === 'verify';
   const subject = isVerify ? 'LuxEstates — Verify Your Email' : 'LuxEstates — Password Reset Code';
@@ -47,21 +49,56 @@ exports.sendOTP = async (email, otp, type = 'verify') => {
       </div>
     </div>`;
 
-  try {
-    const { data, error } = await resend.emails.send({
-      from: FROM_ADDRESS,
-      to: [email],
-      subject,
-      html,
-      text: `Your ${isVerify ? 'verification' : 'password reset'} code is: ${otp}. Expires in 15 minutes.`,
+  const text = `Your ${isVerify ? 'verification' : 'password reset'} code is: ${otp}. Expires in 15 minutes.`;
+
+  // Brevo API Request Payload
+  const requestPayload = JSON.stringify({
+    sender: { name: senderName, email: senderEmail },
+    to: [{ email: email }],
+    subject: subject,
+    htmlContent: html,
+    textContent: text,
+  });
+
+  const options = {
+    hostname: 'api.brevo.com',
+    port: 443,
+    path: '/v3/smtp/email',
+    method: 'POST',
+    headers: {
+      'api-key': apiKey,
+      'content-type': 'application/json',
+      'accept': 'application/json',
+      'content-length': Buffer.byteLength(requestPayload),
+    },
+  };
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let responseBody = '';
+      res.on('data', (chunk) => {
+        responseBody += chunk;
+      });
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log(`[emailService] Email successfully sent to ${email} via Brevo.`);
+          resolve(JSON.parse(responseBody || '{}'));
+        } else {
+          console.error(`[emailService] Brevo API Error (HTTP ${res.statusCode}):`, responseBody);
+          reject(new Error(`Brevo HTTP error ${res.statusCode}: ${responseBody}`));
+        }
+      });
     });
 
-    if (error) {
-      console.error('[emailService] Resend error:', error);
-    } else {
-      console.log(`[emailService] Email sent to ${email}, id: ${data?.id}`);
-    }
-  } catch (err) {
-    console.error('[emailService] Failed to send email:', err.message);
-  }
+    req.on('error', (err) => {
+      console.error('[emailService] HTTP request error:', err);
+      reject(err);
+    });
+
+    req.write(requestPayload);
+    req.end();
+  }).catch((err) => {
+    // Gracefully catch and print to prevent backend crash while debugging
+    console.error('[emailService] sendOTP failed silently to avoid crash:', err.message);
+  });
 };
