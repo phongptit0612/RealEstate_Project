@@ -113,10 +113,10 @@ export default function PropertyDetail() {
                                 copiedLink ? 'bg-green-100 text-green-600' : 'hover:bg-slate-100 text-slate-600'
                             }`}
                             onClick={handleShare}
-                            title="Share listing"
+                            title={t('detail.share') || "Share listing"}
                         >
                             <Share2 className="w-5 h-5" />
-                            {copiedLink && <span className="text-xs">Copied!</span>}
+                            {copiedLink && <span className="text-xs">{t('detail.copied')}</span>}
                         </button>
                         <button
                             className="p-2 rounded-full hover:bg-slate-100 transition-colors hidden sm:block"
@@ -228,11 +228,11 @@ export default function PropertyDetail() {
                                 </div>
                                 <div className="text-right flex-shrink-0">
                                     <p className="text-3xl font-bold text-brand-600">{formatPrice(property.price_usd)}</p>
-                                    {property.listing_type === 'rent' && <p className="text-sm text-slate-400">/month</p>}
+                                    {property.listing_type === 'rent' && <p className="text-sm text-slate-400">{t('detail.perMonth')}</p>}
                                     {property.expires_at && (
                                         <p className="text-xs text-slate-400 mt-1 flex items-center justify-end gap-1">
                                             <Calendar className="w-3 h-3" />
-                                            Expires {new Date(property.expires_at).toLocaleDateString()}
+                                            {t('manage.expiry')} {new Date(property.expires_at).toLocaleDateString()}
                                         </p>
                                     )}
                                     {/* Boost button — owner only */}
@@ -241,7 +241,7 @@ export default function PropertyDetail() {
                                             to={`/pricing?property_id=${property.property_id}`}
                                             className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 border border-amber-300 hover:border-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-50 transition-all"
                                         >
-                                            <Zap className="w-3 h-3" /> Boost this listing
+                                            <Zap className="w-3 h-3" /> {t('manage.btnBoost')}
                                         </Link>
                                     )}
                                 </div>
@@ -454,7 +454,7 @@ export default function PropertyDetail() {
                                 <p className="text-3xl font-bold text-brand-600">{formatPrice(property.price_usd)}</p>
                                 {property.area_m2 && (
                                     <p className="text-xs text-slate-400 mt-1">
-                                        ≈ {formatPrice(property.price_usd / property.area_m2)} /m²
+                                        ≈ {formatPrice(property.price_usd / property.area_m2)} {t('detail.perSqm')}
                                     </p>
                                 )}
                             </div>
@@ -517,7 +517,7 @@ export default function PropertyDetail() {
                                         </button>
                                     ) : (
                                         <div className="w-full py-3 rounded-xl bg-surface border border-slate-200 text-slate-400 text-sm font-semibold text-center">
-                                            This is your listing
+                                            {t('detail.myListing')}
                                         </div>
                                     )
                                 ) : (

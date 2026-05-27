@@ -55,18 +55,12 @@ function App() {
   const loadFavorites = useFavoriteStore(s => s.loadFavorites);
   const fetchRates = useCurrencyStore(s => s.fetchRates);
   const preferredCurrency = useCurrencyStore(s => s.preferredCurrency);
-  const setLanguageFromCurrency = useLanguageStore(s => s.setLanguageFromCurrency);
 
   // Bootstrap: auth + exchange rates on mount
   useEffect(() => {
     checkAuth();
     fetchRates();
   }, [checkAuth, fetchRates]);
-
-  // Auto-switch language whenever currency changes (VND → vi, others → en)
-  useEffect(() => {
-    setLanguageFromCurrency(preferredCurrency);
-  }, [preferredCurrency, setLanguageFromCurrency]);
 
   // Load favorite IDs whenever auth state changes
   useEffect(() => {

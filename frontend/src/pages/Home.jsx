@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Home as HomeIcon, Search, Heart, User, MapPin, Building, ChevronRight } from 'lucide-react';
+import { Search, Heart, MapPin, Building, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import useCurrencyStore from '../store/currencyStore';
-import useUserStore from '../store/userStore';
 import useLanguageStore from '../store/languageStore';
 import PropertyCard from '../components/PropertyCard';
 import Footer from '../components/Footer';
+import Navbar from '../components/Navbar';
 
 export default function Home() {
-  const { preferredCurrency, setCurrency, formatPrice, currencies, currencyLabels } = useCurrencyStore();
-  const { isAuthenticated, user, logout } = useUserStore();
+  const { formatPrice } = useCurrencyStore();
   const { t } = useLanguageStore();
   const navigate = useNavigate();
-  const [scrollY, setScrollY] = useState(0);
   const [featuredProperties, setFeaturedProperties] = useState([]);
   
   // Search State
@@ -40,9 +38,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-
     // Fetch live featured properties (limit=6 for homepage)
     axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/search?limit=6`)
       .then(res => {
@@ -51,72 +46,12 @@ export default function Home() {
         setFeaturedProperties(list.slice(0, 6));
       })
       .catch(err => console.error("Failed to fetch featured", err));
-
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-brand-600 selection:text-white">
-      {/* Navbar */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 20 ? 'bg-white shadow-md py-4' : 'bg-white border-b border-gray-200 py-4'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-2 cursor-pointer group">
-            <div className="group-hover:scale-110 transition-transform">
-              <img src="/logo.png" alt="LuxEstates" className="w-10 h-10 object-contain filter invert" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">LuxEstates</span>
-          </div>
-
-          <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-700">
-            <Link to="/properties" className="hover:text-brand-600 transition-colors">{t('nav.properties')}</Link>
-            <Link to="/agencies" className="hover:text-brand-600 transition-colors">{t('nav.agencies')}</Link>
-            <a href="#" className="hover:text-brand-600 transition-colors">{t('nav.aboutUs')}</a>
-            <div className="relative">
-              <select
-                className="appearance-none bg-gray-100 border border-gray-200 rounded-lg pl-4 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-600 transition-all cursor-pointer font-medium hover:bg-gray-200 text-slate-700"
-                value={preferredCurrency}
-                onChange={(e) => setCurrency(e.target.value)}
-              >
-                {currencies.map(c => (
-                  <option key={c} value={c}>{currencyLabels[c] || c}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 text-slate-700">
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors hidden sm:block">
-              <Heart className="w-5 h-5 text-slate-700" />
-            </button>
-            {isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                {user?.role === 'admin' ? (
-                  <Link
-                    to="/admin"
-                    className="flex items-center gap-2 text-sm font-bold bg-brand-600 text-white hover:bg-brand-700 px-4 py-2 rounded-full transition-all shadow-md"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                    {t('nav.adminPanel')}
-                  </Link>
-                ) : (
-                  <Link to="/dashboard/properties" className="text-sm font-bold text-brand-600 hover:text-white transition-all hover:bg-brand-600 px-4 py-2 rounded-full border border-brand-600">
-                    {t('nav.dashboard')}
-                  </Link>
-                )}
-                <span className="font-medium text-sm text-slate-600">{t('nav.hi')}, {user?.name?.split(' ')[0]}</span>
-                <button onClick={logout} className="flex items-center gap-2 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-full font-medium transition-all border border-red-100">
-                  {t('nav.logout')}
-                </button>
-              </div>
-            ) : (
-              <Link to="/login" className="flex items-center gap-2 bg-white text-slate-800 hover:bg-gray-50 px-4 py-2 rounded-full font-medium transition-all border border-gray-200 hover:border-gray-300 hover:shadow-sm">
-                <User className="w-4 h-4" />
-                <span>Sign In</span>
-              </Link>
-            )}
-          </div>
-        </div>
-      </nav>
+      {/* Reusable Premium Navbar */}
+      <Navbar />
 
       {/* Hero Section */}
       <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
@@ -133,109 +68,109 @@ export default function Home() {
           <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-surface to-transparent"></div>
         </div>
 
-          {/* Hero Content */}
-          <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-20">
-            <span className="inline-block py-1.5 px-4 rounded-full bg-white/20 border border-white/30 text-white text-sm font-medium mb-6 uppercase tracking-wider backdrop-blur-md shadow-lg">
-              {t('hero.subtitle')}
-            </span>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight drop-shadow-2xl text-white">
-              {t('hero.tagline')}
-            </h1>
-            <p className="text-lg md:text-xl text-gray-100 mb-10 max-w-2xl mx-auto font-medium drop-shadow-md">
-              {t('hero.subtitle')}
-            </p>
+        {/* Hero Content */}
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-20">
+          <span className="inline-block py-1.5 px-4 rounded-full bg-white/20 border border-white/30 text-white text-sm font-medium mb-6 uppercase tracking-wider backdrop-blur-md shadow-lg">
+            {t('hero.subtitle')}
+          </span>
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight drop-shadow-2xl text-white">
+            {t('hero.tagline')}
+          </h1>
+          <p className="text-lg md:text-xl text-gray-100 mb-10 max-w-2xl mx-auto font-medium drop-shadow-md">
+            {t('hero.subtitle')}
+          </p>
 
-            {/* Multi-Tab Search Card */}
-            <div className="max-w-4xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-3xl shadow-2xl border border-white/20">
-              {/* Tabs */}
-              <div className="flex gap-2 p-2 w-max mb-1">
-                <button 
-                  onClick={() => setActiveTab('buy')}
-                  className={`px-6 py-2 rounded-full font-bold shadow-sm transition-all text-sm ${activeTab === 'buy' ? 'bg-white text-brand-600' : 'text-white hover:bg-white/20'}`}>
-                  Buy
-                </button>
-                <button 
-                  onClick={() => setActiveTab('rent')}
-                  className={`px-6 py-2 rounded-full font-bold shadow-sm transition-all text-sm ${activeTab === 'rent' ? 'bg-white text-brand-600' : 'text-white hover:bg-white/20'}`}>
-                  Rent
-                </button>
-                <button 
-                  onClick={() => setActiveTab('quick')}
-                  className={`px-6 py-2 rounded-full font-bold shadow-sm transition-all text-sm ${activeTab === 'quick' ? 'bg-white text-brand-600' : 'text-white hover:bg-white/20'}`}>
-                  Quick Search
-                </button>
-              </div>
-              
-              {/* Search Inputs */}
-              {activeTab === 'quick' ? (
-                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl flex flex-wrap items-center gap-3 transition-all shadow-lg justify-center">
-                  {['Da Nang Villas', 'Luxury Penthouses', 'Beachfront', 'City Center', 'Under $2000'].map(tag => (
-                    <button 
-                      key={tag}
-                      onClick={() => handleQuickSearch(tag)}
-                      className="bg-white border border-gray-200 hover:border-brand-300 hover:bg-brand-50 text-slate-700 hover:text-brand-700 px-5 py-2.5 rounded-full font-bold text-sm shadow-sm transition-all"
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <form onSubmit={handleSearch} className="bg-white p-3 rounded-2xl flex flex-col md:flex-row items-center gap-2 transition-all shadow-lg group">
-                  <div className="flex-1 flex flex-col px-4 py-2 w-full md:border-r border-gray-100 transition-colors hover:bg-slate-50 rounded-xl md:rounded-r-none">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left mb-1">Location</span>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-brand-500 flex-shrink-0" />
-                      <input
-                        type="text"
-                        value={searchLocation}
-                        onChange={(e) => setSearchLocation(e.target.value)}
-                        placeholder={t('hero.searchPlaceholder') || 'Where to?'}
-                        className="bg-transparent border-none outline-none text-slate-900 w-full placeholder:text-gray-400 font-bold min-w-0 text-sm"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 flex flex-col px-4 py-2 w-full md:border-r border-gray-100 transition-colors hover:bg-slate-50">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left mb-1">Property Type</span>
-                    <div className="flex items-center gap-2">
-                      <Building className="w-4 h-4 text-brand-500 flex-shrink-0" />
-                      <select 
-                        value={propertyType}
-                        onChange={(e) => setPropertyType(e.target.value)}
-                        className="bg-transparent border-none outline-none text-slate-900 w-full cursor-pointer font-bold min-w-0 text-sm"
-                      >
-                        <option value="">{t('search.allTypes') || 'All Types'}</option>
-                        <option value="villa">Villa</option>
-                        <option value="apartment">Apartment</option>
-                        <option value="penthouse">Penthouse</option>
-                        <option value="house">House</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 flex flex-col px-4 py-2 w-full transition-colors hover:bg-slate-50 rounded-xl md:rounded-l-none">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left mb-1">Max Price</span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900 text-sm">$</span>
-                      <input
-                        type="number"
-                        value={maxPrice}
-                        onChange={(e) => setMaxPrice(e.target.value)}
-                        placeholder="Any Price"
-                        className="bg-transparent border-none outline-none text-slate-900 w-full placeholder:text-gray-400 font-bold min-w-0 text-sm"
-                      />
-                    </div>
-                  </div>
-                  
-                  <button type="submit" className="w-full md:w-auto bg-brand-600 hover:bg-brand-500 text-white px-8 h-14 rounded-xl font-bold flex items-center justify-center gap-2 outline-none border-none shadow-lg hover:shadow-brand-500/30 transition-all ml-1 text-base">
-                    <Search className="w-5 h-5" />
-                    Search
-                  </button>
-                </form>
-              )}
+          {/* Multi-Tab Search Card */}
+          <div className="max-w-4xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-3xl shadow-2xl border border-white/20">
+            {/* Tabs */}
+            <div className="flex gap-2 p-2 w-max mb-1">
+              <button 
+                onClick={() => setActiveTab('buy')}
+                className={`px-6 py-2 rounded-full font-bold shadow-sm transition-all text-sm ${activeTab === 'buy' ? 'bg-white text-brand-600' : 'text-white hover:bg-white/20'}`}>
+                {t('hero.buyTab')}
+              </button>
+              <button 
+                onClick={() => setActiveTab('rent')}
+                className={`px-6 py-2 rounded-full font-bold shadow-sm transition-all text-sm ${activeTab === 'rent' ? 'bg-white text-brand-600' : 'text-white hover:bg-white/20'}`}>
+                {t('hero.rentTab')}
+              </button>
+              <button 
+                onClick={() => setActiveTab('quick')}
+                className={`px-6 py-2 rounded-full font-bold shadow-sm transition-all text-sm ${activeTab === 'quick' ? 'bg-white text-brand-600' : 'text-white hover:bg-white/20'}`}>
+                {t('hero.quickSearchTab')}
+              </button>
             </div>
+            
+            {/* Search Inputs */}
+            {activeTab === 'quick' ? (
+              <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl flex flex-wrap items-center gap-3 transition-all shadow-lg justify-center">
+                {['Da Nang Villas', 'Luxury Penthouses', 'Beachfront', 'City Center', 'Under $2000'].map(tag => (
+                  <button 
+                    key={tag}
+                    onClick={() => handleQuickSearch(tag)}
+                    className="bg-white border border-gray-200 hover:border-brand-300 hover:bg-brand-50 text-slate-700 hover:text-brand-700 px-5 py-2.5 rounded-full font-bold text-sm shadow-sm transition-all"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <form onSubmit={handleSearch} className="bg-white p-3 rounded-2xl flex flex-col md:flex-row items-center gap-2 transition-all shadow-lg group">
+                <div className="flex-1 flex flex-col px-4 py-2 w-full md:border-r border-gray-100 transition-colors hover:bg-slate-50 rounded-xl md:rounded-r-none">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left mb-1">{t('hero.location')}</span>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-brand-500 flex-shrink-0" />
+                    <input
+                      type="text"
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
+                      placeholder={t('hero.searchPlaceholder') || t('hero.whereTo')}
+                      className="bg-transparent border-none outline-none text-slate-900 w-full placeholder:text-gray-400 font-bold min-w-0 text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex-1 flex flex-col px-4 py-2 w-full md:border-r border-gray-100 transition-colors hover:bg-slate-50">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left mb-1">{t('hero.propertyType')}</span>
+                  <div className="flex items-center gap-2">
+                    <Building className="w-4 h-4 text-brand-500 flex-shrink-0" />
+                    <select 
+                      value={propertyType}
+                      onChange={(e) => setPropertyType(e.target.value)}
+                      className="bg-transparent border-none outline-none text-slate-900 w-full cursor-pointer font-bold min-w-0 text-sm"
+                    >
+                      <option value="">{t('search.allTypes') || 'All Types'}</option>
+                      <option value="villa">Villa</option>
+                      <option value="apartment">Apartment</option>
+                      <option value="penthouse">Penthouse</option>
+                      <option value="house">House</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-col px-4 py-2 w-full transition-colors hover:bg-slate-50 rounded-xl md:rounded-l-none">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left mb-1">{t('hero.maxPrice')}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-900 text-sm">$</span>
+                    <input
+                      type="number"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      placeholder={t('hero.anyPrice') || 'Any Price'}
+                      className="bg-transparent border-none outline-none text-slate-900 w-full placeholder:text-gray-400 font-bold min-w-0 text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <button type="submit" className="w-full md:w-auto bg-brand-600 hover:bg-brand-500 text-white px-8 h-14 rounded-xl font-bold flex items-center justify-center gap-2 outline-none border-none shadow-lg hover:shadow-brand-500/30 transition-all ml-1 text-base">
+                  <Search className="w-5 h-5" />
+                  {t('hero.search')}
+                </button>
+              </form>
+            )}
           </div>
         </div>
+      </div>
 
       {/* Featured Properties Demo Section */}
       <div className="bg-surface py-24 relative overflow-hidden">
