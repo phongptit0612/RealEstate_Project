@@ -54,6 +54,8 @@ exports.createCheckoutSession = async (req, res) => {
             unitAmount = Math.round(tierInfo.priceUsd * 100);
         }
 
+        const requestOrigin = req.get('origin') || (process.env.FRONTEND_URL || 'http://localhost:5173').split(',')[0].trim();
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'payment',
@@ -74,8 +76,8 @@ exports.createCheckoutSession = async (req, res) => {
                 property_id: String(property_id),
                 tier,
             },
-            success_url: `${process.env.FRONTEND_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.FRONTEND_URL}/subscription/cancel`,
+            success_url: `${requestOrigin}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${requestOrigin}/subscription/cancel`,
         });
 
         await pool.query(
