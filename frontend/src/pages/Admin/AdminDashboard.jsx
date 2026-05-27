@@ -33,6 +33,9 @@ export default function AdminDashboard() {
         </div>
     );
 
+    const trend = stats?.trend || [];
+    const userTrend = stats?.userTrend || [];
+
     return (
         <div className="space-y-8">
             <div>
@@ -62,8 +65,8 @@ export default function AdminDashboard() {
                             <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">Last 7 Days</span>
                         </div>
                         <div className="flex items-end gap-2 h-40 mt-auto">
-                            {stats.trend.map(({ day, count }) => {
-                                const max = Math.max(...stats.trend.map(t => t.count), 1);
+                            {trend.map(({ day, count }) => {
+                                const max = Math.max(...trend.map(t => t.count), 1);
                                 const heightPct = Math.round((count / max) * 100);
                                 return (
                                     <div key={day} className="flex-1 flex flex-col items-center gap-2 group">
@@ -82,7 +85,7 @@ export default function AdminDashboard() {
                                     </div>
                                 );
                             })}
-                            {(!stats?.trend || stats.trend.length === 0) && (
+                            {trend.length === 0 && (
                                 <div className="w-full flex items-center justify-center text-slate-400 text-sm pb-4">No listings in the last 7 days</div>
                             )}
                         </div>
@@ -98,8 +101,8 @@ export default function AdminDashboard() {
                             <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">Last 7 Days</span>
                         </div>
                         <div className="flex items-end gap-2 h-40 mt-auto">
-                            {stats.userTrend.map(({ day, count }) => {
-                                const max = Math.max(...stats.userTrend.map(t => t.count), 1);
+                            {userTrend.map(({ day, count }) => {
+                                const max = Math.max(...userTrend.map(t => t.count), 1);
                                 const heightPct = Math.round((count / max) * 100);
                                 return (
                                     <div key={day} className="flex-1 flex flex-col items-center gap-2 group">
@@ -118,7 +121,7 @@ export default function AdminDashboard() {
                                     </div>
                                 );
                             })}
-                            {(!stats?.userTrend || stats.userTrend.length === 0) && (
+                            {userTrend.length === 0 && (
                                 <div className="w-full flex items-center justify-center text-slate-400 text-sm pb-4">No users joined in the last 7 days</div>
                             )}
                         </div>
