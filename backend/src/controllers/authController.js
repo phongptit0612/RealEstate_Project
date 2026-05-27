@@ -10,10 +10,11 @@ const generateToken = (res, user) => {
         { expiresIn: '7d' }
     );
 
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('jwt', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 };
@@ -102,7 +103,13 @@ exports.login = async (req, res) => {
 
 // ─── LOGOUT ─────────────────────────────────────────────────
 exports.logout = (req, res) => {
-    res.cookie('jwt', '', { httpOnly: true, expires: new Date(0) });
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('jwt', '', { 
+        httpOnly: true, 
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        expires: new Date(0) 
+    });
     res.json({ message: 'Logged out successfully' });
 };
 
