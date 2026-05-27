@@ -212,8 +212,8 @@ exports.forgotPassword = async (req, res) => {
 
         // Invalidate any existing unused reset tokens for this user
         await pool.query(
-            'UPDATE otp_tokens SET is_used = TRUE WHERE user_id = ? AND purpose = "password_reset" AND is_used = FALSE',
-            [userId]
+            'UPDATE otp_tokens SET is_used = TRUE WHERE user_id = ? AND purpose = ? AND is_used = FALSE',
+            [userId, 'password_reset']
         );
 
         await pool.query(
@@ -249,8 +249,8 @@ exports.resetPassword = async (req, res) => {
         const userId = users[0].user_id;
 
         const [otps] = await pool.query(
-            'SELECT * FROM otp_tokens WHERE user_id = ? AND token = ? AND purpose = "password_reset" AND is_used = FALSE AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1',
-            [userId, token]
+            'SELECT * FROM otp_tokens WHERE user_id = ? AND token = ? AND purpose = ? AND is_used = FALSE AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1',
+            [userId, token, 'password_reset']
         );
 
         if (otps.length === 0) return res.status(400).json({ error: 'Invalid or expired reset code' });
