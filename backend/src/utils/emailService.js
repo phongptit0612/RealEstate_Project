@@ -52,16 +52,18 @@ exports.sendOTP = async (email, otp, type = 'verify') => {
     return;
   }
 
-  try {
-    await transporter.sendMail({
-      from: `"LuxEstates" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject,
-      text: `Your ${isVerify ? 'verification' : 'password reset'} code is: ${otp}. Expires in 15 minutes.`,
-      html
-    });
+  // Send email asynchronously in the background so it doesn't block the API request
+  transporter.sendMail({
+    from: `"LuxEstates" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject,
+    text: `Your ${isVerify ? 'verification' : 'password reset'} code is: ${otp}. Expires in 15 minutes.`,
+    html
+  })
+  .then(() => {
     console.log(`[emailService] OTP email sent to ${email}`);
-  } catch (error) {
+  })
+  .catch((error) => {
     console.error('[emailService] Send failed:', error.message);
-  }
+  });
 };
