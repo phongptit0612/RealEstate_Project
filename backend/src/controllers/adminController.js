@@ -148,7 +148,6 @@ exports.approveListing = async (req, res) => {
     }
 };
 
-// PATCH /api/admin/listings/:id/reject
 exports.rejectListing = async (req, res) => {
     try {
         const { id } = req.params;
@@ -176,7 +175,6 @@ exports.rejectListing = async (req, res) => {
     }
 };
 
-// DELETE /api/admin/listings/:id
 exports.deleteListing = async (req, res) => {
     try {
         const { id } = req.params;

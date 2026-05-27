@@ -1,35 +1,34 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.SMTP_PORT || 587,
-    secure: false,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-    }
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: process.env.SMTP_PORT || 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
 });
 
 /**
- * Send an OTP email.
  * @param {string} email - Recipient email address
  * @param {string} otp   - 6-digit OTP code
  * @param {'verify'|'reset'} type - Purpose of the OTP
  */
 exports.sendOTP = async (email, otp, type = 'verify') => {
-    // Always log in dev for easy testing
-    console.log(`\n========================================`);
-    console.log(`[DEV] OTP for ${email} (${type}): ${otp}`);
-    console.log(`========================================\n`);
+  // Always log in dev for easy testing
+  console.log(`\n========================================`);
+  console.log(`[DEV] OTP for ${email} (${type}): ${otp}`);
+  console.log(`========================================\n`);
 
-    const isVerify = type === 'verify';
-    const subject = isVerify ? 'LuxEstates — Verify Your Email' : 'LuxEstates — Password Reset Code';
-    const heading = isVerify ? 'Email Verification Code' : 'Password Reset Code';
-    const note    = isVerify
-        ? 'Use this code to verify your email address and activate your LuxEstates account.'
-        : 'Use this code to reset your password. If you did not request this, please ignore this email.';
+  const isVerify = type === 'verify';
+  const subject = isVerify ? 'LuxEstates — Verify Your Email' : 'LuxEstates — Password Reset Code';
+  const heading = isVerify ? 'Email Verification Code' : 'Password Reset Code';
+  const note = isVerify
+    ? 'Use this code to verify your email address and activate your LuxEstates account.'
+    : 'Use this code to reset your password. If you did not request this, please ignore this email.';
 
-    const html = `
+  const html = `
     <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;">
       <div style="background:#0033ab;padding:24px;text-align:center;">
         <h2 style="color:#ffffff;margin:0;font-size:22px;">🏠 LuxEstates</h2>
@@ -47,22 +46,22 @@ exports.sendOTP = async (email, otp, type = 'verify') => {
       </div>
     </div>`;
 
-    // Skip real send if no valid SMTP credentials configured
-    if (!process.env.SMTP_USER || process.env.SMTP_USER === 'your_gmail_address') {
-        console.log('[emailService] Skipping real send — no SMTP credentials configured.');
-        return;
-    }
+  // Skip real send if no valid SMTP credentials configured
+  if (!process.env.SMTP_USER || process.env.SMTP_USER === 'your_gmail_address') {
+    console.log('[emailService] Skipping real send — no SMTP credentials configured.');
+    return;
+  }
 
-    try {
-        await transporter.sendMail({
-            from: `"LuxEstates" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject,
-            text: `Your ${isVerify ? 'verification' : 'password reset'} code is: ${otp}. Expires in 15 minutes.`,
-            html
-        });
-        console.log(`[emailService] OTP email sent to ${email}`);
-    } catch (error) {
-        console.error('[emailService] Send failed:', error.message);
-    }
+  try {
+    await transporter.sendMail({
+      from: `"LuxEstates" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject,
+      text: `Your ${isVerify ? 'verification' : 'password reset'} code is: ${otp}. Expires in 15 minutes.`,
+      html
+    });
+    console.log(`[emailService] OTP email sent to ${email}`);
+  } catch (error) {
+    console.error('[emailService] Send failed:', error.message);
+  }
 };

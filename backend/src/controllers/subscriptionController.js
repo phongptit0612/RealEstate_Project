@@ -1,6 +1,5 @@
 const pool = require('../config/db');
 
-// Lazy Stripe initializer — server boots fine without STRIPE_SECRET_KEY
 let _stripe = null;
 function getStripe() {
     if (!_stripe) {
@@ -14,13 +13,10 @@ function getStripe() {
 }
 
 const TIERS = {
-    silver: { priceUsd: 9.99,  days: 30, label: 'Silver VIP' },
-    gold:   { priceUsd: 29.99, days: 30, label: 'Gold VIP'   },
+    silver: { priceUsd: 9.99, days: 30, label: 'Silver VIP' },
+    gold: { priceUsd: 29.99, days: 30, label: 'Gold VIP' },
 };
 
-// ── POST /api/subscriptions/checkout ────────────────────────────────────────
-// Body: { property_id, tier, currency }
-// Creates a Stripe Checkout Session and returns the session URL
 exports.createCheckoutSession = async (req, res) => {
     const userId = req.user.userId;
     const { property_id, tier, currency = 'usd' } = req.body;
@@ -29,9 +25,8 @@ exports.createCheckoutSession = async (req, res) => {
     if (!property_id) return res.status(400).json({ error: 'property_id is required.' });
 
     try {
-        const stripe = getStripe(); // throws if key not set
+        const stripe = getStripe();
 
-        // Verify property belongs to this user
         const [[prop]] = await pool.query(
             'SELECT property_id, title FROM properties WHERE property_id = ? AND owner_id = ?',
             [property_id, userId]
@@ -75,12 +70,12 @@ exports.createCheckoutSession = async (req, res) => {
                 quantity: 1,
             }],
             metadata: {
-                user_id:     String(userId),
+                user_id: String(userId),
                 property_id: String(property_id),
                 tier,
             },
             success_url: `${process.env.FRONTEND_URL}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url:  `${process.env.FRONTEND_URL}/subscription/cancel`,
+            cancel_url: `${process.env.FRONTEND_URL}/subscription/cancel`,
         });
 
         await pool.query(
@@ -99,7 +94,7 @@ exports.createCheckoutSession = async (req, res) => {
 // ── POST /api/subscriptions/webhook ─────────────────────────────────────────
 // Stripe calls this when a payment is completed
 exports.handleWebhook = async (req, res) => {
-    const sig  = req.headers['stripe-signature'];
+    const sig = req.headers['stripe-signature'];
     let event;
 
     try {
@@ -111,7 +106,7 @@ exports.handleWebhook = async (req, res) => {
     }
 
     if (event.type === 'checkout.session.completed') {
-        const session  = event.data.object;
+        const session = event.data.object;
         const { user_id, property_id, tier } = session.metadata;
         const tierInfo = TIERS[tier];
 

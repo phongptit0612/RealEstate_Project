@@ -5,7 +5,6 @@ const { protect } = require('../middlewares/authMiddleware');
 
 router.use(protect);
 
-// ── GET /api/conversations ── List all conversations for the logged-in user
 router.get('/', async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -32,7 +31,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// ── POST /api/conversations ── Start or resume a conversation
 router.post('/', async (req, res) => {
     try {
         const { property_id, seller_id } = req.body;
@@ -42,7 +40,6 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'You cannot message yourself' });
         }
 
-        // Find or create the conversation
         const [existing] = await pool.query(
             'SELECT * FROM conversations WHERE property_id = ? AND buyer_id = ? AND seller_id = ?',
             [property_id || null, buyer_id, seller_id]
@@ -64,14 +61,12 @@ router.post('/', async (req, res) => {
     }
 });
 
-// ── GET /api/conversations/:id/messages ── Load message history
 router.get('/:id/messages', async (req, res) => {
     try {
         const userId = req.user.userId;
         const { id } = req.params;
         const { before, limit = 50 } = req.query;
 
-        // Verify user is part of this conversation
         const [[conv]] = await pool.query(
             'SELECT * FROM conversations WHERE conversation_id = ? AND (buyer_id = ? OR seller_id = ?)',
             [id, userId, userId]

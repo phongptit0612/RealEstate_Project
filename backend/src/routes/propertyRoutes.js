@@ -3,6 +3,7 @@ const router = express.Router();
 const propertyController = require('../controllers/propertyController');
 const { protect } = require('../middlewares/authMiddleware');
 
+// ?
 router.get('/search', propertyController.searchProperties);
 router.get('/metadata', propertyController.getSearchMetadata);
 router.get('/recently-viewed', protect, propertyController.getRecentlyViewed);
