@@ -33,18 +33,18 @@ app.use(cors({
 app.use(compression());
 
 // ── Rate Limiting ──────────────────────────────────────────────
-// General auth limiter: 20 requests per 15 minutes
+// General auth limiter: 300 requests per 15 minutes
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20,
+    max: 300,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many requests, please try again in 15 minutes.' },
 });
-// Strict login limiter: 8 attempts per 15 minutes
+// Strict login limiter: 100 attempts per 15 minutes
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 8,
+    max: 100,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many login attempts, please try again in 15 minutes.' },
