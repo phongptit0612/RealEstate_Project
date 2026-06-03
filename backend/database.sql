@@ -432,9 +432,4 @@ INSERT INTO `subscription_packages` (`package_id`, `name`, `price_usd`, `duratio
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- ==========================================
--- FULLTEXT index for keyword search
--- Run this once if not already applied:
--- ALTER TABLE properties ADD FULLTEXT idx_ft_title_desc (title, description);
--- ==========================================
-ALTER TABLE `properties` ADD FULLTEXT `idx_ft_title_desc` (`title`, `description`);
+-- FULLTEXT index for keyword search is already defined inline in the CREATE TABLE above (idx_prop_fts)

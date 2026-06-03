@@ -35,7 +35,7 @@ exports.uploadImages = [
             const files = req.files;
             if (!files || files.length === 0) return res.status(400).json({ error: 'No files uploaded' });
 
-            const values = files.map((file, index) => [property_id, file.path, index === 0]);
+            const values = files.map((file, index) => [property_id, file.path, index + 1]);
             
             await pool.query(
                 'INSERT INTO property_images (property_id, image_url, sort_order) VALUES ?',

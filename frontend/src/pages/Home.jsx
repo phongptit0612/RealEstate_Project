@@ -24,7 +24,7 @@ export default function Home() {
     e.preventDefault();
     if (activeTab === 'quick') return;
     const params = new URLSearchParams();
-    if (searchLocation) params.append('query', searchLocation);
+    if (searchLocation) params.append('keyword', searchLocation);
     if (propertyType) params.append('type', propertyType);
     if (maxPrice) params.append('maxPrice', maxPrice);
     if (activeTab === 'rent') params.append('listingType', 'rent');
@@ -34,7 +34,7 @@ export default function Home() {
   };
 
   const handleQuickSearch = (tagQuery) => {
-    navigate(`/properties?query=${encodeURIComponent(tagQuery)}`);
+    navigate(`/properties?keyword=${encodeURIComponent(tagQuery)}`);
   };
 
   useEffect(() => {

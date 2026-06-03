@@ -2,14 +2,15 @@ const https = require('https');
 
 /**
  * Send an OTP code via Brevo's Transactional Email API.
- * Uses native HTTPS module to avoid external dependencies like axios or nodemailer.
+ * 
  * 
  * @param {string} email - Recipient email address
  * @param {string} otp   - 6-digit OTP code
  * @param {'verify'|'reset'} type - Purpose of the OTP
  */
+
+
 exports.sendOTP = async (email, otp, type = 'verify') => {
-  // Always log OTP to console for debugging/fallback
   console.log(`\n========================================`);
   console.log(`[OTP] For ${email} (${type}): ${otp}`);
   console.log(`========================================\n`);
@@ -98,7 +99,6 @@ exports.sendOTP = async (email, otp, type = 'verify') => {
     req.write(requestPayload);
     req.end();
   }).catch((err) => {
-    // Gracefully catch and print to prevent backend crash while debugging
     console.error('[emailService] sendOTP failed silently to avoid crash:', err.message);
   });
 };

@@ -104,22 +104,6 @@ exports.getMyProperties = async (req, res) => {
     }
 };
 
-exports.updatePropertyStatus = async (req, res) => {
-    try {
-        const { property_id } = req.params;
-        const { status } = req.body;
-        const owner_id = req.user.userId;
-        const [result] = await pool.query(
-            'UPDATE properties SET listing_status = ? WHERE property_id = ? AND owner_id = ?',
-            [status === 'available' ? 'active' : status, property_id, owner_id]
-        );
-        if (result.affectedRows === 0) return res.status(404).json({ error: 'Property not found or unauthorized' });
-        res.json({ message: 'Status updated successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
 // PUT /api/properties/:property_id — owner edits their listing
 exports.updateProperty = async (req, res) => {
     try {
@@ -498,7 +482,7 @@ exports.getPropertyById = async (req, res) => {
         if (authHeader) {
             try {
                 const jwt = require('jsonwebtoken');
-                const decoded = jwt.verify(authHeader, process.env.JWT_SECRET || 'super_secret_jwt_key_you_can_use_anything_in_dev');
+                const decoded = jwt.verify(authHeader, process.env.JWT_SECRET);
                 pool.query(
                     'INSERT INTO recently_viewed (user_id, property_id, viewed_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE viewed_at = NOW()',
                     [decoded.userId, id]

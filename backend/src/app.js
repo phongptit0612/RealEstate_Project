@@ -17,8 +17,7 @@ app.use(cors({
         if (!origin) return callback(null, true);
 
         const isAllowed = allowedOrigins.includes(origin) ||
-            origin.startsWith('http://localhost:') ||
-            origin.endsWith('.vercel.app');
+            origin.startsWith('http://localhost:');
 
         if (isAllowed) {
             callback(null, true);
@@ -33,22 +32,18 @@ app.use(cors({
 app.use(compression());
 
 // ── Rate Limiting ──────────────────────────────────────────────
-// General auth limiter: 300 requests per 15 minutes
+// General auth limiter: 30 requests per 15 minutes
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 300,
+    max: 30,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many requests, please try again in 15 minutes.' },
 });
-// Strict login limiter: 100 attempts per 15 minutes
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: 'Too many login attempts, please try again in 15 minutes.' },
-});
+
+// ── Stripe webhook needs raw body BEFORE json parsing ──────────
+const subscriptionRoutes = require('./routes/subscriptionRoutes');
+app.use('/api/subscriptions', subscriptionRoutes);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -62,17 +57,15 @@ const adminRoutes = require('./routes/adminRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
 const conversationRoutes = require('./routes/conversationRoutes');
-const subscriptionRoutes = require('./routes/subscriptionRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/auth/login', loginLimiter); // extra strict on login
 app.use('/api/properties', propertyRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/conversations', conversationRoutes);
-app.use('/api/subscriptions', subscriptionRoutes);
+// Note: /api/subscriptions already mounted above (before express.json for webhook)
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 const pool = require('./config/db');

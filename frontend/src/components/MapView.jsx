@@ -5,7 +5,6 @@ import 'leaflet/dist/leaflet.css';
 import { Link } from 'react-router-dom';
 import useCurrencyStore from '../store/currencyStore';
 
-// ── Fix Leaflet's broken default icons in Vite/Webpack ──────
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -13,7 +12,6 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// Custom blue brand marker
 const brandIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -23,7 +21,6 @@ const brandIcon = new L.Icon({
     shadowSize: [41, 41],
 });
 
-// Fly to center when `center` prop changes
 function FlyToCenter({ center, zoom }) {
     const map = useMap();
     useEffect(() => {
@@ -32,23 +29,12 @@ function FlyToCenter({ center, zoom }) {
     return null;
 }
 
-/**
- * MapView — reusable Leaflet map component
- *
- * Props:
- *   properties  [{property_id, title, price_usd, latitude, longitude, primary_image, ...}]
- *   center      [lat, lng] — optional forced center (overrides auto-center)
- *   zoom        number — initial zoom level (default 12)
- *   height      string — CSS height (default '500px')
- *   singlePin   bool — if true, only show one pin (for PropertyDetail)
- */
+
 export default function MapView({ properties = [], center, zoom = 12, height = '500px', singlePin = false }) {
     const { formatPrice } = useCurrencyStore();
 
-    // Filter only properties that have coordinates
     const mapped = properties.filter(p => p.latitude && p.longitude);
 
-    // Default center: Ho Chi Minh City
     const defaultCenter = [10.7769, 106.7009];
     const mapCenter = center || (mapped.length > 0
         ? [parseFloat(mapped[0].latitude), parseFloat(mapped[0].longitude)]
@@ -79,7 +65,6 @@ export default function MapView({ properties = [], center, zoom = 12, height = '
                 style={{ height: '100%', width: '100%' }}
                 scrollWheelZoom={true}
             >
-                {/* Dark-styled tile layer using CartoDB Dark Matter */}
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"

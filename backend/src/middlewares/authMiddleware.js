@@ -8,7 +8,8 @@ exports.protect = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super_secret_jwt_key_you_can_use_anything_in_dev');
+        if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET is not configured');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded; 
         next();
     } catch (error) {

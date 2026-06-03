@@ -5,6 +5,22 @@ const { protect } = require('../middlewares/authMiddleware');
 
 router.use(protect);
 
+// ── GET /api/conversations/unread-count ── Badge count for sidebar
+// IMPORTANT: This must be defined BEFORE /:id routes to avoid matching 'unread-count' as an id
+router.get('/unread-count', async (req, res) => {
+    try {
+        const [[{ count }]] = await pool.query(`
+            SELECT COUNT(*) as count FROM messages m
+            JOIN conversations c ON m.conversation_id = c.conversation_id
+            WHERE (c.buyer_id = ? OR c.seller_id = ?)
+            AND m.sender_id != ? AND m.is_read = 0
+        `, [req.user.userId, req.user.userId, req.user.userId]);
+        res.json({ count });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 router.get('/', async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -98,21 +114,6 @@ router.get('/:id/messages', async (req, res) => {
         );
 
         res.json(messages.reverse()); // Return oldest-first for rendering
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// ── GET /api/conversations/unread-count ── Badge count for sidebar
-router.get('/unread-count', async (req, res) => {
-    try {
-        const [[{ count }]] = await pool.query(`
-            SELECT COUNT(*) as count FROM messages m
-            JOIN conversations c ON m.conversation_id = c.conversation_id
-            WHERE (c.buyer_id = ? OR c.seller_id = ?)
-            AND m.sender_id != ? AND m.is_read = 0
-        `, [req.user.userId, req.user.userId, req.user.userId]);
-        res.json({ count });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

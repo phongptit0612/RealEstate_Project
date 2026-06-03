@@ -7,34 +7,26 @@ const onlineUsers = new Map();
 module.exports = function (io) {
 
     // ── Auth middleware ──────────────────────────────────────────────────────
-    // Accepts userId from socket auth payload (sent by frontend) OR JWT cookie
+    // Authenticates via JWT cookie only (secure — never trust client-sent userId)
     io.use(async (socket, next) => {
         try {
-            // 1. Try auth payload first (most reliable)
-            const userId = socket.handshake.auth?.userId;
-            if (userId) {
-                const [[user]] = await pool.query(
-                    'SELECT user_id FROM users WHERE user_id = ? AND is_active = 1',
-                    [Number(userId)]
-                );
-                if (!user) return next(new Error('User not found or suspended'));
-                socket.userId = Number(userId);
-                return next();
-            }
-
-            // 2. Fallback: try to extract JWT from cookie
+            // Extract JWT from cookie header
             const cookie = socket.handshake.headers?.cookie || '';
             const match = cookie.match(/(?:^|;\s*)jwt=([^;]+)/);
-            if (match) {
-                const decoded = jwt.verify(
-                    match[1],
-                    process.env.JWT_SECRET || 'super_secret_jwt_key_you_can_use_anything_in_dev'
-                );
-                socket.userId = Number(decoded.userId);
-                return next();
-            }
+            if (!match) return next(new Error('Authentication required'));
 
-            return next(new Error('Authentication required'));
+            if (!process.env.JWT_SECRET) return next(new Error('JWT_SECRET is not configured'));
+            const decoded = jwt.verify(match[1], process.env.JWT_SECRET);
+            
+            // Verify user still exists and is active
+            const [[user]] = await pool.query(
+                'SELECT user_id FROM users WHERE user_id = ? AND is_active = 1',
+                [Number(decoded.userId)]
+            );
+            if (!user) return next(new Error('User not found or suspended'));
+            
+            socket.userId = Number(decoded.userId);
+            return next();
         } catch (err) {
             return next(new Error('Invalid auth: ' + err.message));
         }
@@ -95,14 +87,14 @@ module.exports = function (io) {
                     sent_at: new Date().toISOString(),
                 };
 
-                // ① Broadcast to all sockets in the conversation room
+                //  Broadcast to all sockets in the conversation room
                 io.to(`conv_${conversation_id}`).emit('new_message', message);
 
-                // ② Also push directly to receiver's personal room
+                // Also push directly to receiver's personal room
                 //    (in case they have the inbox open but haven't joined this conv room)
                 io.to(`user_${receiver_id}`).emit('new_message', message);
 
-                // ③ Notify receiver's inbox list to refresh
+                // Notify receiver's inbox list to refresh
                 io.to(`user_${receiver_id}`).emit('inbox_update', {
                     conversation_id: Number(conversation_id),
                     last_message: body.trim(),
@@ -124,7 +116,6 @@ module.exports = function (io) {
             }
         });
 
-        // ── MARK messages as read ──────────────────────────────────────────
         socket.on('mark_read', async ({ conversation_id }) => {
             try {
                 await pool.query(

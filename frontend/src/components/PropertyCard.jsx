@@ -20,7 +20,7 @@ export default function PropertyCard({ property }) {
         : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop';
 
     const handleFavorite = (e) => {
-        e.preventDefault(); // Prevent navigating to detail page
+        e.preventDefault();
         e.stopPropagation();
         if (!isAuthenticated) { navigate('/login'); return; }
         toggleFavorite(property.property_id);
@@ -36,15 +36,15 @@ export default function PropertyCard({ property }) {
                 </span>
                 {property.listing_type && (
                     <span className={`property-badge text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm ${property.listing_type === 'rent'
-                            ? 'bg-violet-100 text-violet-700 border border-violet-200'
-                            : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                        ? 'bg-violet-100 text-violet-700 border border-violet-200'
+                        : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                         }`}>
                         {property.listing_type === 'sale' ? t('card.forSale') : t('card.forRent')}
                     </span>
                 )}
             </div>
 
-            {/* ❤️ Favorite Button */}
+            {/*Favorite Button */}
             <button
                 onClick={handleFavorite}
                 title={favorited ? t('card.saved') : t('card.save')}

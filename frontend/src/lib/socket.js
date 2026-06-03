@@ -1,23 +1,17 @@
 import { io } from 'socket.io-client';
 
-// True module-level singleton — survives React re-renders and StrictMode double-invocation
 let socket = null;
 let currentUserId = null;
 
-/**
- * Idempotent connect — safe to call multiple times from multiple components.
- * Only creates a new socket when the userId changes or socket doesn't exist.
- */
+
 export function connectSocket(userId) {
     const id = Number(userId);
 
-    // Already connected for the same user → reuse
     if (socket && currentUserId === id) {
         if (socket.disconnected) socket.connect();
         return socket;
     }
 
-    // Different user → teardown old socket
     if (socket) {
         socket.removeAllListeners();
         socket.disconnect();
@@ -27,7 +21,6 @@ export function connectSocket(userId) {
     socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000', {
         withCredentials: true,
         auth: { userId: id },
-        // Start with polling (reliable), upgrade to WebSocket after handshake
         transports: ['polling', 'websocket'],
         reconnection: true,
         reconnectionAttempts: Infinity,
@@ -49,9 +42,7 @@ export function getSocket() {
     return socket;
 }
 
-/**
- * Hard disconnect — ONLY call this on user logout, not on component unmount.
- */
+
 export function disconnectSocket() {
     if (socket) {
         socket.removeAllListeners();

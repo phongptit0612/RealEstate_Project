@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, User, Globe, ChevronDown } from 'lucide-react';
+import { Heart, User, Globe, ChevronDown, Menu, X } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
 import useUserStore from '../store/userStore';
 import useLanguageStore from '../store/languageStore';
@@ -8,10 +8,11 @@ import useLanguageStore from '../store/languageStore';
 export default function Navbar() {
   const { preferredCurrency, setCurrency, currencies, currencyLabels } = useCurrencyStore();
   const { isAuthenticated, user, logout } = useUserStore();
-  const { language, setLanguage, t } = useLanguageStore();
+  const { language, setLanguage, setLanguageFromCurrency, t } = useLanguageStore();
   const navigate = useNavigate();
   const [scrollY, setScrollY] = useState(0);
   const [langOpen, setLangOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -19,12 +20,28 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // F5: Auto-switch language when currency changes
+  const handleCurrencyChange = (currencyCode) => {
+    setCurrency(currencyCode);
+    setLanguageFromCurrency(currencyCode);
+  };
+
   const languagesList = [
     { code: 'en', label: '🇺🇸 English' },
     { code: 'vi', label: '🇻🇳 Tiếng Việt' }
   ];
 
   const currentLangObj = languagesList.find(l => l.code === language) || languagesList[0];
+
+  // Shared nav links for both desktop and mobile
+  const navLinks = (
+    <>
+      <Link to="/properties" className="hover:text-brand-600 transition-colors" onClick={() => setMobileOpen(false)}>{t('nav.properties')}</Link>
+      <Link to="/agencies" className="hover:text-brand-600 transition-colors" onClick={() => setMobileOpen(false)}>{t('nav.agencies')}</Link>
+      <Link to="/guidelines" className="hover:text-brand-600 transition-colors" onClick={() => setMobileOpen(false)}>{t('nav.aboutUs')}</Link>
+      <Link to="/pricing" className="hover:text-brand-600 transition-colors" onClick={() => setMobileOpen(false)}>{t('nav.vipPlans')}</Link>
+    </>
+  );
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${scrollY > 20 ? 'bg-white/95 backdrop-blur-md shadow-md py-3.5 border-b border-gray-100' : 'bg-white border-b border-gray-200 py-4'}`}>
@@ -37,22 +54,20 @@ export default function Navbar() {
           <span className="text-xl font-bold tracking-tight text-slate-900">LuxEstates</span>
         </Link>
 
-        {/* Navigation Links (Center) */}
+        {/* Navigation Links (Center — Desktop) */}
         <div className="hidden md:flex items-center space-x-8 text-sm font-semibold text-slate-700">
-          <Link to="/properties" className="hover:text-brand-600 transition-colors">{t('nav.properties')}</Link>
-          <Link to="/agencies" className="hover:text-brand-600 transition-colors">{t('nav.agencies')}</Link>
-          <a href="#" className="hover:text-brand-600 transition-colors">{t('nav.aboutUs')}</a>
-          <Link to="/pricing" className="hover:text-brand-600 transition-colors">{t('nav.vipPlans')}</Link>
+          {navLinks}
         </div>
 
         {/* Action Controls & Selectors (Right) */}
         <div className="flex items-center gap-4 text-slate-700">
           {/* Currency Dropdown Selector */}
-          <div className="relative">
+          <div className="relative hidden sm:block">
             <select
+              aria-label="Select currency"
               className="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-3.5 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-600 transition-all cursor-pointer font-bold text-xs hover:bg-slate-100 text-slate-700"
               value={preferredCurrency}
-              onChange={(e) => setCurrency(e.target.value)}
+              onChange={(e) => handleCurrencyChange(e.target.value)}
             >
               {currencies.map(c => (
                 <option key={c} value={c}>{currencyLabels[c] || c}</option>
@@ -62,9 +77,10 @@ export default function Navbar() {
           </div>
 
           {/* Dedicated Language Selector Dropdown */}
-          <div className="relative">
+          <div className="relative hidden sm:block">
             <button
               onClick={() => setLangOpen(prev => !prev)}
+              aria-label="Select language"
               className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-brand-600 transition-all cursor-pointer font-bold text-xs hover:bg-slate-100 text-slate-700"
             >
               <Globe className="w-3.5 h-3.5 text-slate-500" />
@@ -95,39 +111,104 @@ export default function Navbar() {
           </div>
 
           {/* Saved List Icon */}
-          <Link to="/dashboard/favorites" className="p-2 hover:bg-slate-100 rounded-full transition-colors hidden sm:block relative group">
+          <Link to="/dashboard/favorites" aria-label="Saved properties" className="p-2 hover:bg-slate-100 rounded-full transition-colors hidden sm:block relative group">
             <Heart className="w-5 h-5 text-slate-700" />
           </Link>
 
-          {/* Authentication State Controls */}
-          {isAuthenticated ? (
-            <div className="flex items-center gap-3">
-              {user?.role === 'admin' ? (
-                <Link
-                  to="/admin"
-                  className="flex items-center gap-1.5 text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-brand-600/25"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                  {t('nav.adminPanel')}
-                </Link>
-              ) : (
-                <Link to="/dashboard/properties" className="text-xs font-bold text-brand-600 hover:text-white transition-all hover:bg-brand-600 px-4 py-2 rounded-full border border-brand-600">
-                  {t('nav.dashboard')}
-                </Link>
-              )}
-              <span className="font-semibold text-xs text-slate-600 hidden lg:inline">{t('nav.hi')}, {user?.name?.split(' ')[0]}</span>
-              <button onClick={logout} className="flex items-center gap-1 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-full font-bold text-xs transition-all border border-red-100 shadow-sm hover:shadow-red-500/10">
-                {t('nav.logout')}
-              </button>
-            </div>
-          ) : (
-            <Link to="/login" className="flex items-center gap-2 bg-white text-slate-800 hover:bg-slate-50 px-4 py-2 rounded-full font-bold text-xs transition-all border border-slate-200 hover:border-slate-300 hover:shadow-sm">
-              <User className="w-3.5 h-3.5 text-slate-500" />
-              <span>{t('nav.login')}</span>
-            </Link>
-          )}
+          {/* Authentication State Controls (Desktop) */}
+          <div className="hidden md:flex items-center gap-3">
+            {isAuthenticated ? (
+              <>
+                {user?.role === 'admin' ? (
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-1.5 text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 px-4 py-2 rounded-full transition-all shadow-md hover:shadow-brand-600/25"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    {t('nav.adminPanel')}
+                  </Link>
+                ) : (
+                  <Link to="/dashboard/properties" className="text-xs font-bold text-brand-600 hover:text-white transition-all hover:bg-brand-600 px-4 py-2 rounded-full border border-brand-600">
+                    {t('nav.dashboard')}
+                  </Link>
+                )}
+                <span className="font-semibold text-xs text-slate-600 hidden lg:inline">{t('nav.hi')}, {user?.name?.split(' ')[0]}</span>
+                <button onClick={logout} className="flex items-center gap-1 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white px-4 py-2 rounded-full font-bold text-xs transition-all border border-red-100 shadow-sm hover:shadow-red-500/10">
+                  {t('nav.logout')}
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className="flex items-center gap-2 bg-white text-slate-800 hover:bg-slate-50 px-4 py-2 rounded-full font-bold text-xs transition-all border border-slate-200 hover:border-slate-300 hover:shadow-sm">
+                <User className="w-3.5 h-3.5 text-slate-500" />
+                <span>{t('nav.login')}</span>
+              </Link>
+            )}
+          </div>
+
+          {/* F6: Mobile Hamburger Menu Button */}
+          <button
+            onClick={() => setMobileOpen(prev => !prev)}
+            aria-label="Toggle menu"
+            className="md:hidden p-2 hover:bg-slate-100 rounded-full transition-colors"
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
       </div>
+
+      {/* F6: Mobile Menu Drawer */}
+      {mobileOpen && (
+        <div className="md:hidden bg-white border-t border-gray-100 shadow-lg animate-in slide-in-from-top-2 duration-200">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-4 text-sm font-semibold text-slate-700">
+            {navLinks}
+
+            {/* Mobile Currency & Language selectors */}
+            <div className="flex gap-2 pt-2 border-t border-gray-100">
+              <select
+                aria-label="Select currency"
+                className="flex-1 appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold"
+                value={preferredCurrency}
+                onChange={(e) => handleCurrencyChange(e.target.value)}
+              >
+                {currencies.map(c => (
+                  <option key={c} value={c}>{currencyLabels[c] || c}</option>
+                ))}
+              </select>
+              <select
+                aria-label="Select language"
+                className="flex-1 appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+              >
+                {languagesList.map(l => (
+                  <option key={l.code} value={l.code}>{l.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Mobile Auth Controls */}
+            <div className="pt-2 border-t border-gray-100">
+              {isAuthenticated ? (
+                <div className="flex flex-col gap-2">
+                  <Link to={user?.role === 'admin' ? '/admin' : '/dashboard/properties'} onClick={() => setMobileOpen(false)}
+                    className="text-center text-xs font-bold text-white bg-brand-600 px-4 py-2.5 rounded-full">
+                    {user?.role === 'admin' ? t('nav.adminPanel') : t('nav.dashboard')}
+                  </Link>
+                  <button onClick={() => { logout(); setMobileOpen(false); }}
+                    className="text-center text-xs font-bold text-red-500 bg-red-50 px-4 py-2.5 rounded-full border border-red-100">
+                    {t('nav.logout')}
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" onClick={() => setMobileOpen(false)}
+                  className="block text-center text-xs font-bold text-slate-800 bg-slate-50 px-4 py-2.5 rounded-full border border-slate-200">
+                  {t('nav.login')}
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

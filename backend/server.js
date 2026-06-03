@@ -16,8 +16,7 @@ const io = new Server(server, {
         origin: (origin, callback) => {
             if (!origin) return callback(null, true);
             const isAllowed = allowedOrigins.includes(origin) || 
-                              origin.startsWith('http://localhost:') || 
-                              origin.endsWith('.vercel.app');
+                              origin.startsWith('http://localhost:');
             if (isAllowed) {
                 callback(null, true);
             } else {

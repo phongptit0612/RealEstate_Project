@@ -4,7 +4,6 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin, Search, Loader2, X } from 'lucide-react';
 
-// Fix Vite broken Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -21,13 +20,11 @@ const redIcon = new L.Icon({
     shadowSize: [41, 41],
 });
 
-// Click handler inside map
 function ClickHandler({ onMapClick }) {
     useMapEvents({ click: (e) => onMapClick(e.latlng) });
     return null;
 }
 
-// Fly to position when it changes
 function FlyTo({ position }) {
     const map = useMap();
     useEffect(() => {
@@ -36,13 +33,7 @@ function FlyTo({ position }) {
     return null;
 }
 
-/**
- * LocationPicker — interactive map for picking a lat/lng on Create/Edit listing
- *
- * Props:
- *   initialLat, initialLng — pre-set position (for edit mode)
- *   onSelect({ lat, lng, address }) — callback when user picks a location
- */
+
 export default function LocationPicker({ initialLat, initialLng, onSelect }) {
     const defaultCenter = [10.7769, 106.7009]; // HCMC
     const [position, setPosition] = useState(
@@ -95,7 +86,6 @@ export default function LocationPicker({ initialLat, initialLng, onSelect }) {
         finally { setSearching(false); }
     };
 
-    // Pick from search results
     const pickResult = (result) => {
         const lat = parseFloat(result.lat);
         const lng = parseFloat(result.lon);
@@ -107,7 +97,6 @@ export default function LocationPicker({ initialLat, initialLng, onSelect }) {
 
     return (
         <div className="space-y-3">
-            {/* Search box */}
             <form onSubmit={handleSearch} className="flex gap-2">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -131,7 +120,6 @@ export default function LocationPicker({ initialLat, initialLng, onSelect }) {
                 </button>
             </form>
 
-            {/* Search results dropdown */}
             {searchResults.length > 0 && (
                 <div className="bg-[#051124] border border-white/10 rounded-xl overflow-hidden shadow-2xl">
                     {searchResults.map((r, i) => (
@@ -148,20 +136,18 @@ export default function LocationPicker({ initialLat, initialLng, onSelect }) {
                 </div>
             )}
 
-            {/* Status text */}
             <div className="flex items-center gap-2 text-xs text-slate-500">
                 {reverseLoading ? (
                     <><Loader2 className="w-3 h-3 animate-spin" /> Getting address...</>
                 ) : position ? (
                     <><MapPin className="w-3 h-3 text-emerald-400" />
-                    <span className="text-emerald-400">Pin set: </span>
-                    {position[0].toFixed(6)}, {position[1].toFixed(6)}</>
+                        <span className="text-emerald-400">Pin set: </span>
+                        {position[0].toFixed(6)}, {position[1].toFixed(6)}</>
                 ) : (
                     <><MapPin className="w-3 h-3" /> Click on the map or search to set the property location</>
                 )}
             </div>
 
-            {/* Map */}
             <div className="rounded-2xl overflow-hidden border border-white/10 shadow-xl" style={{ height: '340px' }}>
                 <MapContainer
                     center={position || defaultCenter}
