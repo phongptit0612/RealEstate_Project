@@ -10,7 +10,8 @@ const generateToken = (res, user) => {
         { expiresIn: '7d' }
     );
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === 'production' || 
+                         (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'));
     res.cookie('jwt', token, {
         httpOnly: true,
         secure: isProduction,
@@ -103,7 +104,8 @@ exports.login = async (req, res) => {
 
 // ─── LOGOUT ─────────────────────────────────────────────────
 exports.logout = (req, res) => {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === 'production' || 
+                         (process.env.FRONTEND_URL && !process.env.FRONTEND_URL.includes('localhost'));
     res.cookie('jwt', '', { 
         httpOnly: true, 
         secure: isProduction,
