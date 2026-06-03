@@ -1,18 +1,18 @@
-# 🏡 LuxEstates — Premium Real Estate Marketplace
+# LuxEstates — Premium Real Estate Marketplace
 
 A full-stack, luxury real estate platform for buying, selling, and renting properties, built with a professional developer experience and a premium, multilingual user interface.
 
 ---
 
-## 📌 About The Project
+##  About The Project
 
 LuxEstates is a full-featured real estate web application that allows users to browse, list, and manage properties. It features a professional Admin panel for content moderation, a real-time Inbox for buyer-seller communication, a VIP boost system powered by Stripe, and multilingual/multi-currency support.
 
 ---
 
-## ✨ Full Feature List
+## Full Feature List
 
-### 🔐 Authentication & Security
+### Authentication & Security
 - **User Registration** with mandatory **Email OTP Verification** before account activation
 - **JWT-based Authentication** stored in secure HTTP-only cookies
 - **Login / Logout** with rate limiting (8 attempts per 15 min)
@@ -21,7 +21,7 @@ LuxEstates is a full-featured real estate web application that allows users to b
 - **Avatar Upload** with Cloudinary hosting
 - **Role-based Access Control**: `user` and `admin` roles with route guards
 
-### 🏠 Property Listings
+### Property Listings
 - **Multi-step Listing Creation** (4 steps: Basics → Metrics → Location → Media)
   - Step 1: Title, Description, Property Type, Listing Type (Sale/Rent)
   - Step 2: Price (native currency input with auto USD conversion), Area, Bedrooms, Bathrooms, Facing Direction
@@ -35,40 +35,40 @@ LuxEstates is a full-featured real estate web application that allows users to b
 - **Admin Approval Gate** — all listings are "Pending" until reviewed by admin
 - **Property Detail Page** — full details, image gallery, map, agent contact, mortgage calculator, similar listings, feature tags, report button
 
-### 🔍 Search & Discovery
+### Search & Discovery
 - **Advanced Search Page** with filters: keyword, city, property type, listing type, price range, bedrooms, bathrooms, area, VIP status
 - **Sorting** by: Newest, Price (High/Low), Most Viewed, Area
 - **URL-based Filter Persistence** — shareable search links
 - **Clickable Feature Tags** on the detail page — click a tag to search by it
 - **Weighted Similarity Engine** — similar properties scored by City + Type match, with fallback logic ensuring results always appear
 
-### 💳 VIP Boost & Subscriptions
+### VIP Boost & Subscriptions
 - **Two VIP Tiers:**
-  - 🥈 **Silver**: Priority placement, highlighted card border, Silver badge
-  - 🥇 **Gold**: Pinned to TOP of results, Home page feature, animated glow, Gold badge
+  - **Silver**: Priority placement, highlighted card border, Silver badge
+  - **Gold**: Pinned to TOP of results, Home page feature, animated glow, Gold badge
 - **Stripe Checkout** integration for real payment processing
 - **Stripe Webhook** listener for payment confirmation
 - **Dev Simulation Mode** (`/simulate` endpoint) for testing without Stripe
 - **VIP Boost Guard**: Cannot boost unapproved listings — shows notification
 - **My Subscriptions Page** — view all active and past subscriptions
 
-### 💬 Real-time Inbox (Messaging)
+### Real-time Inbox (Messaging)
 - **Buyer-Seller Conversations** linked to specific property listings
 - **Paginated Message History** (load older messages on scroll)
 - **Unread Message Badge** in dashboard sidebar
 - **Real-time Delivery** via Socket.io
 - **"Contact Agent" button** on property detail page to start a conversation
 
-### 🗺️ Maps & Location
+### Maps & Location
 - **Interactive LocationPicker** — user pins exact property location on a Leaflet map
 - **Auto-fill Address** from map pin using Reverse Geocoding
 - **MapView Component** — embedded read-only map on property detail page
 - **OpenStreetMap** tiles (no API key required)
 
-### 📸 Media & Gallery
+### Media & Gallery
 - **Multi-file Image Upload** (up to 10 photos) via Multer + Cloudinary
 - **Interactive Tech Bar Lightbox** — click any image to enlarge with:
-  - 🔍 Zoom In / Out controls (25% steps, up to 400%)
+  - Zoom In / Out controls (25% steps, up to 400%)
   - Live zoom percentage display
   - Click-to-toggle zoom (1x ↔ 2x)
   - Pan/scroll support when zoomed in
@@ -76,14 +76,14 @@ LuxEstates is a full-featured real estate web application that allows users to b
 - **Thumbnail Strip** — click active thumbnail to also open lightbox
 - **Prev/Next Arrows** for browsing gallery slides
 
-### 📐 Mortgage Calculator
+### Mortgage Calculator
 - Embedded on every property detail page
 - Adjustable **Down Payment %**, **Annual Interest Rate**, **Loan Term** (years) via sliders
 - Live calculation of **Monthly Payment** and **Principal Loan Amount**
 - All values displayed in user's **preferred currency** (real-time converted)
 - Fully translated (EN / VI)
 
-### 🌍 Localization & Currency
+### Localization & Currency
 - **Languages Supported:** English 🇺🇸, Vietnamese 🇻🇳
 - **Auto Language Switch**: Selecting VND currency automatically switches to Vietnamese; all others switch to English
 - **Currencies Supported:** USD, VND, EUR, GBP, JPY, KRW, CNY, SGD, THB, AUD, CAD
@@ -93,35 +93,35 @@ LuxEstates is a full-featured real estate web application that allows users to b
 - **Smart Price Formatting**: Live dot separators for VND (e.g., `2.500.000.000`), commas for USD
 - **Persistent Preferences**: Language + currency saved to `localStorage` via Zustand persist
 
-### ❤️ Favorites
+### Favorites
 - Save/unsave properties with a heart icon (requires login)
 - **Favorites Dashboard** — view all saved properties
 - Favorites persist in database, not just local state
 
-### 📋 Activity History
+### Activity History
 - Log of user actions: property views, saves, messages sent
 
-### 👤 User Profile
+### User Profile
 - Edit Name, Phone, Bio
 - Upload/change Avatar
 - Change Password
 
-### 📢 Notifications
+### Notifications
 - In-app notification system for listing approvals, messages, etc.
 - REST endpoint for fetching unread notifications
 
-### 🏢 Agencies / Agents Directory
+### Agencies / Agents Directory
 - Public directory of all registered agents/sellers
 - Search agents by name or area
 - "View Listings" link per agent
 
-### 📜 Platform Guidelines Page
+### Platform Guidelines Page
 - Professional, structured guidelines page for listing standards
 - Linked from the listing creation confirmation modal
 
 ---
 
-## 🛡️ Admin Panel (`/admin`)
+## Admin Panel (`/admin`)
 
 Full role-protected admin dashboard with:
 
@@ -136,7 +136,7 @@ Full role-protected admin dashboard with:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 | Technology | Purpose |
@@ -189,7 +189,7 @@ Full role-protected admin dashboard with:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Real_Estate_Project/
@@ -217,7 +217,7 @@ Real_Estate_Project/
 
 ---
 
-## 🚀 Local Development Setup
+## Local Development Setup
 
 ### Prerequisites
 - Node.js v18+
@@ -277,7 +277,7 @@ The app will be available at **http://localhost:5173**
 
 ---
 
-## 🗺️ Application Routes
+## Application Routes
 
 ### Public Pages
 | Route | Page |
