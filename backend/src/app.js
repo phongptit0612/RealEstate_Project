@@ -20,7 +20,8 @@ app.use(cors({
         if (!origin) return callback(null, true);
 
         const isAllowed = allowedOrigins.includes(origin) ||
-            origin.startsWith('http://localhost:');
+            origin.startsWith('http://localhost:') ||
+            origin.endsWith('.vercel.app');
 
         if (isAllowed) {
             callback(null, true);
