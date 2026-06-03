@@ -9,7 +9,7 @@ const server = http.createServer(app);
 
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
     .split(',')
-    .map(url => url.trim());
+    .map(url => url.trim().replace(/\/$/, ''));
 
 const io = new Server(server, {
     cors: {
@@ -20,6 +20,7 @@ const io = new Server(server, {
             if (isAllowed) {
                 callback(null, true);
             } else {
+                console.warn(`[CORS Blocked Socket.io] Request from origin '${origin}' blocked. Allowed origins:`, allowedOrigins);
                 callback(new Error('Not allowed by CORS'));
             }
         },

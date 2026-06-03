@@ -7,9 +7,12 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+// Trust reverse proxy (e.g. Render, Vercel) for accurate rate limiting IP detection
+app.set('trust proxy', 1);
+
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
     .split(',')
-    .map(url => url.trim());
+    .map(url => url.trim().replace(/\/$/, ''));
 
 app.use(cors({
     origin: (origin, callback) => {
@@ -22,6 +25,7 @@ app.use(cors({
         if (isAllowed) {
             callback(null, true);
         } else {
+            console.warn(`[CORS Blocked] Request from origin '${origin}' blocked. Allowed origins:`, allowedOrigins);
             callback(new Error('Not allowed by CORS'));
         }
     },
