@@ -22,7 +22,8 @@ function getTransporter() {
         auth: { user, pass },
         connectionTimeout: 5000, // 5 seconds
         greetingTimeout: 5000,   // 5 seconds
-        socketTimeout: 5000      // 5 seconds
+        socketTimeout: 5000,     // 5 seconds
+        family: 4                // Force IPv4 to prevent ENETUNREACH on IPv6-only resolutions
     });
 
     return _transporter;
