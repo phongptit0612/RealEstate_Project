@@ -27,7 +27,7 @@ export default function PropertyCard({ property }) {
     };
 
     return (
-        <Link to={`/properties/${property.property_id}`} className="group block bg-white border border-gray-200 rounded-3xl overflow-hidden hover:border-[#0033ab] transition-all duration-300 shadow-sm hover:shadow-xl relative">
+        <Link to={property.slug ? `/properties/${property.slug}` : `/properties/${property.property_id}`} className="group block bg-white border border-gray-200 rounded-3xl overflow-hidden hover:border-[#0033ab] transition-all duration-300 shadow-sm hover:shadow-xl relative">
 
             {/* Top Badges */}
             <div className="absolute top-4 left-4 z-10 flex gap-2">

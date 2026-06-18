@@ -275,12 +275,19 @@ exports.getAgents = async (req, res) => {
     try {
         const [agents] = await pool.query(`
             SELECT u.user_id, u.full_name, u.email, u.avatar_url, u.created_at,
-                   COUNT(p.property_id) AS listing_count,
-                   AVG(p.price_usd) AS avg_price
+                   COUNT(DISTINCT p.property_id) AS listing_count,
+                   AVG(p.price_usd) AS avg_price,
+                   COALESCE(rev.avg_rating, 0) AS avg_rating,
+                   COALESCE(rev.review_count, 0) AS review_count
             FROM users u
             JOIN properties p ON u.user_id = p.owner_id
+            LEFT JOIN (
+                SELECT reviewee_id, AVG(rating) AS avg_rating, COUNT(review_id) AS review_count
+                FROM reviews
+                GROUP BY reviewee_id
+            ) rev ON u.user_id = rev.reviewee_id
             WHERE p.mod_status = 'approved' AND u.is_active = 1
-            GROUP BY u.user_id
+            GROUP BY u.user_id, rev.avg_rating, rev.review_count
             HAVING listing_count > 0
             ORDER BY listing_count DESC, u.created_at ASC
             LIMIT 50

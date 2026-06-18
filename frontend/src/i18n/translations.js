@@ -165,6 +165,7 @@ const translations = {
       viewAll: 'View All',
       sale: 'sale',
       rent: 'rent',
+      new: 'New',
     },
     pricing: {
       back: 'Back to Properties',
@@ -366,6 +367,17 @@ const translations = {
         }
       }
     },
+    reviews: {
+      title: 'Agent Reviews & Ratings',
+      summaryHint: 'Reviews are written by clients who interacted with this agent regarding listings on our marketplace.',
+      empty: 'No reviews yet for this agent.',
+      writeTitle: 'Write a Review for this Agent',
+      yourRating: 'Your Rating:',
+      commentPlaceholder: 'Describe your experience working with this agent... (optional)',
+      btnSubmit: 'Submit Review',
+      listingRef: 'Listing:',
+      loadMore: 'Load More Reviews',
+    },
   },
 
   vi: {
@@ -534,6 +546,7 @@ const translations = {
       viewAll: 'Xem tất cả',
       sale: 'mua bán',
       rent: 'cho thuê',
+      new: 'Mới',
     },
     pricing: {
       back: 'Quay lại Bất động sản',
@@ -734,6 +747,17 @@ const translations = {
           failed: 'Đặt lại mật khẩu không thành công. Mã xác minh có thể đã hết hạn.',
         }
       }
+    },
+    reviews: {
+      title: 'Đánh giá & Xếp hạng Đại lý',
+      summaryHint: 'Đánh giá được viết bởi các khách hàng đã tương tác với đại lý này về các tin đăng trên sàn giao dịch của chúng tôi.',
+      empty: 'Chưa có đánh giá nào cho đại lý này.',
+      writeTitle: 'Viết Đánh giá cho Đại lý',
+      yourRating: 'Đánh giá của bạn:',
+      commentPlaceholder: 'Mô tả trải nghiệm làm việc của bạn với đại lý này... (không bắt buộc)',
+      btnSubmit: 'Gửi Đánh giá',
+      listingRef: 'Tin đăng:',
+      loadMore: 'Xem thêm đánh giá',
     },
   },
 };

@@ -54,6 +54,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
 const conversationRoutes = require('./routes/conversationRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/properties', propertyRoutes);
@@ -62,6 +63,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/conversations', conversationRoutes);
+app.use('/api/reviews', reviewRoutes);
 // Note: /api/subscriptions already mounted above (before express.json for webhook)
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 

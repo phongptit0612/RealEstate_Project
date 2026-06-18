@@ -66,7 +66,7 @@ export default function ActivityHistory() {
                     {history.map((prop, idx) => (
                         <Link
                             key={`${prop.property_id}-${idx}`}
-                            to={`/properties/${prop.property_id}`}
+                            to={prop.slug ? `/properties/${prop.slug}` : `/properties/${prop.property_id}`}
                             className="group flex items-center gap-5 bg-white border border-gray-200 hover:border-brand-300 hover:shadow-md shadow-sm rounded-2xl p-4 transition-all duration-200"
                         >
                             {/* Thumbnail */}

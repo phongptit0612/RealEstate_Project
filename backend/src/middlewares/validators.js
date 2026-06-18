@@ -124,6 +124,20 @@ const schemas = {
         reason: Joi.string().max(100).required(),
         details: Joi.string().max(2000).allow('', null),
     }),
+
+    // Reviews: Submit
+    createReview: Joi.object({
+        reviewee_id: Joi.number().integer().required().messages({
+            'any.required': 'Reviewee (agent) is required',
+        }),
+        property_id: Joi.number().integer().allow(null),
+        rating: Joi.number().integer().min(1).max(5).required().messages({
+            'any.required': 'Rating is required',
+            'number.min': 'Rating must be between 1 and 5',
+            'number.max': 'Rating must be between 1 and 5',
+        }),
+        comment: Joi.string().max(2000).allow('', null),
+    }),
 };
 
 module.exports = { validate, schemas };

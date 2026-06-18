@@ -139,7 +139,7 @@ exports.handleWebhook = async (req, res) => {
 exports.getMySubscriptions = async (req, res) => {
     const userId = req.user.userId;
     const [rows] = await pool.query(
-        `SELECT s.*, p.title AS property_title, p.vip_tier, p.vip_expires_at
+        `SELECT s.*, p.title AS property_title, p.vip_tier, p.vip_expires_at, p.slug AS property_slug
          FROM subscriptions s
          JOIN properties p ON s.property_id = p.property_id
          WHERE s.user_id = ?

@@ -70,9 +70,16 @@ export default function Agencies() {
                                         }
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-bold text-slate-900 text-lg leading-tight truncate">{agent.full_name || 'Anonymous'}</h3>
-                                        <p className="text-slate-400 text-sm truncate">{agent.email}</p>
-                                    </div>
+                                         <h3 className="font-bold text-slate-900 text-lg leading-tight truncate">{agent.full_name || 'Anonymous'}</h3>
+                                         <p className="text-slate-400 text-sm truncate mb-1">{agent.email}</p>
+                                         <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
+                                             <span>★</span>
+                                             <span className="text-slate-700 text-sm">{agent.avg_rating > 0 ? parseFloat(agent.avg_rating).toFixed(1) : 'New'}</span>
+                                             {agent.review_count > 0 && (
+                                                 <span className="text-slate-400 font-medium text-xs">({agent.review_count} {agent.review_count === 1 ? 'review' : 'reviews'})</span>
+                                             )}
+                                         </div>
+                                     </div>
                                 </div>
 
                                 {/* Stats */}

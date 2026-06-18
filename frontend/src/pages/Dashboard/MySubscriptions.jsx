@@ -76,7 +76,7 @@ export default function MySubscriptions() {
 
                                 {/* Property title */}
                                 <div className="flex-1 min-w-0">
-                                    <Link to={`/properties/${sub.property_id}`} className="font-bold text-slate-900 hover:text-brand-600 transition-colors truncate block">
+                                    <Link to={sub.property_slug ? `/properties/${sub.property_slug}` : `/properties/${sub.property_id}`} className="font-bold text-slate-900 hover:text-brand-600 transition-colors truncate block">
                                         {sub.property_title || `Property #${sub.property_id}`}
                                     </Link>
                                     <div className="flex flex-wrap gap-4 mt-1 text-xs text-slate-500">

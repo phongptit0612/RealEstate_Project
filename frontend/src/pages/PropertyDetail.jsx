@@ -18,7 +18,7 @@ import Footer from '../components/Footer';
 
 
 export default function PropertyDetail() {
-    const { id } = useParams();
+    const { idOrSlug } = useParams();
     const navigate = useNavigate();
     const { formatPrice } = useCurrencyStore();
     const { t } = useLanguageStore();
@@ -37,16 +37,133 @@ export default function PropertyDetail() {
     const [copiedLink, setCopiedLink] = useState(false);
     const [enlargedImage, setEnlargedImage] = useState(null);
 
+    const [reviews, setReviews] = useState([]);
+    const [reviewsLoading, setReviewsLoading] = useState(false);
+    const [reviewsPage, setReviewsPage] = useState(1);
+    const [reviewsTotalPages, setReviewsTotalPages] = useState(1);
+    const [reviewsStats, setReviewsStats] = useState({ avgRating: '0.0', totalReviews: 0 });
+    const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+    const [submittingReview, setSubmittingReview] = useState(false);
+
+    const fetchReviews = (pageNumber = 1, append = false) => {
+        if (!property?.seller_id) return;
+        setReviewsLoading(true);
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/reviews/agent/${property.seller_id}?page=${pageNumber}&limit=10`)
+            .then(res => {
+                if (append) {
+                    setReviews(prev => [...prev, ...res.data.reviews]);
+                } else {
+                    setReviews(res.data.reviews);
+                }
+                setReviewsPage(res.data.page);
+                setReviewsTotalPages(res.data.totalPages);
+                setReviewsStats({ avgRating: res.data.avgRating, totalReviews: res.data.totalReviews });
+            })
+            .catch(err => console.error('Error fetching reviews:', err))
+            .finally(() => setReviewsLoading(false));
+    };
+
+    const submitReview = async (e) => {
+        e.preventDefault();
+        if (!isAuthenticated) { navigate('/login'); return; }
+        setSubmittingReview(true);
+        try {
+            await axios.post(
+                `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/reviews`,
+                {
+                    reviewee_id: property.seller_id,
+                    property_id: property.property_id,
+                    rating: newReview.rating,
+                    comment: newReview.comment
+                },
+                { withCredentials: true }
+            );
+            
+            // Reset and reload reviews
+            setNewReview({ rating: 5, comment: '' });
+            fetchReviews(1, false);
+            // Refresh property to update seller card stats
+            axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${idOrSlug}`, { withCredentials: true })
+                .then(r => setProperty(r.data))
+                .catch(() => {});
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to submit review');
+        } finally {
+            setSubmittingReview(false);
+        }
+    };
+
+    const deleteReview = async (reviewId) => {
+        if (!window.confirm('Are you sure you want to delete this review?')) return;
+        try {
+            await axios.delete(
+                `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/reviews/${reviewId}`,
+                { withCredentials: true }
+            );
+            fetchReviews(1, false);
+            // Refresh property to update seller card stats
+            axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${idOrSlug}`, { withCredentials: true })
+                .then(r => setProperty(r.data))
+                .catch(() => {});
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to delete review');
+        }
+    };
+
+    const StarRatingInput = ({ value, onChange }) => {
+        return (
+            <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                        type="button"
+                        key={star}
+                        onClick={() => onChange(star)}
+                        className={`text-xl transition-all ${
+                            star <= value ? 'text-amber-500 scale-110' : 'text-slate-200 hover:text-amber-400'
+                        }`}
+                    >
+                        ★
+                    </button>
+                ))}
+            </div>
+        );
+    };
+
+    useEffect(() => {
+        if (property?.seller_id) {
+            fetchReviews(1, false);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [property?.seller_id]);
+
     useEffect(() => {
         setLoading(true);
-        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${id}`, { withCredentials: true })
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${idOrSlug}`, { withCredentials: true })
             .then(r => { setProperty(r.data); setLoading(false); })
             .catch(() => { setError('Property not found or not approved.'); setLoading(false); });
         // Fetch similar listings
-        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${id}/similar`)
+        axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${idOrSlug}/similar`)
             .then(r => setSimilar(r.data || []))
             .catch(() => {});
-    }, [id]);
+    }, [idOrSlug]);
+
+    useEffect(() => {
+        if (property) {
+            let canonicalLink = document.querySelector("link[rel='canonical']");
+            if (!canonicalLink) {
+                canonicalLink = document.createElement("link");
+                canonicalLink.setAttribute("rel", "canonical");
+                document.head.appendChild(canonicalLink);
+            }
+            canonicalLink.setAttribute("href", `${window.location.origin}/properties/${property.slug || property.property_id}`);
+        }
+        return () => {
+            const canonicalLink = document.querySelector("link[rel='canonical']");
+            if (canonicalLink) {
+                canonicalLink.setAttribute("href", window.location.origin);
+            }
+        };
+    }, [property]);
 
     const handleShare = () => {
         navigator.clipboard.writeText(window.location.href).then(() => {
@@ -59,7 +176,7 @@ export default function PropertyDetail() {
         e.preventDefault();
         try {
             await axios.post(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/reports`, {
-                property_id: id, ...reportData
+                property_id: property?.property_id, ...reportData
             }, { withCredentials: true });
             setReportSent(true);
         } catch (err) {
@@ -126,10 +243,10 @@ export default function PropertyDetail() {
                             <Printer className="w-5 h-5 text-slate-600" />
                         </button>
                         <button
-                            onClick={() => { if(!isAuthenticated) navigate('/login'); else toggleFavorite(id); }}
-                            className={`p-2 rounded-full transition-all ${isFavorited(id) ? 'bg-red-500 text-white' : 'hover:bg-slate-100 text-slate-600'}`}
+                            onClick={() => { if(!isAuthenticated) navigate('/login'); else toggleFavorite(property?.property_id); }}
+                            className={`p-2 rounded-full transition-all ${isFavorited(property?.property_id) ? 'bg-red-500 text-white' : 'hover:bg-slate-100 text-slate-600'}`}
                         >
-                            <Heart className={`w-5 h-5 ${isFavorited(id) ? 'fill-current' : ''}`} />
+                            <Heart className={`w-5 h-5 ${isFavorited(property?.property_id) ? 'fill-current' : ''}`} />
                         </button>
                     </div>
                 </div>
@@ -205,7 +322,7 @@ export default function PropertyDetail() {
 
                         {/* Header */}
                         <div>
-                            <div className="flex items-start justify-between gap-4 flex-wrap">
+                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                                 <div>
                                     <div className="flex items-center gap-3 flex-wrap mb-1">
                                         <h1 className="text-3xl font-bold text-slate-900">{property.title}</h1>
@@ -221,16 +338,16 @@ export default function PropertyDetail() {
                                             </span>
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-2 text-slate-500">
-                                        <MapPin className="w-4 h-4 text-brand-600 flex-shrink-0" />
+                                    <div className="flex items-start gap-2 text-slate-500">
+                                        <MapPin className="w-4 h-4 text-brand-600 flex-shrink-0 mt-0.5" />
                                         <span className="text-sm">{fullAddress}</span>
                                     </div>
                                 </div>
-                                <div className="text-right flex-shrink-0">
+                                <div className="text-left md:text-right flex-shrink-0">
                                     <p className="text-3xl font-bold text-brand-600">{formatPrice(property.price_usd)}</p>
                                     {property.listing_type === 'rent' && <p className="text-sm text-slate-400">{t('detail.perMonth')}</p>}
                                     {property.expires_at && (
-                                        <p className="text-xs text-slate-400 mt-1 flex items-center justify-end gap-1">
+                                        <p className="text-xs text-slate-400 mt-1 flex items-center justify-start md:justify-end gap-1">
                                             <Calendar className="w-3 h-3" />
                                             {t('manage.expiry')} {new Date(property.expires_at).toLocaleDateString()}
                                         </p>
@@ -370,6 +487,129 @@ export default function PropertyDetail() {
                             </div>
                         )}
 
+                        {/* ── AGENT REVIEWS ── */}
+                        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mt-8 animate-in fade-in duration-300">
+                            <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                <User className="w-5 h-5 text-brand-600" />
+                                {t('reviews.title') || 'Agent Reviews & Ratings'}
+                            </h2>
+
+                            {/* Reviews Stats Summary */}
+                            <div className="flex items-center gap-6 mb-8 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                                <div className="text-center flex-shrink-0 min-w-[70px]">
+                                    <div className="text-4xl font-black text-slate-900 whitespace-nowrap">{reviewsStats.avgRating}</div>
+                                    <div className="flex justify-center text-amber-500 text-sm my-1">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <span key={i}>{i < Math.round(parseFloat(reviewsStats.avgRating)) ? '★' : '☆'}</span>
+                                        ))}
+                                    </div>
+                                    <div className="text-xs text-slate-400 font-medium whitespace-nowrap">{reviewsStats.totalReviews} {reviewsStats.totalReviews === 1 ? 'review' : 'reviews'}</div>
+                                </div>
+                                <div className="w-px h-16 bg-slate-200"></div>
+                                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">
+                                    {t('reviews.summaryHint') || 'Reviews are written by clients who interacted with this agent regarding listings on our marketplace.'}
+                                </p>
+                            </div>
+
+                            {/* Reviews List */}
+                            {reviewsLoading && reviews.length === 0 ? (
+                                <div className="space-y-4 animate-pulse">
+                                    {[1, 2].map(i => (
+                                        <div key={i} className="h-24 bg-slate-100 rounded-xl" />
+                                    ))}
+                                </div>
+                            ) : reviews.length === 0 ? (
+                                <div className="text-center py-8 text-slate-400 text-sm bg-slate-50/50 rounded-xl border border-dashed">
+                                    {t('reviews.empty') || 'No reviews yet for this agent.'}
+                                </div>
+                            ) : (
+                                <div className="space-y-5 mb-6">
+                                    {reviews.map(rev => (
+                                        <div key={rev.review_id} className="border-b border-slate-100 last:border-0 pb-5 last:pb-0 flex items-start gap-4">
+                                            <div className="w-10 h-10 rounded-full bg-brand-600/10 flex items-center justify-center text-brand-600 font-bold text-sm overflow-hidden flex-shrink-0">
+                                                {rev.reviewer_avatar ? (
+                                                    <img src={rev.reviewer_avatar.startsWith('http') ? rev.reviewer_avatar : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${rev.reviewer_avatar}`} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    rev.reviewer_name?.[0]?.toUpperCase() || 'U'
+                                                )}
+                                            </div>
+                                            <div className="flex-grow min-w-0">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div>
+                                                        <h4 className="font-bold text-slate-800 text-sm truncate">{rev.reviewer_name || 'Anonymous'}</h4>
+                                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                                            <div className="text-amber-500 text-xs font-black">
+                                                                {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}
+                                                            </div>
+                                                            <span className="text-[10px] text-slate-400">{new Date(rev.created_at).toLocaleDateString()}</span>
+                                                        </div>
+                                                    </div>
+                                                    {user && (Number(user.id) === Number(rev.reviewer_id) || user.role === 'admin') && (
+                                                        <button
+                                                            onClick={() => deleteReview(rev.review_id)}
+                                                            className="text-xs text-red-400 hover:text-red-600 font-semibold cursor-pointer transition-colors"
+                                                        >
+                                                            {t('common.delete') || 'Delete'}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                {rev.comment && <p className="text-slate-600 text-sm mt-2 leading-relaxed whitespace-pre-line">{rev.comment}</p>}
+                                                {rev.property_title && (
+                                                    <p className="text-[11px] text-slate-400 mt-1.5 italic">
+                                                        {t('reviews.listingRef') || 'Listing:'} "{rev.property_title}"
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {/* Load More Button */}
+                                    {reviewsPage < reviewsTotalPages && (
+                                        <button
+                                            type="button"
+                                            onClick={() => fetchReviews(reviewsPage + 1, true)}
+                                            className="w-full py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-sm font-semibold hover:bg-slate-100 transition-colors"
+                                        >
+                                            {reviewsLoading ? 'Loading...' : t('reviews.loadMore') || 'Load More Reviews'}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Write Review Form */}
+                            {user && Number(user.id) !== Number(property.seller_id) && (
+                                <form onSubmit={submitReview} className="mt-8 pt-6 border-t border-slate-100 space-y-4">
+                                    <h3 className="font-bold text-slate-900 text-sm">{t('reviews.writeTitle') || 'Write a Review for this Agent'}</h3>
+                                    
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xs text-slate-400 font-medium">{t('reviews.yourRating') || 'Your Rating:'}</span>
+                                        <StarRatingInput
+                                            value={newReview.rating}
+                                            onChange={val => setNewReview(prev => ({ ...prev, rating: val }))}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <textarea
+                                            rows={3}
+                                            value={newReview.comment}
+                                            onChange={e => setNewReview(prev => ({ ...prev, comment: e.target.value }))}
+                                            placeholder={t('reviews.commentPlaceholder') || 'Describe your experience working with this agent... (optional)'}
+                                            className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-brand-600 resize-none"
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={submittingReview}
+                                        className="px-5 py-2.5 bg-brand-600 text-white font-semibold text-xs rounded-xl hover:bg-brand-700 disabled:bg-slate-300 transition-colors shadow-sm"
+                                    >
+                                        {submittingReview ? 'Submitting...' : t('reviews.btnSubmit') || 'Submit Review'}
+                                    </button>
+                                </form>
+                            )}
+                        </div>
+
                         {/* ── SIMILAR LISTINGS ── */}
                         {similar.length > 0 && (
                             <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 border border-gray-100 shadow-sm mt-10 relative overflow-hidden">
@@ -391,7 +631,7 @@ export default function PropertyDetail() {
                                         return (
                                             <Link
                                                 key={p.property_id}
-                                                to={`/properties/${p.property_id}`}
+                                                to={p.slug ? `/properties/${p.slug}` : `/properties/${p.property_id}`}
                                                 className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-md hover:shadow-xl hover:border-brand-600/30 transition-all duration-300 flex flex-col"
                                             >
                                                 <div className="h-44 overflow-hidden relative">
@@ -436,7 +676,7 @@ export default function PropertyDetail() {
                             ) : (
                                 <Link
                                     to="/login"
-                                    state={{ from: `/properties/${id}` }}
+                                    state={{ from: `/properties/${property?.slug || property?.property_id}` }}
                                     className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-brand-600 transition-colors font-medium"
                                 >
                                     <Flag className="w-4 h-4" /> {t('detail.loginToReport')}
@@ -473,9 +713,25 @@ export default function PropertyDetail() {
                                     </div>
                                     <div>
                                         <p className="font-bold text-slate-800">{property.seller_name}</p>
-                                        <p className="text-xs text-slate-400 flex items-center gap-1">
-                                            <CheckCircle className="w-3 h-3 text-emerald-500" /> {t('detail.verifiedMember')}
-                                        </p>
+                                        <div className="flex flex-col gap-0.5 mt-0.5">
+                                            <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                                                <CheckCircle className="w-3 h-3 text-emerald-500" /> {t('detail.verifiedMember')}
+                                            </p>
+                                            <div className="flex items-center gap-1 text-amber-500 font-bold text-xs">
+                                                <span>★</span>
+                                                <span className="text-slate-700 text-sm">
+                                                    {property.seller_avg_rating > 0 
+                                                        ? parseFloat(property.seller_avg_rating).toFixed(1) 
+                                                        : t('common.new') || 'New'
+                                                    }
+                                                </span>
+                                                {property.seller_review_count > 0 && (
+                                                    <span className="text-slate-400 font-medium text-[10px]">
+                                                        ({property.seller_review_count})
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -523,7 +779,7 @@ export default function PropertyDetail() {
                                 ) : (
                                     <Link
                                         to="/login"
-                                        state={{ from: `/properties/${id}` }}
+                                        state={{ from: `/properties/${property?.slug || property?.property_id}` }}
                                         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm transition-colors shadow-md"
                                     >
                                         <Mail className="w-4 h-4" /> {t('detail.loginToSendMessage')}

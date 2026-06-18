@@ -92,7 +92,7 @@ export default function MapView({ properties = [], center, zoom = 12, height = '
                                 <p className="text-blue-600 font-bold text-base mb-2">{formatPrice(prop.price_usd)}</p>
                                 {!singlePin && (
                                     <Link
-                                        to={`/properties/${prop.property_id}`}
+                                        to={prop.slug ? `/properties/${prop.slug}` : `/properties/${prop.property_id}`}
                                         className="block text-center text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-colors"
                                     >
                                         View Listing →

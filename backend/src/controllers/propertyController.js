@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const slugify = require('../utils/slugify');
 
 exports.createProperty = async (req, res) => {
     try {
@@ -31,15 +32,31 @@ exports.createProperty = async (req, res) => {
         }
 
         const { latitude, longitude } = req.body;
+
+        // Generate unique slug
+        let baseSlug = slugify(title) || 'property';
+        let slug = baseSlug;
+        let counter = 1;
+        let isUnique = false;
+        while (!isUnique) {
+            const [existing] = await pool.query('SELECT property_id FROM properties WHERE slug = ?', [slug]);
+            if (existing.length === 0) {
+                isUnique = true;
+            } else {
+                slug = `${baseSlug}-${counter}`;
+                counter++;
+            }
+        }
+
         const [result] = await pool.query(
             `INSERT INTO properties
-            (owner_id, type_id, district_id, title, description, listing_type, address,
+            (owner_id, type_id, district_id, title, slug, description, listing_type, address,
              price_usd, area_m2, bedrooms, bathrooms, video_url, direction, latitude, longitude,
              mod_status, listing_status, expires_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'active', DATE_ADD(NOW(), INTERVAL 7 DAY))`,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'active', DATE_ADD(NOW(), INTERVAL 7 DAY))`,
             [
                 owner_id, type_id, district_id || null,
-                title, description, valid_listing_type,
+                title, slug, description, valid_listing_type,
                 full_address, price_usd,
                 area_sqm || null, bedrooms || null, bathrooms || null,
                 final_vid, direction || null, latitude || null, longitude || null
@@ -118,7 +135,27 @@ exports.updateProperty = async (req, res) => {
 
         const fields = [];
         const values = [];
-        if (title !== undefined)        { fields.push('title = ?');         values.push(title); }
+        if (title !== undefined) {
+            if (title !== existing[0].title || !existing[0].slug) {
+                let baseSlug = slugify(title) || 'property';
+                let slug = baseSlug;
+                let counter = 1;
+                let isUnique = false;
+                while (!isUnique) {
+                    const [existingSlug] = await pool.query('SELECT property_id FROM properties WHERE slug = ? AND property_id != ?', [slug, property_id]);
+                    if (existingSlug.length === 0) {
+                        isUnique = true;
+                    } else {
+                        slug = `${baseSlug}-${counter}`;
+                        counter++;
+                    }
+                }
+                fields.push('slug = ?');
+                values.push(slug);
+            }
+            fields.push('title = ?');
+            values.push(title);
+        }
         if (description !== undefined)  { fields.push('description = ?');   values.push(description); }
         if (price_usd !== undefined)    {
             // Record price history if price changed
@@ -435,6 +472,8 @@ exports.getSearchMetadata = async (req, res) => {
 exports.getPropertyById = async (req, res) => {
     try {
         const { id } = req.params;
+        const isNumeric = /^\d+$/.test(id);
+        const queryField = isNumeric ? 'p.property_id' : 'p.slug';
 
         // Main property data with joins
         const [rows] = await pool.query(`
@@ -443,23 +482,31 @@ exports.getPropertyById = async (req, res) => {
                    d.name as district_name, d.zipcode,
                    c.name as city_name, c.country,
                    u.user_id as seller_id, u.full_name as seller_name,
-                   u.email as seller_email, u.phone as seller_phone, u.avatar_url as seller_avatar
+                   u.email as seller_email, u.phone as seller_phone, u.avatar_url as seller_avatar,
+                   COALESCE(rev.avg_rating, 0) AS seller_avg_rating,
+                   COALESCE(rev.review_count, 0) AS seller_review_count
             FROM properties p
             LEFT JOIN property_types pt ON p.type_id = pt.type_id
             LEFT JOIN districts d ON p.district_id = d.district_id
             LEFT JOIN cities c ON d.city_id = c.city_id
             JOIN users u ON p.owner_id = u.user_id
-            WHERE p.property_id = ? AND p.mod_status = 'approved'
+            LEFT JOIN (
+                SELECT reviewee_id, AVG(rating) AS avg_rating, COUNT(review_id) AS review_count
+                FROM reviews
+                GROUP BY reviewee_id
+            ) rev ON u.user_id = rev.reviewee_id
+            WHERE ${queryField} = ? AND p.mod_status = 'approved'
         `, [id]);
 
         if (rows.length === 0) return res.status(404).json({ error: 'Property not found' });
 
         const property = rows[0];
+        const propId = property.property_id;
 
         // All images
         const [images] = await pool.query(
             'SELECT image_url, sort_order FROM property_images WHERE property_id = ? ORDER BY sort_order ASC',
-            [id]
+            [propId]
         );
 
         // Features/tags
@@ -468,12 +515,12 @@ exports.getPropertyById = async (req, res) => {
             FROM property_features pf
             JOIN features f ON pf.feature_id = f.feature_id
             WHERE pf.property_id = ?
-        `, [id]);
+        `, [propId]);
 
         // Price history (last 10 changes)
         const [priceHistory] = await pool.query(
             'SELECT old_price_usd, new_price_usd, changed_at FROM price_history WHERE property_id = ? ORDER BY changed_at DESC LIMIT 10',
-            [id]
+            [propId]
         );
 
         // Track recently viewed (fire-and-forget, only if auth token present)
@@ -485,17 +532,17 @@ exports.getPropertyById = async (req, res) => {
                 const decoded = jwt.verify(authHeader, process.env.JWT_SECRET);
                 pool.query(
                     'INSERT INTO recently_viewed (user_id, property_id, viewed_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE viewed_at = NOW()',
-                    [decoded.userId, id]
+                    [decoded.userId, propId]
                 ).catch(() => {});
             } catch (_) {}
         }
 
         // Track view count from recently_viewed
         const [[{ view_count }]] = await pool.query(
-            'SELECT COUNT(*) as view_count FROM recently_viewed WHERE property_id = ?', [id]
+            'SELECT COUNT(*) as view_count FROM recently_viewed WHERE property_id = ?', [propId]
         );
         const [[{ favorites_count }]] = await pool.query(
-            'SELECT COUNT(*) as favorites_count FROM favorites WHERE property_id = ?', [id]
+            'SELECT COUNT(*) as favorites_count FROM favorites WHERE property_id = ?', [propId]
         );
 
         res.json({ ...property, images, features, priceHistory, view_count, favorites_count });
@@ -509,16 +556,18 @@ exports.getPropertyById = async (req, res) => {
 exports.getSimilarProperties = async (req, res) => {
     try {
         const { id } = req.params;
+        const isNumeric = /^\d+$/.test(id);
+        const queryField = isNumeric ? 'p.property_id' : 'p.slug';
         const [[base]] = await pool.query(
-            `SELECT p.type_id, d.city_id 
+            `SELECT p.property_id, p.type_id, d.city_id 
              FROM properties p 
              LEFT JOIN districts d ON p.district_id = d.district_id 
-             WHERE p.property_id = ?`, [id]
+             WHERE ${queryField} = ?`, [id]
         );
         if (!base) return res.json([]);
 
         const [similar] = await pool.query(`
-            SELECT p.property_id, p.title, p.price_usd, p.listing_type, p.bedrooms, p.area_m2,
+            SELECT p.property_id, p.title, p.slug, p.price_usd, p.listing_type, p.bedrooms, p.area_m2,
                    pt.name as type_name, d.name as district_name, c.name as city_name,
                    (SELECT image_url FROM property_images pi2
                     WHERE pi2.property_id = p.property_id AND pi2.sort_order = 1 LIMIT 1) AS primary_image
@@ -535,7 +584,7 @@ exports.getSimilarProperties = async (req, res) => {
               p.vip_tier = 'silver' DESC, 
               p.created_at DESC
             LIMIT 4
-        `, [id, base.type_id, base.city_id, base.type_id, base.city_id]);
+        `, [base.property_id, base.type_id, base.city_id, base.type_id, base.city_id]);
 
         res.json(similar);
     } catch (error) {

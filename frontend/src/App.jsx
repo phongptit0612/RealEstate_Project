@@ -73,7 +73,7 @@ function App() {
         {/* Public */}
         <Route path="/" element={<Home />} />
         <Route path="/properties" element={<Properties />} />
-        <Route path="/properties/:id" element={<PropertyDetail />} />
+        <Route path="/properties/:idOrSlug" element={<PropertyDetail />} />
         <Route path="/agencies" element={<Agencies />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
