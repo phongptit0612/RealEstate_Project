@@ -370,7 +370,7 @@ CREATE TABLE `exchange_rates` (
 -- SEED DATA
 -- ==========================================
 
--- Admin user  (password: admin123)
+-- Admin user 
 INSERT INTO `users` (`user_id`, `email`, `password_hash`, `full_name`, `phone`, `role`, `is_verified`, `is_active`) VALUES
 (1, 'admin@luxestates.com', '$2a$12$VEPZwKUuc5CRAyNCVl5cHe/T/SSxU6mDcDKHinmNqWMmTe.FaMJIq', 'Super Administrator', '0999999999', 'admin', 1, 1);
 

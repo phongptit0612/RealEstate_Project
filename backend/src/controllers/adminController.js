@@ -304,8 +304,12 @@ exports.updateReport = async (req, res) => {
 // ─── CATEGORY MANAGEMENT ─────────────────────────────────────
 // Cities
 exports.getCities = async (req, res) => {
-    const [cities] = await pool.query(`SELECT * FROM cities ORDER BY name`);
-    res.json(cities);
+    try {
+        const [cities] = await pool.query(`SELECT * FROM cities ORDER BY name`);
+        res.json(cities);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
 exports.createCity = async (req, res) => {
     try {
@@ -327,8 +331,12 @@ exports.deleteCity = async (req, res) => {
 
 // Districts
 exports.getDistricts = async (req, res) => {
-    const [districts] = await pool.query(`SELECT d.*, c.name as city_name FROM districts d JOIN cities c ON d.city_id = c.city_id ORDER BY c.name, d.name`);
-    res.json(districts);
+    try {
+        const [districts] = await pool.query(`SELECT d.*, c.name as city_name FROM districts d JOIN cities c ON d.city_id = c.city_id ORDER BY c.name, d.name`);
+        res.json(districts);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
 exports.createDistrict = async (req, res) => {
     try {
@@ -350,8 +358,12 @@ exports.deleteDistrict = async (req, res) => {
 
 // Property Types
 exports.getPropertyTypes = async (req, res) => {
-    const [types] = await pool.query(`SELECT pt.*, parent.name as parent_name FROM property_types pt LEFT JOIN property_types parent ON pt.parent_id = parent.type_id ORDER BY pt.name`);
-    res.json(types);
+    try {
+        const [types] = await pool.query(`SELECT pt.*, parent.name as parent_name FROM property_types pt LEFT JOIN property_types parent ON pt.parent_id = parent.type_id ORDER BY pt.name`);
+        res.json(types);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
 exports.createPropertyType = async (req, res) => {
     try {

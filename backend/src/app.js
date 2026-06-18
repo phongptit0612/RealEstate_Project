@@ -4,34 +4,26 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const { checkOrigin } = require('./config/corsConfig');
 
 const app = express();
 
 // Trust reverse proxy (e.g. Render, Vercel) for accurate rate limiting IP detection
 app.set('trust proxy', 1);
 
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
-    .split(',')
-    .map(url => url.trim().replace(/\/$/, ''));
+// ── Security Headers ───────────────────────────────────────────
+app.use(helmet());
 
+// ── CORS ───────────────────────────────────────────────────────
 app.use(cors({
-    origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps, curl, postman)
-        if (!origin) return callback(null, true);
-
-        const isAllowed = allowedOrigins.includes(origin) ||
-            origin.startsWith('http://localhost:') ||
-            origin.endsWith('.vercel.app');
-
-        if (isAllowed) {
-            callback(null, true);
-        } else {
-            console.warn(`[CORS Blocked] Request from origin '${origin}' blocked. Allowed origins:`, allowedOrigins);
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: checkOrigin,
     credentials: true,
 }));
+
+// ── HTTP Request Logging ───────────────────────────────────────
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // ── Compression (gzip) ─────────────────────────────────────────
 app.use(compression());

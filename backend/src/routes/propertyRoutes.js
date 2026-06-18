@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const propertyController = require('../controllers/propertyController');
 const { protect } = require('../middlewares/authMiddleware');
+const { validate, schemas } = require('../middlewares/validators');
 
-// ?
 router.get('/search', propertyController.searchProperties);
 router.get('/metadata', propertyController.getSearchMetadata);
 router.get('/recently-viewed', protect, propertyController.getRecentlyViewed);
-router.post('/', protect, propertyController.createProperty);
+router.post('/', protect, validate(schemas.createProperty), propertyController.createProperty);
 router.get('/me', protect, propertyController.getMyProperties);
 router.patch('/:property_id/status', protect, propertyController.updatePropertyStatus);
 router.patch('/:property_id/renew', protect, propertyController.renewListing);
