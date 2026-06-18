@@ -46,7 +46,9 @@ exports.register = async (req, res) => {
 
         await pool.query('INSERT INTO user_preferences (user_id) VALUES (?)', [result.insertId]);
 
-        await emailService.sendOTP(email, otpCode, 'verify');
+        emailService.sendOTP(email, otpCode, 'verify').catch(err => {
+            console.error('[emailService] Background registration OTP send failed:', err);
+        });
 
         res.status(201).json({ message: 'User registered. Please check your email for the OTP.' });
     } catch (error) {
@@ -223,7 +225,9 @@ exports.forgotPassword = async (req, res) => {
             [userId, otpCode, 'password_reset', expiresAt]
         );
 
-        await emailService.sendOTP(email, otpCode, 'reset');
+        emailService.sendOTP(email, otpCode, 'reset').catch(err => {
+            console.error('[emailService] Background reset OTP send failed:', err);
+        });
 
         res.json({ message: 'If that email exists, a reset code has been sent.' });
     } catch (error) {
