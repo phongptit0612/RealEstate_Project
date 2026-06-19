@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { CheckCircle, XCircle, Trash2, Pencil, Save, X, Loader2, Eye, MapPin, Bed, Bath, Square, Compass, Video, Hash } from 'lucide-react';
+import useCurrencyStore from '../../store/currencyStore';
 
 const STATUS_TABS = ['all', 'pending', 'approved', 'rejected'];
 const API = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api`;
 
 export default function AdminListings() {
+    const { formatPrice, preferredCurrency } = useCurrencyStore();
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState('pending');
@@ -14,6 +16,7 @@ export default function AdminListings() {
     const [rejectReason, setRejectReason] = useState('');
     const [editModal, setEditModal] = useState(null);     // full listing object
     const [editForm, setEditForm] = useState({});
+    const [localPriceInput, setLocalPriceInput] = useState('');
     const [editSaving, setEditSaving] = useState(false);
     const [editError, setEditError] = useState('');
     
@@ -55,21 +58,45 @@ export default function AdminListings() {
 
     // ── Edit handlers ────────────────────────────────────────
     const openEdit = (listing) => {
+        const priceDb = listing.price_usd || 0;
+        const uiPrice = preferredCurrency === 'USD' ? (priceDb / 25400) : priceDb;
         setEditForm({
             title: listing.title,
             description: listing.description || '',
-            price_usd: listing.price_usd,
+            price_usd: priceDb,
             listing_type: listing.listing_type || 'sale',
         });
+        setLocalPriceInput(preferredCurrency === 'VND' 
+            ? uiPrice.toLocaleString('vi-VN') 
+            : uiPrice.toLocaleString('en-US'));
         setEditError('');
         setEditModal(listing);
+    };
+
+    const handlePriceChange = (e) => {
+        const rawValue = e.target.value.replace(/\D/g, '');
+        if (!rawValue) {
+            setLocalPriceInput('');
+            setEditForm(f => ({ ...f, price_usd: '' }));
+            return;
+        }
+        const num = parseInt(rawValue, 10);
+        const formatted = preferredCurrency === 'VND' 
+            ? num.toLocaleString('vi-VN') 
+            : num.toLocaleString('en-US');
+        setLocalPriceInput(formatted);
+        const rate = preferredCurrency === 'USD' ? 25400 : 1;
+        setEditForm(f => ({ ...f, price_usd: num * rate }));
     };
 
     const saveEdit = async () => {
         setEditSaving(true);
         setEditError('');
         try {
-            await axios.patch(`${API}/admin/listings/${editModal.property_id}`, editForm, { withCredentials: true });
+            await axios.patch(`${API}/admin/listings/${editModal.property_id}`, {
+                ...editForm,
+                price_usd: parseFloat(editForm.price_usd)
+            }, { withCredentials: true });
             setEditModal(null);
             fetchListings(tab);
         } catch (err) {
@@ -167,7 +194,7 @@ export default function AdminListings() {
                                         <p className="text-xs text-slate-400">{l.owner_email}</p>
                                     </td>
                                     <td className="px-4 py-4 font-semibold text-slate-800">
-                                        ${Number(l.price_usd).toLocaleString()}
+                                        {formatPrice(l.price_usd)}
                                     </td>
                                     <td className="px-4 py-4 text-slate-600">{l.type_name}</td>
                                     <td className="px-4 py-4">{statusBadge(l.mod_status)}</td>
@@ -242,11 +269,11 @@ export default function AdminListings() {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Price (USD)</label>
+                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Price ({preferredCurrency})</label>
                                     <input
-                                        type="number"
-                                        value={editForm.price_usd}
-                                        onChange={e => setEditForm(f => ({ ...f, price_usd: e.target.value }))}
+                                        type="text"
+                                        value={localPriceInput}
+                                        onChange={handlePriceChange}
                                         className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-brand-500"
                                     />
                                 </div>
@@ -353,7 +380,7 @@ export default function AdminListings() {
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                     <div className="bg-surface p-4 rounded-xl border border-gray-100">
                                         <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Price</div>
-                                        <div className="text-lg font-bold text-brand-600">${Number(viewData.price_usd).toLocaleString()}</div>
+                                        <div className="text-lg font-bold text-brand-600">{formatPrice(viewData.price_usd)}</div>
                                     </div>
                                     <div className="bg-surface p-4 rounded-xl border border-gray-100">
                                         <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Type</div>
