@@ -261,22 +261,22 @@ export default function EditListing() {
             <form onSubmit={handleSubmit} className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6 space-y-5">
                 {/* Title */}
                 <div>
-                    <label className={labelClass}>Listing Title *</label>
+                    <label className={labelClass}>{t('create.titleLabel')}</label>
                     <input type="text" required value={form.title} onChange={set('title')} placeholder="e.g. Modern Villa in District 2" className={inputClass} />
                 </div>
 
                 {/* Description */}
                 <div>
-                    <label className={labelClass}>Description</label>
+                    <label className={labelClass}>{t('create.descLabel')}</label>
                     <textarea rows={4} value={form.description} onChange={set('description')} placeholder="Describe the property..." className={`${inputClass} resize-none`} />
                 </div>
 
                 {/* Listing Type + Price */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className={labelClass}>Listing For</label>
+                        <label className={labelClass}>{t('create.listingFor')}</label>
                         <div className="flex gap-2">
-                            {[['sale', '🏷️ For Sale'], ['rent', '🔑 For Rent']].map(([val, label]) => (
+                            {[['sale', `🏷️ ${t('create.forSale')}`], ['rent', `🔑 ${t('create.forRent')}`]].map(([val, label]) => (
                                 <button
                                     key={val}
                                     type="button"
@@ -291,7 +291,7 @@ export default function EditListing() {
                         </div>
                     </div>
                     <div>
-                        <label className={labelClass}>{form.listing_type === 'rent' ? 'Rent Price (USD) / month' : 'Sale Price (USD)'} *</label>
+                        <label className={labelClass}>{form.listing_type === 'rent' ? t('create.rentPrice') : t('create.salePrice')} *</label>
                         <input type="number" required min="0" step="0.01" value={form.price_usd} onChange={set('price_usd')} placeholder="250000" className={inputClass} />
                     </div>
                 </div>
@@ -299,29 +299,29 @@ export default function EditListing() {
                 {/* Area, Beds, Baths, Direction */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div>
-                        <label className={labelClass}>Area (m²)</label>
+                        <label className={labelClass}>{t('create.totalArea')} (m²)</label>
                         <input type="number" min="0" value={form.area_sqm} onChange={set('area_sqm')} placeholder="120" className={inputClass} />
                     </div>
                     <div>
-                        <label className={labelClass}>Bedrooms</label>
+                        <label className={labelClass}>{t('create.bedrooms')}</label>
                         <input type="number" min="0" max="20" value={form.bedrooms} onChange={set('bedrooms')} placeholder="3" className={inputClass} />
                     </div>
                     <div>
-                        <label className={labelClass}>Bathrooms</label>
+                        <label className={labelClass}>{t('create.bathrooms')}</label>
                         <input type="number" min="0" max="20" value={form.bathrooms} onChange={set('bathrooms')} placeholder="2" className={inputClass} />
                     </div>
                     <div>
-                        <label className={labelClass + ' flex items-center gap-1'}><Compass className="w-3 h-3" />Direction</label>
+                        <label className={labelClass + ' flex items-center gap-1'}><Compass className="w-3 h-3" />{t('create.facingDir')}</label>
                         <select value={form.direction} onChange={set('direction')} className={inputClass + ' cursor-pointer'}>
-                            <option value="">Any</option>
-                            <option value="north">North</option>
-                            <option value="south">South</option>
-                            <option value="east">East</option>
-                            <option value="west">West</option>
-                            <option value="northeast">NE</option>
-                            <option value="northwest">NW</option>
-                            <option value="southeast">SE</option>
-                            <option value="southwest">SW</option>
+                            <option value="">{t('create.notSpecified')}</option>
+                            <option value="north">{t('create.dirNorth')}</option>
+                            <option value="south">{t('create.dirSouth')}</option>
+                            <option value="east">{t('create.dirEast')}</option>
+                            <option value="west">{t('create.dirWest')}</option>
+                            <option value="northeast">{t('create.dirNE')}</option>
+                            <option value="northwest">{t('create.dirNW')}</option>
+                            <option value="southeast">{t('create.dirSE')}</option>
+                            <option value="southwest">{t('create.dirSW')}</option>
                         </select>
                     </div>
                 </div>
@@ -329,16 +329,16 @@ export default function EditListing() {
                 {/* City + District (cascading dropdowns) */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className={labelClass + ' flex items-center gap-1'}><MapPin className="w-3 h-3 text-brand-400" />City</label>
+                        <label className={labelClass + ' flex items-center gap-1'}><MapPin className="w-3 h-3 text-brand-400" />{t('create.city')}</label>
                         <select value={form.city_id} onChange={e => { setVal('city_id', e.target.value); setVal('district_id', ''); }} className={inputClass + ' cursor-pointer'}>
-                            <option value="">Select city...</option>
+                            <option value="">{t('create.selectCity')}</option>
                             {metadata.cities.map(c => <option key={c.city_id} value={c.city_id}>{c.name}</option>)}
                         </select>
                     </div>
                     <div>
-                        <label className={labelClass + ' flex items-center gap-1'}><MapPin className="w-3 h-3 text-slate-500" />District</label>
+                        <label className={labelClass + ' flex items-center gap-1'}><MapPin className="w-3 h-3 text-slate-500" />{t('create.district')}</label>
                         <select value={form.district_id} onChange={set('district_id')} disabled={!form.city_id} className={inputClass + ' cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed'}>
-                            <option value="">{form.city_id ? 'Select district...' : 'Select city first'}</option>
+                            <option value="">{form.city_id ? t('create.selectDistrict') : t('create.selectCityFirst')}</option>
                             {activeDistricts.map(d => <option key={d.district_id} value={d.district_id}>{d.name}</option>)}
                         </select>
                     </div>
@@ -346,19 +346,19 @@ export default function EditListing() {
 
                 {/* Street Address */}
                 <div>
-                    <label className={labelClass}>Street Address</label>
-                    <input type="text" value={form.address} onChange={set('address')} placeholder="Auto-filled from map, or type manually" className={inputClass} />
+                    <label className={labelClass}>{t('create.streetAddress')}</label>
+                    <input type="text" value={form.address} onChange={set('address')} placeholder={t('create.autoFillMap')} className={inputClass} />
                 </div>
 
                 {/* Video URL */}
                 <div>
-                    <label className={labelClass}>Video URL <span className="normal-case font-normal text-slate-600">(YouTube, optional)</span></label>
+                    <label className={labelClass}>{t('create.videoUrl')}</label>
                     <input type="url" value={form.video_url} onChange={set('video_url')} placeholder="https://youtube.com/..." className={inputClass} />
                 </div>
 
                 {/* Map Picker */}
                 <div>
-                    <label className={labelClass}><MapPin className="inline w-4 h-4 mr-1 text-[#4d88ff]" />Pin Location on Map</label>
+                    <label className={labelClass}><MapPin className="inline w-4 h-4 mr-1 text-[#4d88ff]" />{t('create.pinLocation')}</label>
                     <LocationPicker
                         initialLat={form.latitude}
                         initialLng={form.longitude}

@@ -25,7 +25,7 @@ const NOTIF_ICONS = {
 
 export default function DashboardLayout() {
     const { logout, user } = useUserStore();
-    const { t } = useLanguageStore();
+    const { t, language, setLanguage } = useLanguageStore();
     const location = useLocation();
     const navigate = useNavigate();
     const [unreadCount, setUnreadCount] = useState(0);
@@ -161,19 +161,45 @@ export default function DashboardLayout() {
                             <div className="text-xs text-slate-500 font-medium capitalize">{user?.role}</div>
                         </div>
                     </div>
+                    {/* Language Switcher */}
+                    <div className="flex gap-2 mb-4 px-2">
+                        <button
+                            type="button"
+                            onClick={() => setLanguage('en')}
+                            className={`flex-1 py-1.5 px-3 rounded-lg border text-xs font-bold transition-all ${
+                                language === 'en'
+                                    ? 'bg-brand-50 border-brand-200 text-brand-700 shadow-sm'
+                                    : 'bg-white border-gray-200 text-slate-500 hover:bg-slate-50'
+                            }`}
+                        >
+                            🇺🇸 English
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setLanguage('vi')}
+                            className={`flex-1 py-1.5 px-3 rounded-lg border text-xs font-bold transition-all ${
+                                language === 'vi'
+                                    ? 'bg-brand-50 border-brand-200 text-brand-700 shadow-sm'
+                                    : 'bg-white border-gray-200 text-slate-500 hover:bg-slate-50'
+                            }`}
+                        >
+                            🇻🇳 Tiếng Việt
+                        </button>
+                    </div>
+
                     <Link
                         to="/"
                         className="flex items-center gap-3 px-4 py-2 w-full text-left text-slate-600 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all font-medium mb-1"
                     >
                         <ArrowLeft className="w-5 h-5" />
-                        Back to Main Site
+                        {t('dashboard.backToMain')}
                     </Link>
                     <button
                         onClick={handleLogout}
                         className="flex items-center gap-3 px-4 py-2 w-full text-left text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all font-medium"
                     >
                         <LogOut className="w-5 h-5" />
-                        Logout
+                        {t('dashboard.logout')}
                     </button>
                 </div>
             </aside>

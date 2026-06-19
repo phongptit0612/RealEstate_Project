@@ -32,7 +32,7 @@ export default function PropertyCard({ property }) {
             {/* Top Badges */}
             <div className="absolute top-4 left-4 z-10 flex gap-2">
                 <span className="property-badge bg-white/95 backdrop-blur-md border border-gray-200 text-slate-800 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm">
-                    {property.type_name || t('card.estate')}
+                    {t(`propertyTypes.${property.type_name}`) || property.type_name || t('card.estate')}
                 </span>
                 {property.listing_type && (
                     <span className={`property-badge text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-sm ${property.listing_type === 'rent'

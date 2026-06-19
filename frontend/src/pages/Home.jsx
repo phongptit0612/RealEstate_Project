@@ -140,10 +140,10 @@ export default function Home() {
                       className="bg-transparent border-none outline-none text-slate-900 w-full cursor-pointer font-bold min-w-0 text-sm"
                     >
                       <option value="">{t('search.allTypes') || 'All Types'}</option>
-                      <option value="villa">Villa</option>
-                      <option value="apartment">Apartment</option>
-                      <option value="penthouse">Penthouse</option>
-                      <option value="house">House</option>
+                      <option value="villa">{t('propertyTypes.Villa') || 'Villa'}</option>
+                      <option value="apartment">{t('propertyTypes.Apartment') || 'Apartment'}</option>
+                      <option value="penthouse">{t('propertyTypes.Penthouse') || 'Penthouse'}</option>
+                      <option value="house">{t('propertyTypes.House') || 'House'}</option>
                     </select>
                   </div>
                 </div>

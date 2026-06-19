@@ -230,8 +230,10 @@ export default function CreateListing() {
                                 className={inputCls + ' cursor-pointer'}
                             >
                                 <option value="">{t('create.selectType')}</option>
-                                {metadata.types.map(t => (
-                                    <option key={t.type_id} value={t.type_id}>{t.name}</option>
+                                {metadata.types.map(tOption => (
+                                    <option key={tOption.type_id} value={tOption.type_id}>
+                                        {t(`propertyTypes.${tOption.name}`) || tOption.name}
+                                    </option>
                                 ))}
                             </select>
                         </div>
@@ -240,7 +242,7 @@ export default function CreateListing() {
                         {metadata.features.length > 0 && (
                             <div>
                                 <label className={labelCls + ' flex items-center gap-2'}>
-                                    <Tag className="w-4 h-4" /> Amenities & Features
+                                    <Tag className="w-4 h-4" /> {t('create.amenitiesLabel')}
                                 </label>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                     {metadata.features.map(f => {
@@ -259,13 +261,15 @@ export default function CreateListing() {
                                                 <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 text-xs ${selected ? 'bg-brand-600 border-brand-600 text-white' : 'border-gray-300'}`}>
                                                     {selected ? '✓' : ''}
                                                 </span>
-                                                {f.name}
+                                                {t(`features.${f.name}`) || f.name}
                                             </button>
                                         );
                                     })}
                                 </div>
                                 {formData.features.length > 0 && (
-                                    <p className="text-xs text-brand-400 mt-2 font-medium">{formData.features.length} feature{formData.features.length > 1 ? 's' : ''} selected</p>
+                                    <p className="text-xs text-brand-400 mt-2 font-medium">
+                                        {formData.features.length} {formData.features.length > 1 ? t('create.filesReady') : t('create.fileReady')}
+                                    </p>
                                 )}
                             </div>
                         )}
@@ -426,11 +430,11 @@ export default function CreateListing() {
                                 <div className="w-20 h-20 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                     <UploadCloud className="w-10 h-10" />
                                 </div>
-                                <span className="text-slate-900 font-bold text-xl mb-2">Click to select photos</span>
-                                <span className="text-slate-500">Upload up to 10 photos (JPG, PNG)</span>
+                                <span className="text-slate-900 font-bold text-xl mb-2">{t('create.selectPhotos')}</span>
+                                <span className="text-slate-500">{t('create.uploadLimit')}</span>
                                 {images.length > 0 && (
                                     <div className="mt-6 px-6 py-3 bg-ocean-500 text-white rounded-xl font-bold uppercase tracking-wider animate-bounce shadow-[0_0_20px_rgba(73,136,196,0.5)]">
-                                        {images.length} file{images.length > 1 ? 's' : ''} ready to upload
+                                        {images.length} {images.length > 1 ? t('create.filesReady') : t('create.fileReady')}
                                     </div>
                                 )}
                             </label>
@@ -445,7 +449,7 @@ export default function CreateListing() {
                         disabled={step === 1 || step === 4}
                         className="px-8 py-3.5 rounded-xl font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all disabled:opacity-0"
                     >
-                        Back
+                        {t('common.back')}
                     </button>
 
                     {step < 4 ? (
@@ -454,7 +458,7 @@ export default function CreateListing() {
                             onClick={handleNext}
                             className="bg-ocean-500 hover:bg-ocean-400 text-white font-bold uppercase tracking-wider py-3.5 px-10 rounded-xl transition-all shadow-lg hover:shadow-ocean-500/30 disabled:opacity-50 flex items-center gap-2"
                         >
-                            {loading ? 'Creating...' : step === 3 ? 'Create Listing →' : 'Continue →'}
+                            {loading ? t('common.loading') : step === 3 ? `${t('create.createListingBtn')} →` : `${t('create.continue')}`}
                         </button>
                     ) : (
                         <button
@@ -462,7 +466,7 @@ export default function CreateListing() {
                             disabled={loading}
                             className="bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-10 rounded-xl uppercase tracking-wider disabled:opacity-50 transition-all"
                         >
-                            {loading ? 'Uploading...' : images.length > 0 ? `Upload ${images.length} Photo${images.length > 1 ? 's' : ''} & Finish` : 'Skip & Finish'}
+                            {loading ? t('create.uploading') : images.length > 0 ? t('create.uploadFinish').replace('{count}', images.length) : t('create.skipFinish')}
                         </button>
                     )}
                 </div>
