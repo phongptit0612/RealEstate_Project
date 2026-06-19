@@ -144,7 +144,6 @@ export default function ManageListings() {
                         <thead>
                             <tr className="border-b border-gray-100 bg-slate-50 text-slate-500 text-sm tracking-wide">
                                 <th className="p-5 font-medium pl-8">{t('manage.propMatrix')}</th>
-                                <th className="p-5 font-medium">{t('manage.origVal')}</th>
                                 <th className="p-5 font-medium">{t('manage.liveVal')}</th>
                                 <th className="p-5 font-medium">{t('manage.vipStatus')}</th>
                                 <th className="p-5 font-medium">{t('manage.approval')}</th>
@@ -170,9 +169,6 @@ export default function ManageListings() {
                                                 <div className="text-sm text-slate-500 font-medium">{prop.city}</div>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td className="p-5">
-                                        <div className="text-slate-600 font-mono text-sm">${Number(prop.price_usd).toLocaleString()}</div>
                                     </td>
                                     <td className="p-5">
                                         <div className="text-brand-600 font-bold text-lg">
@@ -287,7 +283,7 @@ export default function ManageListings() {
                                 </tr>
                             ))}
                             {properties.length === 0 && (
-                                <tr><td colSpan="8" className="p-12 text-center text-slate-500 font-medium">{t('manage.emptyPortfolio', 'Your private portfolio is currently empty.')}</td></tr>
+                                <tr><td colSpan="7" className="p-12 text-center text-slate-500 font-medium">{t('manage.emptyPortfolio', 'Your private portfolio is currently empty.')}</td></tr>
                             )}
                         </tbody>
                     </table>
