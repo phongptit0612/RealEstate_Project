@@ -139,11 +139,11 @@ export default function Home() {
                       onChange={(e) => setPropertyType(e.target.value)}
                       className="bg-transparent border-none outline-none text-slate-900 w-full cursor-pointer font-bold min-w-0 text-sm"
                     >
-                      <option value="">{t('search.allTypes') || 'All Types'}</option>
-                      <option value="villa">{t('propertyTypes.Villa') || 'Villa'}</option>
-                      <option value="apartment">{t('propertyTypes.Apartment') || 'Apartment'}</option>
-                      <option value="penthouse">{t('propertyTypes.Penthouse') || 'Penthouse'}</option>
-                      <option value="house">{t('propertyTypes.House') || 'House'}</option>
+                      <option value="">Tất cả loại</option>
+                      <option value="villa">Biệt thự</option>
+                      <option value="apartment">Căn hộ</option>
+                      <option value="penthouse">Penthouse</option>
+                      <option value="house">Nhà ở</option>
                     </select>
                   </div>
                 </div>

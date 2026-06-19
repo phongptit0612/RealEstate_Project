@@ -232,7 +232,7 @@ export default function CreateListing() {
                                 <option value="">{t('create.selectType')}</option>
                                 {metadata.types.map(tOption => (
                                     <option key={tOption.type_id} value={tOption.type_id}>
-                                        {t(`propertyTypes.${tOption.name}`) || tOption.name}
+                                        {tOption.name}
                                     </option>
                                 ))}
                             </select>
@@ -261,7 +261,7 @@ export default function CreateListing() {
                                                 <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 text-xs ${selected ? 'bg-brand-600 border-brand-600 text-white' : 'border-gray-300'}`}>
                                                     {selected ? '✓' : ''}
                                                 </span>
-                                                {t(`features.${f.name}`) || f.name}
+                                                {f.name}
                                             </button>
                                         );
                                     })}

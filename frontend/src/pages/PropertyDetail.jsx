@@ -269,7 +269,7 @@ export default function PropertyDetail() {
                     {/* Type + Status badges */}
                     <div className="absolute top-5 left-5 flex gap-2 z-10">
                         <span className="bg-white/95 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
-                            {t(`propertyTypes.${property.type_name}`) || property.type_name || 'Estate'}
+                            {property.type_name || 'Bất động sản'}
                         </span>
                         <span className={`text-xs font-bold px-3 py-1.5 rounded-full shadow-sm ${
                             property.listing_type === 'rent' ? 'bg-violet-100 text-violet-700' : 'bg-emerald-100 text-emerald-700'
@@ -429,7 +429,7 @@ export default function PropertyDetail() {
                                             to={`/properties?features=${f.feature_id}`}
                                             className="bg-brand-600/8 hover:bg-brand-600 hover:text-white text-brand-600 text-sm font-semibold px-4 py-2 rounded-full border border-brand-600/15 transition-colors cursor-pointer"
                                         >
-                                            {t(`features.${f.name}`) || f.name}
+                                            {f.name}
                                         </Link>
                                     ))}
                                 </div>
@@ -654,7 +654,7 @@ export default function PropertyDetail() {
                                                     <p className="text-brand-600 font-extrabold text-base mb-2">{formatPrice(p.price_usd)}</p>
                                                     <div className="flex items-center gap-3 text-xs text-slate-400 mt-auto pt-2 border-t border-gray-50">
                                                         <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {p.district_name || p.city_name || 'N/A'}</span>
-                                                        <span className="flex items-center gap-1"><Home className="w-3 h-3" /> {t(`propertyTypes.${p.type_name}`) || p.type_name}</span>
+                                                        <span className="flex items-center gap-1"><Home className="w-3 h-3" /> {p.type_name}</span>
                                                     </div>
                                                 </div>
                                             </Link>

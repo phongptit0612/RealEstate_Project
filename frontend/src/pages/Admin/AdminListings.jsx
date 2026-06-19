@@ -443,7 +443,7 @@ export default function AdminListings() {
                                         <div className="flex flex-wrap gap-2">
                                             {viewData.features.map(f => (
                                                 <span key={f.feature_id} className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium">
-                                                    {t(`features.${f.name}`) || f.name}
+                                                    {f.name}
                                                 </span>
                                             ))}
                                         </div>
