@@ -13,7 +13,7 @@ export default function Home() {
   const { t } = useLanguageStore();
   const navigate = useNavigate();
   const [featuredProperties, setFeaturedProperties] = useState([]);
-  
+
   // Search State
   const [activeTab, setActiveTab] = useState('buy');
   const [searchLocation, setSearchLocation] = useState('');
@@ -29,7 +29,7 @@ export default function Home() {
     if (maxPrice) params.append('maxPrice', maxPrice);
     if (activeTab === 'rent') params.append('listingType', 'rent');
     else params.append('listingType', 'sale');
-    
+
     navigate(`/properties?${params.toString()}`);
   };
 
@@ -84,28 +84,28 @@ export default function Home() {
           <div className="max-w-4xl mx-auto bg-white/10 backdrop-blur-md p-2 rounded-3xl shadow-2xl border border-white/20">
             {/* Tabs */}
             <div className="flex gap-2 p-2 w-max mb-1">
-              <button 
+              <button
                 onClick={() => setActiveTab('buy')}
                 className={`px-6 py-2 rounded-full font-bold shadow-sm transition-all text-sm ${activeTab === 'buy' ? 'bg-white text-brand-600' : 'text-white hover:bg-white/20'}`}>
                 {t('hero.buyTab')}
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('rent')}
                 className={`px-6 py-2 rounded-full font-bold shadow-sm transition-all text-sm ${activeTab === 'rent' ? 'bg-white text-brand-600' : 'text-white hover:bg-white/20'}`}>
                 {t('hero.rentTab')}
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('quick')}
                 className={`px-6 py-2 rounded-full font-bold shadow-sm transition-all text-sm ${activeTab === 'quick' ? 'bg-white text-brand-600' : 'text-white hover:bg-white/20'}`}>
                 {t('hero.quickSearchTab')}
               </button>
             </div>
-            
+
             {/* Search Inputs */}
             {activeTab === 'quick' ? (
               <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl flex flex-wrap items-center gap-3 transition-all shadow-lg justify-center">
                 {['Da Nang Villas', 'Luxury Penthouses', 'Beachfront', 'City Center', 'Under $2000'].map(tag => (
-                  <button 
+                  <button
                     key={tag}
                     onClick={() => handleQuickSearch(tag)}
                     className="bg-white border border-gray-200 hover:border-brand-300 hover:bg-brand-50 text-slate-700 hover:text-brand-700 px-5 py-2.5 rounded-full font-bold text-sm shadow-sm transition-all"
@@ -129,12 +129,12 @@ export default function Home() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex-1 flex flex-col px-4 py-2 w-full md:border-r border-gray-100 transition-colors hover:bg-slate-50">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left mb-1">{t('hero.propertyType')}</span>
                   <div className="flex items-center gap-2">
                     <Building className="w-4 h-4 text-brand-500 flex-shrink-0" />
-                    <select 
+                    <select
                       value={propertyType}
                       onChange={(e) => setPropertyType(e.target.value)}
                       className="bg-transparent border-none outline-none text-slate-900 w-full cursor-pointer font-bold min-w-0 text-sm"
@@ -161,7 +161,7 @@ export default function Home() {
                     />
                   </div>
                 </div>
-                
+
                 <button type="submit" className="w-full md:w-auto bg-brand-600 hover:bg-brand-500 text-white px-8 h-14 rounded-xl font-bold flex items-center justify-center gap-2 outline-none border-none shadow-lg hover:shadow-brand-500/30 transition-all ml-1 text-base">
                   <Search className="w-5 h-5" />
                   {t('hero.search')}
@@ -194,7 +194,7 @@ export default function Home() {
               ))
             ) : (
               <div className="col-span-3 text-center text-slate-500 py-12">
-                No featured properties available at the moment.
+                Không có bất động sản nào (Đang được cập nhật)
               </div>
             )}
           </div>

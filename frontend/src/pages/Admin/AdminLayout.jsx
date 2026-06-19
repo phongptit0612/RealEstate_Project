@@ -5,6 +5,7 @@ import {
     ChevronRight, LogOut, Menu, X, ShieldCheck
 } from 'lucide-react';
 import useUserStore from '../../store/userStore';
+import useLanguageStore from '../../store/languageStore';
 
 const navItems = [
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -19,6 +20,7 @@ export default function AdminLayout() {
     const navigate = useNavigate();
     const logout = useUserStore(s => s.logout);
     const user = useUserStore(s => s.user);
+    const { t } = useLanguageStore();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const handleLogout = () => { logout(); navigate('/login'); };
@@ -34,7 +36,7 @@ export default function AdminLayout() {
                 </div>
                 <div>
                     <p className="font-bold text-slate-900 text-sm leading-none">LuxEstates</p>
-                    <p className="text-xs text-slate-400 mt-0.5">Admin Panel</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{t('admin.panel', 'Admin Panel')}</p>
                 </div>
             </div>
 
@@ -50,11 +52,11 @@ export default function AdminLayout() {
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
                                 active
                                     ? 'bg-brand-600 text-white shadow-md shadow-[#0033ab]/20'
-                                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                             }`}
                         >
                             <Icon className="w-4 h-4" />
-                            {label}
+                            {t('admin.' + label.toLowerCase(), label)}
                             {active && <ChevronRight className="w-4 h-4 ml-auto" />}
                         </Link>
                     );
@@ -76,7 +78,7 @@ export default function AdminLayout() {
                     onClick={handleLogout}
                     className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
                 >
-                    <LogOut className="w-4 h-4" /> Logout
+                    <LogOut className="w-4 h-4" /> {t('admin.logout', 'Logout')}
                 </button>
             </div>
         </div>
@@ -109,7 +111,7 @@ export default function AdminLayout() {
                     <button onClick={() => setSidebarOpen(true)}>
                         <Menu className="w-6 h-6 text-slate-600" />
                     </button>
-                    <span className="font-bold text-slate-900">Admin Panel</span>
+                    <span className="font-bold text-slate-900">{t('admin.panel', 'Admin Panel')}</span>
                 </div>
 
                 {/* Page content */}

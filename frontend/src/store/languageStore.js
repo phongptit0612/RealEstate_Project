@@ -8,25 +8,37 @@ const CURRENCY_LANG_MAP = {
 
 const SUPPORTED_LANGS = new Set(Object.keys(translations));
 
+// Read persisted language synchronously from localStorage to avoid flash
+const getInitialLang = () => {
+  try {
+    const stored = localStorage.getItem('language-storage');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const lang = parsed?.state?.language;
+      if (lang && SUPPORTED_LANGS.has(lang)) return lang;
+    }
+  } catch (_) {}
+  return 'vi'; // default to Vietnamese
+};
 
 const useLanguageStore = create(
   persist(
     (set, get) => ({
-      language: 'en',
+      language: getInitialLang(),
+      currentLang: getInitialLang(),
 
       setLanguage: (lang) => {
-        const resolved = SUPPORTED_LANGS.has(lang) ? lang : 'en';
-        set({ language: resolved });
+        const resolved = SUPPORTED_LANGS.has(lang) ? lang : 'vi';
+        set({ language: resolved, currentLang: resolved });
         document.documentElement.lang = resolved;
       },
 
       setLanguageFromCurrency: (currencyCode) => {
-        const lang = CURRENCY_LANG_MAP[currencyCode] || 'en';
+        const lang = CURRENCY_LANG_MAP[currencyCode] || 'vi';
         get().setLanguage(lang);
       },
 
-
-      t: (path) => {
+      t: (path, fallback) => {
         const { language } = get();
         const parts = path.split('.');
 
@@ -39,11 +51,22 @@ const useLanguageStore = create(
           return node;
         };
 
-        return resolve(translations[language]) ?? resolve(translations.en) ?? path;
+        return resolve(translations[language]) ?? resolve(translations.en) ?? fallback ?? path;
       },
-    }), {
-    name: 'language-storage',
-    partialize: (state) => ({ language: state.language })
-  }));
+    }),
+    {
+      name: 'language-storage',
+      partialize: (state) => ({ language: state.language }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          const resolved = SUPPORTED_LANGS.has(state.language) ? state.language : 'vi';
+          state.language = resolved;
+          state.currentLang = resolved;
+          document.documentElement.lang = resolved;
+        }
+      },
+    }
+  )
+);
 
 export default useLanguageStore;

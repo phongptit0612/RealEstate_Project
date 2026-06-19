@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { CheckCircle, XCircle, Trash2, Pencil, Save, X, Loader2, Eye, MapPin, Bed, Bath, Square, Compass, Video, Hash } from 'lucide-react';
 import useCurrencyStore from '../../store/currencyStore';
+import useLanguageStore from '../../store/languageStore';
 
 const STATUS_TABS = ['all', 'pending', 'approved', 'rejected'];
 const API = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api`;
 
 export default function AdminListings() {
     const { formatPrice, preferredCurrency } = useCurrencyStore();
+    const { t } = useLanguageStore();
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState('pending');
@@ -124,27 +126,27 @@ export default function AdminListings() {
             approved: 'bg-emerald-100 text-emerald-700',
             rejected: 'bg-red-100 text-red-700',
         };
-        return <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${map[status] || 'bg-gray-100 text-gray-600'}`}>{status}</span>;
+        return <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide ${map[status] || 'bg-gray-100 text-gray-600'}`}>{t('admin.' + status, status)}</span>;
     };
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Listings</h1>
-                    <p className="text-slate-500 mt-1">{total} total listings</p>
+                    <h1 className="text-2xl font-bold text-slate-900">{t('admin.listings', 'Listings')}</h1>
+                    <p className="text-slate-500 mt-1">{total} {t('admin.totalListings', 'total listings')}</p>
                 </div>
             </div>
 
             {/* Tabs */}
             <div className="flex gap-2 bg-slate-100 p-1 rounded-xl w-fit">
-                {STATUS_TABS.map(t => (
+                {STATUS_TABS.map(tOption => (
                     <button
-                        key={t}
-                        onClick={() => setTab(t)}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${tab === t ? 'bg-white shadow text-brand-600' : 'text-slate-500 hover:text-slate-700'}`}
+                        key={tOption}
+                        onClick={() => setTab(tOption)}
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${tab === tOption ? 'bg-white shadow text-brand-600' : 'text-slate-500 hover:text-slate-700'}`}
                     >
-                        {t}
+                        {t('admin.' + tOption, tOption)}
                     </button>
                 ))}
             </div>
@@ -155,13 +157,13 @@ export default function AdminListings() {
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-gray-100 bg-surface">
-                                <th className="text-left px-6 py-4 text-slate-500 font-semibold">Title</th>
-                                <th className="text-left px-4 py-4 text-slate-500 font-semibold">Owner</th>
-                                <th className="text-left px-4 py-4 text-slate-500 font-semibold">Price</th>
-                                <th className="text-left px-4 py-4 text-slate-500 font-semibold">Type</th>
-                                <th className="text-left px-4 py-4 text-slate-500 font-semibold">Status</th>
-                                <th className="text-left px-4 py-4 text-slate-500 font-semibold">Date</th>
-                                <th className="text-right px-6 py-4 text-slate-500 font-semibold">Actions</th>
+                                <th className="text-left px-6 py-4 text-slate-500 font-semibold">{t('admin.title', 'Title')}</th>
+                                <th className="text-left px-4 py-4 text-slate-500 font-semibold">{t('admin.owner', 'Owner')}</th>
+                                <th className="text-left px-4 py-4 text-slate-500 font-semibold">{t('admin.price', 'Price')}</th>
+                                <th className="text-left px-4 py-4 text-slate-500 font-semibold">{t('admin.type', 'Type')}</th>
+                                <th className="text-left px-4 py-4 text-slate-500 font-semibold">{t('admin.status', 'Status')}</th>
+                                <th className="text-left px-4 py-4 text-slate-500 font-semibold">{t('admin.date', 'Date')}</th>
+                                <th className="text-right px-6 py-4 text-slate-500 font-semibold">{t('admin.actions', 'Actions')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -178,7 +180,7 @@ export default function AdminListings() {
                             ) : listings.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="text-center py-16 text-slate-400">
-                                        No listings found in this category.
+                                        {t('admin.noListings', 'No listings found in this category.')}
                                     </td>
                                 </tr>
                             ) : listings.map(l => (
@@ -186,7 +188,7 @@ export default function AdminListings() {
                                     <td className="px-6 py-4">
                                         <p className="font-semibold text-slate-800 line-clamp-1 max-w-[180px]">{l.title}</p>
                                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${l.listing_type === 'sale' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
-                                            {l.listing_type === 'sale' ? 'For Sale' : 'For Rent'}
+                                            {l.listing_type === 'sale' ? t('admin.forSale', 'For Sale') : t('admin.forRent', 'For Rent')}
                                         </span>
                                     </td>
                                     <td className="px-4 py-4">
@@ -204,28 +206,28 @@ export default function AdminListings() {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-1.5 justify-end">
                                             {/* View */}
-                                            <button onClick={() => openView(l.property_id)} title="View full details"
+                                            <button onClick={() => openView(l.property_id)} title={t('admin.viewDetails', 'View Details')}
                                                 className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
                                                 <Eye className="w-4 h-4" />
                                             </button>
                                             {/* Edit */}
-                                            <button onClick={() => openEdit(l)} title="Edit content"
+                                            <button onClick={() => openEdit(l)} title={t('admin.editTitle', 'Edit Listing')}
                                                 className="p-2 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">
                                                 <Pencil className="w-4 h-4" />
                                             </button>
                                             {l.mod_status !== 'approved' && (
-                                                <button onClick={() => approve(l.property_id)} title="Approve"
+                                                <button onClick={() => approve(l.property_id)} title={t('common.approved', 'Approve')}
                                                     className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors">
                                                     <CheckCircle className="w-4 h-4" />
                                                 </button>
                                             )}
                                             {l.mod_status !== 'rejected' && (
-                                                <button onClick={() => setRejectModal({ id: l.property_id, title: l.title })} title="Reject"
+                                                <button onClick={() => setRejectModal({ id: l.property_id, title: l.title })} title={t('admin.rejectTitle', 'Reject')}
                                                     className="p-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors">
                                                     <XCircle className="w-4 h-4" />
                                                 </button>
                                             )}
-                                            <button onClick={() => remove(l.property_id)} title="Delete"
+                                            <button onClick={() => remove(l.property_id)} title={t('common.delete', 'Delete')}
                                                 className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
@@ -243,7 +245,7 @@ export default function AdminListings() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
                         <div className="flex items-center justify-between mb-5">
-                            <h2 className="text-lg font-bold text-slate-900">Edit Listing</h2>
+                            <h2 className="text-lg font-bold text-slate-900">{t('admin.editTitle', 'Edit Listing')}</h2>
                             <button onClick={() => setEditModal(null)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100">
                                 <X className="w-5 h-5" />
                             </button>
@@ -251,7 +253,7 @@ export default function AdminListings() {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Title</label>
+                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">{t('admin.title', 'Title')}</label>
                                 <input
                                     value={editForm.title}
                                     onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
@@ -259,7 +261,7 @@ export default function AdminListings() {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Description</label>
+                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">{t('admin.description', 'Description')}</label>
                                 <textarea
                                     rows={3}
                                     value={editForm.description}
@@ -269,7 +271,7 @@ export default function AdminListings() {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Price ({preferredCurrency})</label>
+                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">{t('admin.price', 'Price')} ({preferredCurrency})</label>
                                     <input
                                         type="text"
                                         value={localPriceInput}
@@ -278,14 +280,14 @@ export default function AdminListings() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Listing Type</label>
+                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">{t('admin.listingType', 'Listing Type')}</label>
                                     <select
                                         value={editForm.listing_type}
                                         onChange={e => setEditForm(f => ({ ...f, listing_type: e.target.value }))}
                                         className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer"
                                     >
-                                        <option value="sale">For Sale</option>
-                                        <option value="rent">For Rent</option>
+                                        <option value="sale">{t('admin.forSale', 'For Sale')}</option>
+                                        <option value="rent">{t('admin.forRent', 'For Rent')}</option>
                                     </select>
                                 </div>
                             </div>
@@ -298,11 +300,11 @@ export default function AdminListings() {
                         <div className="flex gap-3 mt-5">
                             <button onClick={() => setEditModal(null)}
                                 className="flex-1 py-2.5 rounded-xl border border-gray-200 text-slate-600 text-sm font-semibold hover:bg-surface">
-                                Cancel
+                                {t('admin.cancel', 'Cancel')}
                             </button>
                             <button onClick={saveEdit} disabled={editSaving}
                                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors">
-                                {editSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save Changes</>}
+                                {editSaving ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('admin.saving', 'Saving...')}</> : <><Save className="w-4 h-4" /> {t('admin.saveChanges', 'Save Changes')}</>}
                             </button>
                         </div>
                     </div>
@@ -313,11 +315,11 @@ export default function AdminListings() {
             {rejectModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
-                        <h2 className="text-lg font-bold text-slate-900 mb-1">Reject Listing</h2>
+                        <h2 className="text-lg font-bold text-slate-900 mb-1">{t('admin.rejectTitle', 'Reject Listing')}</h2>
                         <p className="text-sm text-slate-500 mb-4">"{rejectModal.title}"</p>
                         <textarea
                             rows={4}
-                            placeholder="Reason for rejection (will be sent to the owner)..."
+                            placeholder={t('admin.reasonPlaceholder', 'Reason for rejection (will be sent to the owner)...')}
                             value={rejectReason}
                             onChange={e => setRejectReason(e.target.value)}
                             className="w-full border border-gray-200 rounded-xl p-3 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-brand-600 resize-none"
@@ -325,11 +327,11 @@ export default function AdminListings() {
                         <div className="flex gap-3 mt-4">
                             <button onClick={() => { setRejectModal(null); setRejectReason(''); }}
                                 className="flex-1 py-2.5 rounded-xl border border-gray-200 text-slate-600 text-sm font-semibold hover:bg-surface">
-                                Cancel
+                                {t('admin.cancel', 'Cancel')}
                             </button>
                             <button onClick={reject}
                                 className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold">
-                                Confirm Reject
+                                {t('admin.confirmReject', 'Confirm Reject')}
                             </button>
                         </div>
                     </div>
@@ -340,7 +342,7 @@ export default function AdminListings() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                     <div className="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-5">
-                            <h2 className="text-xl font-bold text-slate-900">Listing Details</h2>
+                            <h2 className="text-xl font-bold text-slate-900">{t('admin.viewDetails', 'Listing Details')}</h2>
                             <button onClick={() => { setViewModal(null); setViewData(null); }} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100">
                                 <X className="w-5 h-5" />
                             </button>
@@ -349,7 +351,7 @@ export default function AdminListings() {
                         {viewLoading ? (
                             <div className="flex flex-col items-center justify-center py-12">
                                 <Loader2 className="w-8 h-8 text-brand-600 animate-spin mb-4" />
-                                <p className="text-slate-500">Loading details...</p>
+                                <p className="text-slate-500">{t('admin.loadingDetails', 'Loading details...')}</p>
                             </div>
                         ) : viewData ? (
                             <div className="space-y-6">
@@ -363,12 +365,12 @@ export default function AdminListings() {
                                             viewData.mod_status === 'pending' ? 'bg-amber-100 text-amber-700' :
                                             'bg-red-100 text-red-700'
                                         }`}>
-                                            {viewData.mod_status}
+                                            {t('admin.' + viewData.mod_status, viewData.mod_status)}
                                         </span>
                                         <span className={`text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wider ${
                                             viewData.listing_status === 'active' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'
                                         }`}>
-                                            {viewData.listing_status}
+                                            {t('manage.status' + viewData.listing_status.charAt(0).toUpperCase() + viewData.listing_status.slice(1), viewData.listing_status)}
                                         </span>
                                     </div>
                                     <p className="flex items-center gap-1.5 text-slate-500 mt-2 text-sm">
@@ -379,48 +381,48 @@ export default function AdminListings() {
                                 {/* Metrics Grid */}
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                     <div className="bg-surface p-4 rounded-xl border border-gray-100">
-                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Price</div>
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">{t('admin.price', 'Price')}</div>
                                         <div className="text-lg font-bold text-brand-600">{formatPrice(viewData.price_usd)}</div>
                                     </div>
                                     <div className="bg-surface p-4 rounded-xl border border-gray-100">
-                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Type</div>
-                                        <div className="text-lg font-bold text-slate-800 capitalize">{viewData.listing_type}</div>
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">{t('admin.type', 'Type')}</div>
+                                        <div className="text-lg font-bold text-slate-800 capitalize">{t('admin.' + viewData.listing_type, viewData.listing_type)}</div>
                                     </div>
                                     <div className="bg-surface p-4 rounded-xl border border-gray-100">
-                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Bedrooms</div>
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">{t('admin.bedrooms', 'Bedrooms')}</div>
                                         <div className="flex items-center gap-1.5 text-lg font-bold text-slate-800">
                                             <Bed className="w-4 h-4 text-slate-400" /> {viewData.bedrooms || '—'}
                                         </div>
                                     </div>
                                     <div className="bg-surface p-4 rounded-xl border border-gray-100">
-                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Bathrooms</div>
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">{t('admin.bathrooms', 'Bathrooms')}</div>
                                         <div className="flex items-center gap-1.5 text-lg font-bold text-slate-800">
                                             <Bath className="w-4 h-4 text-slate-400" /> {viewData.bathrooms || '—'}
                                         </div>
                                     </div>
                                     <div className="bg-surface p-4 rounded-xl border border-gray-100">
-                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Area</div>
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">{t('admin.area', 'Area')}</div>
                                         <div className="flex items-center gap-1.5 text-lg font-bold text-slate-800">
                                             <Square className="w-4 h-4 text-slate-400" /> {viewData.area_m2 || '—'} m²
                                         </div>
                                     </div>
                                     <div className="bg-surface p-4 rounded-xl border border-gray-100">
-                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Direction</div>
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">{t('admin.direction', 'Direction')}</div>
                                         <div className="flex items-center gap-1.5 text-lg font-bold text-slate-800 capitalize">
-                                            <Compass className="w-4 h-4 text-slate-400" /> {viewData.direction || '—'}
+                                            <Compass className="w-4 h-4 text-slate-400" /> {viewData.direction ? t(`directionMap.${viewData.direction}`) : '—'}
                                         </div>
                                     </div>
                                     <div className="bg-surface p-4 rounded-xl border border-gray-100">
-                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Zipcode</div>
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">{t('admin.zipcode', 'Zipcode')}</div>
                                         <div className="flex items-center gap-1.5 text-lg font-bold text-slate-800">
                                             <Hash className="w-4 h-4 text-slate-400" /> {viewData.zipcode || '—'}
                                         </div>
                                     </div>
                                     <div className="bg-surface p-4 rounded-xl border border-gray-100 flex flex-col justify-center">
-                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">Video URL</div>
+                                        <div className="text-xs text-slate-500 mb-1 uppercase font-semibold">{t('admin.videoUrl', 'Video URL')}</div>
                                         {viewData.video_url ? (
                                             <a href={viewData.video_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm font-bold text-brand-600 hover:underline">
-                                                <Video className="w-4 h-4" /> View Video
+                                                <Video className="w-4 h-4" /> {t('admin.viewVideo', 'View Video')}
                                             </a>
                                         ) : (
                                             <div className="text-sm text-slate-500">—</div>
@@ -430,18 +432,18 @@ export default function AdminListings() {
                                 
                                 {/* Description */}
                                 <div>
-                                    <h4 className="font-bold text-slate-900 mb-2">Description</h4>
+                                    <h4 className="font-bold text-slate-900 mb-2">{t('admin.description', 'Description')}</h4>
                                     <p className="text-slate-600 text-sm whitespace-pre-wrap">{viewData.description || 'No description provided.'}</p>
                                 </div>
                                 
                                 {/* Features */}
                                 {viewData.features && viewData.features.length > 0 && (
                                     <div>
-                                        <h4 className="font-bold text-slate-900 mb-2">Features</h4>
+                                        <h4 className="font-bold text-slate-900 mb-2">{t('admin.features', 'Features')}</h4>
                                         <div className="flex flex-wrap gap-2">
                                             {viewData.features.map(f => (
                                                 <span key={f.feature_id} className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium">
-                                                    {f.name}
+                                                    {t(`features.${f.name}`) || f.name}
                                                 </span>
                                             ))}
                                         </div>
@@ -451,7 +453,7 @@ export default function AdminListings() {
                                 {/* Images */}
                                 {viewData.images && viewData.images.length > 0 && (
                                     <div>
-                                        <h4 className="font-bold text-slate-900 mb-2">Images ({viewData.images.length})</h4>
+                                        <h4 className="font-bold text-slate-900 mb-2">{t('admin.images', 'Images')} ({viewData.images.length})</h4>
                                         <div className="grid grid-cols-3 gap-2">
                                             {viewData.images.map((img, i) => (
                                                 <img key={i} src={img.image_url.startsWith('http') ? img.image_url : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${img.image_url.startsWith('/') ? '' : '/'}${img.image_url}`} alt="Property" className="w-full h-24 object-cover rounded-lg" />
@@ -462,10 +464,10 @@ export default function AdminListings() {
                                 
                                 {/* Seller Info */}
                                 <div className="p-4 bg-slate-50 rounded-xl border border-gray-100 flex flex-col gap-1">
-                                    <h4 className="font-bold text-slate-900 mb-1">Seller Information</h4>
-                                    <p className="text-sm text-slate-600"><span className="font-medium text-slate-800">Name:</span> {viewData.seller_name}</p>
-                                    <p className="text-sm text-slate-600"><span className="font-medium text-slate-800">Email:</span> {viewData.seller_email}</p>
-                                    <p className="text-sm text-slate-600"><span className="font-medium text-slate-800">Phone:</span> {viewData.seller_phone || '—'}</p>
+                                    <h4 className="font-bold text-slate-900 mb-1">{t('admin.sellerInfo', 'Seller Information')}</h4>
+                                    <p className="text-sm text-slate-600"><span className="font-medium text-slate-800">{t('admin.name', 'Name')}:</span> {viewData.seller_name}</p>
+                                    <p className="text-sm text-slate-600"><span className="font-medium text-slate-800">{t('admin.email', 'Email')}:</span> {viewData.seller_email}</p>
+                                    <p className="text-sm text-slate-600"><span className="font-medium text-slate-800">{t('admin.phone', 'Phone')}:</span> {viewData.seller_phone || '—'}</p>
                                 </div>
                             </div>
                         ) : null}
