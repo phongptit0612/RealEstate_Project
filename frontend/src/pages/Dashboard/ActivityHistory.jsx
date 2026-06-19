@@ -3,22 +3,24 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Clock, Eye, BedDouble, Bath, Maximize2, MapPin, TrendingUp } from 'lucide-react';
 import useCurrencyStore from '../../store/currencyStore';
+import useLanguageStore from '../../store/languageStore';
 
-function timeAgo(dateStr) {
+function timeAgo(dateStr, t) {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins  = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days  = Math.floor(diff / 86400000);
-    if (mins  < 1)  return 'Just now';
-    if (mins  < 60) return `${mins}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
+    if (mins  < 1)  return t('activity.justNow', 'Just now');
+    if (mins  < 60) return `${mins}${t('activity.mAgo', 'm ago')}`;
+    if (hours < 24) return `${hours}${t('activity.hAgo', 'h ago')}`;
+    return `${days}${t('activity.dAgo', 'd ago')}`;
 }
 
 export default function ActivityHistory() {
     const [history, setHistory]   = useState([]);
     const [loading, setLoading]   = useState(true);
     const { formatPrice } = useCurrencyStore();
+    const { t } = useLanguageStore();
 
     useEffect(() => {
         axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/recently-viewed`, { withCredentials: true })
@@ -40,25 +42,25 @@ export default function ActivityHistory() {
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 mb-2">Activity History</h1>
-                    <p className="text-slate-500">Properties you've recently viewed.</p>
+                    <h1 className="text-3xl font-bold text-slate-900 mb-2">{t('activity.title', 'Activity History')}</h1>
+                    <p className="text-slate-500">{t('activity.subtitle', "Properties you've recently viewed.")}</p>
                 </div>
                 <div className="flex items-center gap-2 bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-2">
                     <TrendingUp className="w-4 h-4 text-brand-600" />
-                    <span className="text-slate-900 font-medium text-sm">{history.length} viewed</span>
+                    <span className="text-slate-900 font-medium text-sm">{history.length} {t('activity.viewed', 'viewed')}</span>
                 </div>
             </div>
 
             {history.length === 0 ? (
                 <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-16 text-center">
                     <Eye className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">No activity yet</h3>
-                    <p className="text-slate-500 mb-6">Browse properties and they'll appear here.</p>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">{t('activity.noActivity', 'No activity yet')}</h3>
+                    <p className="text-slate-500 mb-6">{t('activity.noActivityHint', "Browse properties and they'll appear here.")}</p>
                     <Link
                         to="/properties"
                         className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-3 rounded-xl transition-all"
                     >
-                        Browse Properties
+                        {t('activity.browseBtn', 'Browse Properties')}
                     </Link>
                 </div>
             ) : (
@@ -78,7 +80,7 @@ export default function ActivityHistory() {
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">No Image</div>
+                                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">{t('activity.noImage', 'No Image')}</div>
                                 )}
                             </div>
 
@@ -91,7 +93,7 @@ export default function ActivityHistory() {
                                         </h3>
                                         <div className="flex items-center gap-1.5 text-slate-500 text-xs mt-0.5">
                                             <MapPin className="w-3 h-3" />
-                                            <span>{[prop.district_name, prop.city_name].filter(Boolean).join(', ') || 'Unknown location'}</span>
+                                            <span>{[prop.district_name, prop.city_name].filter(Boolean).join(', ') || t('activity.unknownLocation', 'Unknown location')}</span>
                                         </div>
                                     </div>
                                     <div className="text-right flex-shrink-0">
@@ -101,18 +103,18 @@ export default function ActivityHistory() {
                                                 ? 'bg-emerald-100 text-emerald-700'
                                                 : 'bg-blue-100 text-blue-700'
                                         }`}>
-                                            {prop.listing_type === 'sale' ? 'For Sale' : 'For Rent'}
+                                            {prop.listing_type === 'sale' ? t('card.forSale') : t('card.forRent')}
                                         </span>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center gap-4 mt-2 text-slate-500 text-xs">
-                                    {prop.bedrooms  && <span className="flex items-center gap-1"><BedDouble className="w-3 h-3" />{prop.bedrooms} bed</span>}
-                                    {prop.bathrooms && <span className="flex items-center gap-1"><Bath className="w-3 h-3" />{prop.bathrooms} bath</span>}
-                                    {prop.area_m2   && <span className="flex items-center gap-1"><Maximize2 className="w-3 h-3" />{prop.area_m2}m²</span>}
+                                    {prop.bedrooms  && <span className="flex items-center gap-1"><BedDouble className="w-3 h-3" />{prop.bedrooms} {t('card.beds')}</span>}
+                                    {prop.bathrooms && <span className="flex items-center gap-1"><Bath className="w-3 h-3" />{prop.bathrooms} {t('card.baths')}</span>}
+                                    {prop.area_m2   && <span className="flex items-center gap-1"><Maximize2 className="w-3 h-3" />{prop.area_m2}{t('card.sqm')}</span>}
                                     <span className="ml-auto flex items-center gap-1 text-slate-400">
                                         <Clock className="w-3 h-3" />
-                                        {timeAgo(prop.viewed_at)}
+                                        {timeAgo(prop.viewed_at, t)}
                                     </span>
                                 </div>
                             </div>

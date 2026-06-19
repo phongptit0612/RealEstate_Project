@@ -30,17 +30,17 @@ export default function ManageListings() {
             await axios.patch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${id}/status`, { status: newStatus }, { withCredentials: true });
             setProperties(properties.map(p => p.property_id === id ? { ...p, status: newStatus } : p));
         } catch (error) {
-            alert('Failed to update status');
+            alert(t('manage.updateStatusFailed', 'Failed to update status'));
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to permanently delete this listing?")) return;
+        if (!window.confirm(t('manage.confirmDelete', 'Are you sure you want to permanently delete this listing?'))) return;
         try {
             await axios.delete(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${id}`, { withCredentials: true });
             setProperties(properties.filter(p => p.property_id !== id));
         } catch (error) {
-            alert('Failed to delete listing');
+            alert(t('manage.deleteFailed', 'Failed to delete listing'));
         }
     };
 
@@ -49,13 +49,13 @@ export default function ManageListings() {
             const res = await axios.patch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/properties/${id}/renew`, {}, { withCredentials: true });
             const newExpiry = res.data.expires_at;
             setProperties(properties.map(p => p.property_id === id ? { ...p, expires_at: newExpiry } : p));
-            alert(`✅ Listing renewed! New expiry: ${new Date(newExpiry).toLocaleDateString()}`);
+            alert(t('manage.renewSuccess', '✅ Listing renewed! New expiry: {date}').replace('{date}', new Date(newExpiry).toLocaleDateString()));
         } catch (error) {
-            alert('Failed to renew listing');
+            alert(t('manage.renewFailed', 'Failed to renew listing'));
         }
     };
 
-    if (loading) return <div className="text-ocean-200 animate-pulse font-medium">Loading private portfolios...</div>;
+    if (loading) return <div className="text-ocean-200 animate-pulse font-medium">{t('manage.loadingPortfolio', 'Loading private portfolios...')}</div>;
 
     const totalViews = properties.reduce((sum, p) => sum + (p.view_count || 0), 0);
     const totalFavorites = properties.reduce((sum, p) => sum + (p.favorites_count || 0), 0);
@@ -80,7 +80,7 @@ export default function ManageListings() {
                                 <Eye className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500 font-medium">Total Views</p>
+                                <p className="text-sm text-slate-500 font-medium">{t('manage.totalViews', 'Total Views')}</p>
                                 <p className="text-2xl font-bold text-slate-900">{totalViews}</p>
                             </div>
                         </div>
@@ -89,7 +89,7 @@ export default function ManageListings() {
                                 <Heart className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500 font-medium">Total Favorites</p>
+                                <p className="text-sm text-slate-500 font-medium">{t('manage.totalFavorites', 'Total Favorites')}</p>
                                 <p className="text-2xl font-bold text-slate-900">{totalFavorites}</p>
                             </div>
                         </div>
@@ -98,7 +98,7 @@ export default function ManageListings() {
                                 <MessageSquare className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                                <p className="text-sm text-slate-500 font-medium">Total Inquiries</p>
+                                <p className="text-sm text-slate-500 font-medium">{t('manage.totalInquiries', 'Total Inquiries')}</p>
                                 <p className="text-2xl font-bold text-slate-900">{totalInquiries}</p>
                             </div>
                         </div>
@@ -108,7 +108,7 @@ export default function ManageListings() {
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-2">
                                 <Zap className="w-5 h-5 text-amber-500" />
-                                <h2 className="font-bold text-slate-800">Top Performing Listings (Views)</h2>
+                                <h2 className="font-bold text-slate-800">{t('manage.topListings', 'Top Performing Listings (Views)')}</h2>
                             </div>
                         </div>
                         <div className="flex items-end justify-around gap-4 h-40 mt-auto">
@@ -162,7 +162,7 @@ export default function ManageListings() {
                                                 {prop.primary_image ? (
                                                     <img src={prop.primary_image.startsWith('http') ? prop.primary_image : `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}${prop.primary_image}`} alt={prop.title} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 bg-slate-100">No Media</div>
+                                                    <div className="w-full h-full flex items-center justify-center text-xs text-slate-400 bg-slate-100">{t('manage.noMedia', 'No Media')}</div>
                                                 )}
                                             </div>
                                             <div>
@@ -189,11 +189,11 @@ export default function ManageListings() {
                                                         : 'bg-slate-100 text-slate-700 border border-slate-200'
                                                     }`}>
                                                     <Crown className="w-3 h-3" />
-                                                    {prop.vip_tier === 'gold' ? '🥇 Gold' : '🥈 Silver'}
+                                                    {prop.vip_tier === 'gold' ? t('manage.goldBadge', '🥇 Gold') : t('manage.silverBadge', '🥈 Silver')}
                                                 </span>
                                                 {prop.vip_expires_at && (
                                                     <span className="text-xs text-slate-500">
-                                                        Exp: {new Date(prop.vip_expires_at).toLocaleDateString()}
+                                                        {t('manage.vipExp', 'Exp')}: {new Date(prop.vip_expires_at).toLocaleDateString()}
                                                     </span>
                                                 )}
                                             </div>
@@ -214,7 +214,7 @@ export default function ManageListings() {
                                     </td>
                                     <td className="p-5">
                                         <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider ${prop.mod_status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : prop.mod_status === 'rejected' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'}`}>
-                                            {prop.mod_status}
+                                            {prop.mod_status === 'approved' ? t('common.approved', 'Approved') : prop.mod_status === 'rejected' ? t('common.rejected', 'Rejected') : t('common.pending', 'Pending')}
                                         </span>
                                     </td>
                                     {/* Stats: views, saved, inquiries */}
@@ -242,7 +242,7 @@ export default function ManageListings() {
                                                     ? 'text-red-500' : 'text-slate-400'
                                             }`}>
                                                 {prop.expires_at
-                                                    ? (new Date(prop.expires_at) < new Date() ? '⚠️ Expired' : `📅 ${new Date(prop.expires_at).toLocaleDateString()}`)
+                                                    ? (new Date(prop.expires_at) < new Date() ? t('manage.expired', '⚠️ Expired') : `📅 ${new Date(prop.expires_at).toLocaleDateString()}`)
                                                     : '—'}
                                             </span>
                                             <button
@@ -262,8 +262,8 @@ export default function ManageListings() {
                                                 className="bg-white border border-gray-200 text-slate-700 font-bold rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-600 outline-none text-sm cursor-pointer"
                                             >
                                                 <option value="active">✅ {t('manage.statusActive')}</option>
-                                                <option value="negotiating">💬 Negotiating</option>
-                                                <option value="deposited">📋 Deposited</option>
+                                                <option value="negotiating">💬 {t('manage.statusNegotiating', 'Negotiating')}</option>
+                                                <option value="deposited">📋 {t('manage.statusDeposited', 'Deposited')}</option>
                                                 <option value="sold">🛑 {t('manage.statusSold')}</option>
                                                 <option value="rented">🔑 {t('manage.statusRented')}</option>
                                                 <option value="hidden">👁 {t('manage.statusInactive')}</option>
@@ -287,7 +287,7 @@ export default function ManageListings() {
                                 </tr>
                             ))}
                             {properties.length === 0 && (
-                                <tr><td colSpan="8" className="p-12 text-center text-slate-500 font-medium">Your private portfolio is currently empty.</td></tr>
+                                <tr><td colSpan="8" className="p-12 text-center text-slate-500 font-medium">{t('manage.emptyPortfolio', 'Your private portfolio is currently empty.')}</td></tr>
                             )}
                         </tbody>
                     </table>

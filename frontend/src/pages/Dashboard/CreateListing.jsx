@@ -395,7 +395,7 @@ export default function CreateListing() {
                         {/* Map Pin */}
                         <div>
                             <label className={labelCls + ' flex items-center gap-1'}>
-                                <MapPin className="inline w-4 h-4 text-brand-400" /> Pin Location on Map
+                                <MapPin className="inline w-4 h-4 text-brand-400" /> {t('create.pinLocation')}
                             </label>
                             <LocationPicker
                                 initialLat={formData.latitude}
@@ -420,8 +420,8 @@ export default function CreateListing() {
                             <div className="w-20 h-20 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                                 <CheckCircle className="w-10 h-10" />
                             </div>
-                            <h2 className="text-3xl font-bold text-slate-900 mb-2">Listing Created!</h2>
-                            <p className="text-slate-500 mb-8 max-w-md mx-auto">Your listing is pending admin approval. Upload photos to complete it.</p>
+                            <h2 className="text-3xl font-bold text-slate-900 mb-2">{t('create.listingCreatedSuccess', 'Listing Created!')}</h2>
+                            <p className="text-slate-500 mb-8 max-w-md mx-auto">{t('create.listingCreatedSuccessDesc', 'Your listing is pending admin approval. Upload photos to complete it.')}</p>
                         </div>
 
                         <div className="border-2 border-dashed border-gray-300 hover:border-brand-400 rounded-3xl p-12 text-center transition-all bg-slate-50 hover:bg-brand-50 group">

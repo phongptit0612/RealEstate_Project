@@ -72,15 +72,15 @@ export default function Favorites() {
                     <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-4">
                         <Heart className="w-9 h-9 text-red-300" />
                     </div>
-                    <h2 className="text-xl font-bold text-slate-700 mb-2">No saved properties yet</h2>
+                    <h2 className="text-xl font-bold text-slate-700 mb-2">{t('favorites.noFavorites')}</h2>
                     <p className="text-slate-400 text-sm mb-6 max-w-sm">
-                        Tap the heart icon on any listing to save it here for easy comparison later.
+                        {t('favorites.noFavoritesHint')}
                     </p>
                     <Link
                         to="/properties"
                         className="flex items-center gap-2 px-6 py-3 bg-brand-600 text-white font-semibold rounded-xl hover:bg-brand-700 transition-colors"
                     >
-                        <Home className="w-4 h-4" /> Explore Listings
+                        <Home className="w-4 h-4" /> {t('favorites.exploreBtn')}
                     </Link>
                 </div>
             ) : (

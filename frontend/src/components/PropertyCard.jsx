@@ -83,7 +83,7 @@ export default function PropertyCard({ property }) {
                 <div className="flex items-center gap-1.5 text-slate-500 mb-4">
                     <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                     <span className="text-xs font-medium truncate">
-                        {property.district_name ? `${property.district_name}, ` : ''}{property.city_name || property.address || 'Location N/A'}
+                        {property.district_name ? `${property.district_name}, ` : ''}{property.city_name || property.address || t('card.locationNA')}
                     </span>
                 </div>
 

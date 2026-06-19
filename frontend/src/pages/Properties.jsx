@@ -218,11 +218,11 @@ export default function Properties() {
                                 <div className="flex items-center gap-2">
                                     <select value={filters.bedrooms} onChange={e => setFilters({...filters, bedrooms: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer min-w-0">
                                         <option value="">{t('search.minBedrooms')}</option>
-                                        {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}+ Beds</option>)}
+                                        {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}+ {t('card.beds')}</option>)}
                                     </select>
                                     <select value={filters.bathrooms} onChange={e => setFilters({...filters, bathrooms: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer min-w-0">
                                         <option value="">{t('search.minBathrooms')}</option>
-                                        {[1,2,3,4].map(n => <option key={n} value={n}>{n}+ Baths</option>)}
+                                        {[1,2,3,4].map(n => <option key={n} value={n}>{n}+ {t('card.baths')}</option>)}
                                     </select>
                                 </div>
                             </div>
@@ -242,8 +242,8 @@ export default function Properties() {
                                 </label>
                                 <select value={filters.direction} onChange={e => setFilters({...filters, direction: e.target.value})} className="w-full bg-surface-2 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-500 cursor-pointer min-w-0">
                                     <option value="">{t('search.anyDirection')}</option>
-                                    <option value="north">North</option><option value="south">South</option><option value="east">East</option><option value="west">West</option>
-                                    <option value="northeast">North-East</option><option value="northwest">North-West</option><option value="southeast">South-East</option><option value="southwest">South-West</option>
+                                    <option value="north">{t('directionMap.north')}</option><option value="south">{t('directionMap.south')}</option><option value="east">{t('directionMap.east')}</option><option value="west">{t('directionMap.west')}</option>
+                                    <option value="northeast">{t('directionMap.northeast')}</option><option value="northwest">{t('directionMap.northwest')}</option><option value="southeast">{t('directionMap.southeast')}</option><option value="southwest">{t('directionMap.southwest')}</option>
                                 </select>
                             </div>
                         </div>
@@ -344,13 +344,13 @@ export default function Properties() {
                                     disabled={loadingMore}
                                     className="bg-white border-2 border-brand-600 text-brand-600 hover:bg-brand-600 hover:text-white font-bold py-3 px-8 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50 flex items-center gap-2"
                                 >
-                                    {loadingMore ? 'Loading...' : 'Show More Properties'}
+                                    {loadingMore ? t('common.loading') : t('search.loadMore')}
                                 </button>
                             </div>
                         )}
                         {!loading && properties.length > 0 && page >= totalPages && (
                             <div className="text-center mt-12 mb-8 text-slate-400 text-sm font-medium">
-                                You've viewed all {totalResults} properties
+                                {t('search.viewedAll', "You've viewed all {count} properties").replace('{count}', totalResults)}
                             </div>
                         )}
                     </>

@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail } from 'lucide-react';
+import useLanguageStore from '../store/languageStore';
 
 export default function Footer() {
+    const { t } = useLanguageStore();
     return (
         <footer className="bg-surface border-t border-gray-200 pt-16 pb-8">
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
@@ -12,22 +14,22 @@ export default function Footer() {
                         <span className="text-xl font-bold text-slate-900 tracking-tight">LuxEstates</span>
                     </div>
                     <p className="text-slate-600 text-sm leading-relaxed">
-                        Redefining luxury real estate worldwide. Discover exclusive properties and experience unparalleled service.
+                        {t('footer.tagline', 'Redefining luxury real estate worldwide. Discover exclusive properties and experience unparalleled service.')}
                     </p>
                 </div>
 
                 <div>
-                    <h4 className="text-slate-900 font-bold mb-4 uppercase tracking-widest text-sm">Quick Links</h4>
+                    <h4 className="text-slate-900 font-bold mb-4 uppercase tracking-widest text-sm">{t('footer.quickLinks', 'Quick Links')}</h4>
                     <ul className="space-y-2 text-sm text-slate-600">
-                        <li><Link to="/" className="hover:text-brand-600 transition-colors">Home</Link></li>
-                        <li><Link to="/properties" className="hover:text-brand-600 transition-colors">Properties</Link></li>
-                        <li><a href="#" className="hover:text-brand-600 transition-colors">Agencies</a></li>
-                        <li><a href="#" className="hover:text-brand-600 transition-colors">About Us</a></li>
+                        <li><Link to="/" className="hover:text-brand-600 transition-colors">{t('nav.home', 'Home')}</Link></li>
+                        <li><Link to="/properties" className="hover:text-brand-600 transition-colors">{t('nav.properties', 'Properties')}</Link></li>
+                        <li><a href="#" className="hover:text-brand-600 transition-colors">{t('nav.agencies', 'Agencies')}</a></li>
+                        <li><a href="#" className="hover:text-brand-600 transition-colors">{t('nav.aboutUs', 'About Us')}</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h4 className="text-slate-900 font-bold mb-4 uppercase tracking-widest text-sm">Contact Us</h4>
+                    <h4 className="text-slate-900 font-bold mb-4 uppercase tracking-widest text-sm">{t('footer.contactUs', 'Contact Us')}</h4>
                     <ul className="space-y-3 text-sm text-slate-600">
                         <li className="flex items-start gap-2">
                             <MapPin className="w-4 h-4 text-brand-600 mt-0.5" />
@@ -45,7 +47,7 @@ export default function Footer() {
                 </div>
 
                 <div>
-                    <h4 className="text-slate-900 font-bold mb-4 uppercase tracking-widest text-sm">Follow Us</h4>
+                    <h4 className="text-slate-900 font-bold mb-4 uppercase tracking-widest text-sm">{t('footer.followUs', 'Follow Us')}</h4>
                     <div className="flex gap-4 font-bold text-sm">
                         <a href="#" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-slate-600 hover:bg-brand-600 hover:border-brand-600 hover:text-white transition-all shadow-sm">Fb</a>
                         <a href="#" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-slate-600 hover:bg-brand-600 hover:border-brand-600 hover:text-white transition-all shadow-sm">X</a>
@@ -57,11 +59,11 @@ export default function Footer() {
 
             <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p className="text-xs text-slate-500 flex-shrink-0">
-                    &copy; {new Date().getFullYear()} LuxEstates. All rights reserved.
+                    &copy; {new Date().getFullYear()} LuxEstates. {t('footer.rightsReserved', 'All rights reserved.')}
                 </p>
                 <div className="flex gap-6 text-xs text-slate-500">
-                    <a href="#" className="hover:text-slate-900 transition-colors">Privacy Policy</a>
-                    <a href="#" className="hover:text-slate-900 transition-colors">Terms of Service</a>
+                    <a href="#" className="hover:text-slate-900 transition-colors">{t('footer.privacyPolicy', 'Privacy Policy')}</a>
+                    <a href="#" className="hover:text-slate-900 transition-colors">{t('footer.termsOfService', 'Terms of Service')}</a>
                 </div>
             </div>
         </footer>

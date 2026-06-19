@@ -56,7 +56,7 @@ export default function EditListing() {
                 // Load my listing
                 const r = await axios.get(`${API}/properties/me`, { withCredentials: true });
                 const prop = r.data.find(p => String(p.property_id) === String(id));
-                if (!prop) { setError('Listing not found or you do not own it.'); setLoading(false); return; }
+                if (!prop) { setError(t('edit.notFound', 'Listing not found or you do not own it.')); setLoading(false); return; }
 
                 // Derive city_id from the metadata districts (district_id is in the property)
                 const district_id = prop.district_id;
@@ -84,7 +84,7 @@ export default function EditListing() {
                 const imgRes = await axios.get(`${API}/properties/${id}/images`, { withCredentials: true });
                 setExistingImages(imgRes.data || []);
             } catch {
-                setError('Failed to load listing data.');
+                setError(t('edit.loadFailed', 'Failed to load listing data.'));
             } finally {
                 setLoading(false);
             }
@@ -106,13 +106,13 @@ export default function EditListing() {
 
     // ── Delete an existing image ────────────────────────────
     const handleDeleteImage = async (image_id) => {
-        if (!window.confirm('Remove this photo?')) return;
+        if (!window.confirm(t('edit.confirmDeletePhoto', 'Remove this photo?'))) return;
         setDeletingImg(image_id);
         try {
             await axios.delete(`${API}/media/${image_id}`, { withCredentials: true });
             setExistingImages(prev => prev.filter(img => img.image_id !== image_id));
         } catch (err) {
-            alert(err.response?.data?.error || 'Failed to delete image');
+            alert(err.response?.data?.error || t('edit.deleteImgFailed', 'Failed to delete image'));
         }
         setDeletingImg(null);
     };
@@ -134,7 +134,7 @@ export default function EditListing() {
             setExistingImages(imgRes.data || []);
             setNewImages(null);
         } catch (err) {
-            alert(err.response?.data?.error || 'Upload failed');
+            alert(err.response?.data?.error || t('edit.uploadFailed', 'Upload failed'));
         }
         setUploadingImg(false);
     };
@@ -155,7 +155,7 @@ export default function EditListing() {
             setSuccess(true);
             setTimeout(() => navigate('/dashboard/properties'), 2000);
         } catch (err) {
-            setError(err.response?.data?.error || 'Failed to update listing.');
+            setError(err.response?.data?.error || t('edit.updateFailed', 'Failed to update listing.'));
         } finally {
             setSaving(false);
         }
@@ -192,7 +192,7 @@ export default function EditListing() {
             {success && (
                 <div className="flex items-center gap-3 p-4 bg-emerald-500/15 border border-emerald-500/30 rounded-2xl text-emerald-300 text-sm font-semibold">
                     <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                    Listing updated! Redirecting...
+                    {t('edit.updateSuccess', 'Listing updated! Redirecting...')}
                 </div>
             )}
             {error && (
@@ -240,7 +240,7 @@ export default function EditListing() {
                         <UploadCloud className="w-5 h-5 text-brand-400 flex-shrink-0" />
                         <span className="text-sm">
                             {newImages && newImages.length > 0
-                                ? `${newImages.length} file${newImages.length > 1 ? 's' : ''} selected — `
+                                ? `${newImages.length} ${newImages.length > 1 ? t('edit.filesSelected', 'files selected — ') : t('edit.fileSelected', 'file selected — ')}`
                                 : t('create.addPhotos')}
                             <span className="text-slate-500 text-xs">JPG, PNG, WebP</span>
                         </span>

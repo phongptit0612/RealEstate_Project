@@ -6,18 +6,19 @@ import {
     Loader2, ChevronLeft, CheckCheck
 } from 'lucide-react';
 import useUserStore from '../../store/userStore';
+import useLanguageStore from '../../store/languageStore';
 import { connectSocket } from '../../lib/socket';
 
 const API = `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api`;
 
-function timeAgo(dateStr) {
+function timeAgo(dateStr, t) {
     if (!dateStr) return '';
     const diff = Date.now() - new Date(dateStr).getTime();
     const m = Math.floor(diff / 60000);
-    if (m < 1) return 'just now';
-    if (m < 60) return `${m}m ago`;
+    if (m < 1) return t('inbox.justNow', 'just now');
+    if (m < 60) return `${m}${t('inbox.mAgo', 'm ago')}`;
     const h = Math.floor(m / 60);
-    if (h < 24) return `${h}h ago`;
+    if (h < 24) return `${h}${t('inbox.hAgo', 'h ago')}`;
     return new Date(dateStr).toLocaleDateString();
 }
 
@@ -40,6 +41,7 @@ function Avatar({ name, src, size = 10, online }) {
 export default function Inbox() {
     const { user } = useUserStore();
     const location = useLocation();
+    const { t } = useLanguageStore();
 
     const [conversations, setConversations] = useState([]);
     const [activeConv, setActiveConv] = useState(null);
@@ -259,14 +261,14 @@ export default function Inbox() {
             <aside className={`w-full md:w-80 border-r border-gray-100 flex flex-col flex-shrink-0 ${mobileView === 'chat' ? 'hidden md:flex' : 'flex'}`}>
                 <div className="p-4 border-b border-gray-100">
                     <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
-                        <MessageSquare className="w-5 h-5 text-brand-600" /> Inbox
+                        <MessageSquare className="w-5 h-5 text-brand-600" /> {t('inbox.title', 'Inbox')}
                     </h2>
                     <div className="relative">
                         <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
                             value={search}
                             onChange={e => setSearch(e.target.value)}
-                            placeholder="Search conversations..."
+                            placeholder={t('inbox.searchPlaceholder', 'Search conversations...')}
                             className="w-full pl-9 pr-3 py-2 bg-surface border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-600"
                         />
                     </div>
@@ -286,8 +288,8 @@ export default function Inbox() {
                     ) : filteredConvs.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full py-16 text-center px-4">
                             <MessageSquare className="w-10 h-10 text-slate-200 mb-3" />
-                            <p className="text-slate-400 text-sm">No conversations yet.</p>
-                            <p className="text-slate-300 text-xs mt-1">Contact a seller from any listing.</p>
+                            <p className="text-slate-400 text-sm">{t('inbox.noConvs', 'No conversations yet.')}</p>
+                            <p className="text-slate-300 text-xs mt-1">{t('inbox.contactSeller', 'Contact a seller from any listing.')}</p>
                         </div>
                     ) : filteredConvs.map(conv => {
                         const other = getOther(conv);
@@ -303,14 +305,14 @@ export default function Inbox() {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-0.5">
                                         <p className={`text-sm font-semibold truncate ${isActive ? 'text-brand-600' : 'text-slate-800'}`}>{other.name}</p>
-                                        <span className="text-[10px] text-slate-400 flex-shrink-0 ml-2">{timeAgo(conv.last_message_at)}</span>
+                                        <span className="text-[10px] text-slate-400 flex-shrink-0 ml-2">{timeAgo(conv.last_message_at, t)}</span>
                                     </div>
                                     {conv.property_title && (
                                         <p className="text-[10px] text-slate-400 flex items-center gap-1 mb-0.5">
                                             <Home className="w-3 h-3" /> {conv.property_title}
                                         </p>
                                     )}
-                                    <p className="text-xs text-slate-500 truncate">{conv.last_message || 'Start the conversation'}</p>
+                                    <p className="text-xs text-slate-500 truncate">{conv.last_message || t('inbox.startConv', 'Start the conversation')}</p>
                                 </div>
                                 {conv.unread_count > 0 && (
                                     <span className="flex-shrink-0 w-5 h-5 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -330,8 +332,8 @@ export default function Inbox() {
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                             <MessageSquare className="w-8 h-8 text-slate-300" />
                         </div>
-                        <h3 className="font-bold text-slate-700 mb-1">Select a Conversation</h3>
-                        <p className="text-sm text-slate-400">Choose a conversation from the left to start chatting.</p>
+                        <h3 className="font-bold text-slate-700 mb-1">{t('inbox.selectConv', 'Select a Conversation')}</h3>
+                        <p className="text-sm text-slate-400">{t('inbox.chooseConvDesc', 'Choose a conversation from the left to start chatting.')}</p>
                     </div>
                 ) : (
                     <>
@@ -345,10 +347,10 @@ export default function Inbox() {
                                 <p className="font-bold text-slate-900 text-sm">{currentOther?.name}</p>
                                 <p className="text-xs text-slate-400">
                                     {isOtherTyping ? (
-                                        <span className="text-brand-600 font-medium animate-pulse">typing...</span>
+                                        <span className="text-brand-600 font-medium animate-pulse">{t('inbox.typing', 'typing...')}</span>
                                     ) : onlineUsers.has(Number(currentOther?.id)) ? (
-                                        <span className="text-emerald-500">● Online</span>
-                                    ) : 'Offline'}
+                                        <span className="text-emerald-500">● {t('inbox.online', 'Online')}</span>
+                                    ) : t('inbox.offline', 'Offline')}
                                 </p>
                             </div>
                             {activeConv.property_title && (
@@ -368,7 +370,7 @@ export default function Inbox() {
                             ) : messages.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-full text-center py-12">
                                     <MessageSquare className="w-10 h-10 text-slate-200 mb-3" />
-                                    <p className="text-slate-400 text-sm">No messages yet. Say hello! 👋</p>
+                                    <p className="text-slate-400 text-sm">{t('inbox.noMsgs', 'No messages yet. Say hello! 👋')}</p>
                                 </div>
                             ) : (
                                 <>
@@ -427,7 +429,7 @@ export default function Inbox() {
                             <input
                                 value={input}
                                 onChange={handleTyping}
-                                placeholder="Type a message..."
+                                placeholder={t('inbox.typeMsgPlaceholder', 'Type a message...')}
                                 className="flex-1 border border-gray-200 rounded-2xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-600 bg-surface"
                                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) sendMessage(e); }}
                             />
