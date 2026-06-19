@@ -207,17 +207,14 @@ exports.searchProperties = async (req, res) => {
         const limit = Math.min(50, parseInt(req.query.limit) || 12);
         const offset = (page - 1) * limit;
 
-        let usdMin = parseFloat(minPrice) || 0;
-        let usdMax = parseFloat(maxPrice) || 999999999999;
+        let vndMin = parseFloat(minPrice) || 0;
+        let vndMax = parseFloat(maxPrice) || 999999999999;
 
-        // Currency Scaling logic
-        if (currency !== 'USD' && (minPrice || maxPrice)) {
-            const [rateRows] = await pool.query('SELECT rate_to_usd FROM exchange_rates WHERE currency_code = ?', [currency]);
-            if (rateRows.length > 0) {
-                const rate = rateRows[0].rate_to_usd;
-                if (minPrice) usdMin = parseFloat(minPrice) * rate;
-                if (maxPrice) usdMax = parseFloat(maxPrice) * rate;
-            }
+        // Currency Scaling logic (base is VND)
+        const searchCurrency = currency || 'USD';
+        if (searchCurrency === 'USD') {
+            if (minPrice) vndMin = parseFloat(minPrice) * 25400;
+            if (maxPrice) vndMax = parseFloat(maxPrice) * 25400;
         }
 
         let queryStr = `
@@ -244,7 +241,7 @@ exports.searchProperties = async (req, res) => {
         }
         if (minPrice || maxPrice) {
             queryStr += ` AND p.price_usd BETWEEN ? AND ?`;
-            params.push(usdMin, usdMax);
+            params.push(vndMin, vndMax);
         }
         if (type_id) {
             queryStr += ` AND p.type_id = ?`;

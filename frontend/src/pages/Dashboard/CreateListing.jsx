@@ -90,8 +90,8 @@ export default function CreateListing() {
             
         setLocalPriceInput(formatted);
         
-        const rate = exchangeRates[preferredCurrency] || 1;
-        set('price_usd', num / rate);
+        const rate = preferredCurrency === 'USD' ? 25400 : 1;
+        set('price_usd', num * rate);
     };
 
     const handleNext = () => {
@@ -292,9 +292,9 @@ export default function CreateListing() {
                                     className={inputCls} 
                                     placeholder="0" 
                                 />
-                                {formData.price_usd && preferredCurrency !== 'USD' && (
+                                {formData.price_usd && (
                                     <p className="text-xs text-slate-500 mt-2">
-                                        {t('create.savedToDb')}: <strong className="text-slate-700">${parseFloat(formData.price_usd).toLocaleString(undefined, {maximumFractionDigits: 2})} USD</strong>
+                                        {t('create.savedToDb', 'Saved to database as')}: <strong className="text-slate-700">đ{parseFloat(formData.price_usd).toLocaleString('vi-VN')} VND</strong>
                                     </p>
                                 )}
                             </div>

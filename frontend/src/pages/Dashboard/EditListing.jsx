@@ -14,13 +14,14 @@ const labelClass = "text-xs font-semibold text-slate-500 uppercase tracking-wide
 export default function EditListing() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { formatPrice } = useCurrencyStore();
+    const { formatPrice, preferredCurrency } = useCurrencyStore();
     const { t } = useLanguageStore();
 
     const [loading, setLoading]     = useState(true);
     const [saving, setSaving]       = useState(false);
     const [success, setSuccess]     = useState(false);
     const [error, setError]         = useState('');
+    const [localPriceInput, setLocalPriceInput] = useState('');
     const [metadata, setMetadata]   = useState({ cities: [], districts: [], features: [] });
     const [activeDistricts, setActiveDistricts] = useState([]);
     const [existingImages, setExistingImages]   = useState([]);
@@ -63,10 +64,12 @@ export default function EditListing() {
                 const matchedDistrict = metaRes.data.districts.find(d => d.district_id === parseInt(district_id));
                 const city_id = matchedDistrict?.city_id || prop.city_id || '';
 
+                const priceDb = prop.price_usd || 0;
+                const uiPrice = preferredCurrency === 'USD' ? (priceDb / 25400) : priceDb;
                 setForm({
                     title: prop.title || '',
                     description: prop.description || '',
-                    price_usd: prop.price_usd || '',
+                    price_usd: priceDb,
                     area_sqm: prop.area_m2 || '',
                     bedrooms: prop.bedrooms || '',
                     bathrooms: prop.bathrooms || '',
@@ -79,6 +82,9 @@ export default function EditListing() {
                     latitude: prop.latitude || null,
                     longitude: prop.longitude || null,
                 });
+                setLocalPriceInput(preferredCurrency === 'VND' 
+                    ? uiPrice.toLocaleString('vi-VN') 
+                    : uiPrice.toLocaleString('en-US'));
 
                 // Load existing images
                 const imgRes = await axios.get(`${API}/properties/${id}/images`, { withCredentials: true });
@@ -103,6 +109,22 @@ export default function EditListing() {
 
     const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
     const setVal = (field, val) => setForm(f => ({ ...f, [field]: val }));
+
+    const handlePriceChange = (e) => {
+        const rawValue = e.target.value.replace(/\D/g, '');
+        if (!rawValue) {
+            setLocalPriceInput('');
+            setVal('price_usd', '');
+            return;
+        }
+        const num = parseInt(rawValue, 10);
+        const formatted = preferredCurrency === 'VND' 
+            ? num.toLocaleString('vi-VN') 
+            : num.toLocaleString('en-US');
+        setLocalPriceInput(formatted);
+        const rate = preferredCurrency === 'USD' ? 25400 : 1;
+        setVal('price_usd', num * rate);
+    };
 
     // ── Delete an existing image ────────────────────────────
     const handleDeleteImage = async (image_id) => {
@@ -291,8 +313,13 @@ export default function EditListing() {
                         </div>
                     </div>
                     <div>
-                        <label className={labelClass}>{form.listing_type === 'rent' ? t('create.rentPrice') : t('create.salePrice')} *</label>
-                        <input type="number" required min="0" step="0.01" value={form.price_usd} onChange={set('price_usd')} placeholder="250000" className={inputClass} />
+                        <label className={labelClass}>{form.listing_type === 'rent' ? t('create.rentPrice') : t('create.salePrice')} ({preferredCurrency}) *</label>
+                        <input type="text" required value={localPriceInput} onChange={handlePriceChange} placeholder="0" className={inputClass} />
+                        {form.price_usd && (
+                            <p className="text-xs text-slate-500 mt-2">
+                                {t('create.savedToDb', 'Saved to database as')}: <strong className="text-slate-700">đ{parseFloat(form.price_usd).toLocaleString('vi-VN')} VND</strong>
+                            </p>
+                        )}
                     </div>
                 </div>
 

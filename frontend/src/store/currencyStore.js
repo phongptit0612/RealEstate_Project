@@ -18,7 +18,7 @@ const CURRENCY_LABELS = {
 const useCurrencyStore = create(
   persist(
     (set, get) => ({
-      preferredCurrency: 'USD',
+      preferredCurrency: 'VND',
       exchangeRates: FALLBACK_RATES,
       ratesLoaded: false,
       currencies: Object.keys(FALLBACK_RATES),
@@ -36,18 +36,20 @@ const useCurrencyStore = create(
         set({ preferredCurrency: currencyCode });
       },
 
-      // Convert a USD amount to the preferred currency
-      convertPrice: (priceInUSD) => {
-        if (!priceInUSD) return 0;
-        const { preferredCurrency, exchangeRates } = get();
-        const rate = exchangeRates[preferredCurrency] ?? 1;
-        return new Decimal(priceInUSD).times(rate).toNumber();
+      // Convert a VND amount to the preferred currency
+      convertPrice: (priceInVND) => {
+        if (!priceInVND) return 0;
+        const { preferredCurrency } = get();
+        if (preferredCurrency === 'VND') {
+          return new Decimal(priceInVND).toNumber();
+        }
+        return new Decimal(priceInVND).dividedBy(25400).toNumber();
       },
 
-      // Format a USD amount as a localized currency string
-      formatPrice: (priceInUSD) => {
-        if (priceInUSD === null || priceInUSD === undefined) return '—';
-        const convertedAmount = get().convertPrice(priceInUSD);
+      // Format a VND amount as a localized currency string
+      formatPrice: (priceInVND) => {
+        if (priceInVND === null || priceInVND === undefined) return '—';
+        const convertedAmount = get().convertPrice(priceInVND);
         const { preferredCurrency } = get();
 
         // VND and KRW never use decimal places
