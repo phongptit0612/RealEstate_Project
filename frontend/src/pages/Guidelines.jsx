@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import { ShieldCheck, CheckCircle, AlertTriangle, Image as ImageIcon, FileText, Ban } from 'lucide-react';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
+import useLanguageStore from '../store/languageStore';
 
 export default function Guidelines() {
+    const { t } = useLanguageStore();
+
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -22,9 +25,11 @@ export default function Guidelines() {
                         <div className="w-16 h-16 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
                             <ShieldCheck className="w-8 h-8" />
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">Listing Guidelines</h1>
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
+                            {t('guidelines.title', 'Listing Guidelines')}
+                        </h1>
                         <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
-                            To ensure a premium, trustworthy, and safe experience for all our users, LuxEstates enforces a strict set of quality standards. Please review our guidelines before submitting your property.
+                            {t('guidelines.subtitle', 'To ensure a premium, trustworthy, and safe experience for all our users, LuxEstates enforces a strict set of quality standards. Please review our guidelines before submitting your property.')}
                         </p>
                     </div>
 
@@ -39,13 +44,15 @@ export default function Guidelines() {
                                     <CheckCircle className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900 mb-3">1. Accuracy of Information</h2>
+                                    <h2 className="text-xl font-bold text-slate-900 mb-3">
+                                        {t('guidelines.sec1Title', '1. Accuracy of Information')}
+                                    </h2>
                                     <p className="text-slate-600 leading-relaxed mb-4">
-                                        All property details, including price, square footage, amenities, and location, must be 100% accurate. Misrepresenting a property's size or hiding crucial defects violates our trust policy.
+                                        {t('guidelines.sec1Desc', "All property details, including price, square footage, amenities, and location, must be 100% accurate. Misrepresenting a property's size or hiding crucial defects violates our trust policy.")}
                                     </p>
                                     <ul className="space-y-2 text-sm text-slate-500">
-                                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"/> Ensure the address mapped is exactly where the property is located.</li>
-                                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"/> State the exact number of legal bedrooms and bathrooms.</li>
+                                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"/> {t('guidelines.sec1Bullet1', 'Ensure the address mapped is exactly where the property is located.')}</li>
+                                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"/> {t('guidelines.sec1Bullet2', 'State the exact number of legal bedrooms and bathrooms.')}</li>
                                     </ul>
                                 </div>
                             </div>
@@ -59,14 +66,16 @@ export default function Guidelines() {
                                     <ImageIcon className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900 mb-3">2. High-Quality Media</h2>
+                                    <h2 className="text-xl font-bold text-slate-900 mb-3">
+                                        {t('guidelines.sec2Title', '2. High-Quality Media')}
+                                    </h2>
                                     <p className="text-slate-600 leading-relaxed mb-4">
-                                        As a luxury platform, we require high-resolution images that clearly depict the property. Listings with blurry, heavily watermarked, or misleading photos will be rejected.
+                                        {t('guidelines.sec2Desc', 'As a luxury platform, we require high-resolution images that clearly depict the property. Listings with blurry, heavily watermarked, or misleading photos will be rejected.')}
                                     </p>
                                     <ul className="space-y-2 text-sm text-slate-500">
-                                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"/> Minimum resolution of 1920x1080 is highly recommended.</li>
-                                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"/> Do not upload photos with heavy text overlays or personal contact info.</li>
-                                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"/> Avoid using extreme wide-angle lenses that distort room sizes.</li>
+                                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"/> {t('guidelines.sec2Bullet1', 'Minimum resolution of 1920x1080 is highly recommended.')}</li>
+                                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"/> {t('guidelines.sec2Bullet2', 'Do not upload photos with heavy text overlays or personal contact info.')}</li>
+                                        <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-300"/> {t('guidelines.sec2Bullet3', 'Avoid using extreme wide-angle lenses that distort room sizes.')}</li>
                                     </ul>
                                 </div>
                             </div>
@@ -80,9 +89,11 @@ export default function Guidelines() {
                                     <FileText className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900 mb-3">3. Professional Descriptions</h2>
+                                    <h2 className="text-xl font-bold text-slate-900 mb-3">
+                                        {t('guidelines.sec3Title', '3. Professional Descriptions')}
+                                    </h2>
                                     <p className="text-slate-600 leading-relaxed">
-                                        Your description should read professionally. Use proper grammar, capitalization, and formatting. Do not write the entire description in ALL CAPS. Avoid excessive exclamation marks or spammy sales phrases. Focus on the unique selling points, lifestyle benefits, and neighborhood highlights.
+                                        {t('guidelines.sec3Desc', 'Your description should read professionally. Use proper grammar, capitalization, and formatting. Do not write the entire description in ALL CAPS. Avoid excessive exclamation marks or spammy sales phrases. Focus on the unique selling points, lifestyle benefits, and neighborhood highlights.')}
                                     </p>
                                 </div>
                             </div>
@@ -96,15 +107,17 @@ export default function Guidelines() {
                                     <Ban className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900 mb-3">4. Prohibited Content</h2>
+                                    <h2 className="text-xl font-bold text-slate-900 mb-3">
+                                        {t('guidelines.sec4Title', '4. Prohibited Content')}
+                                    </h2>
                                     <p className="text-slate-600 leading-relaxed mb-4">
-                                        The following items are strictly prohibited on LuxEstates and will result in immediate listing deletion and potential account suspension:
+                                        {t('guidelines.sec4Desc', 'The following items are strictly prohibited on LuxEstates and will result in immediate listing deletion and potential account suspension:')}
                                     </p>
                                     <div className="grid sm:grid-cols-2 gap-3 text-sm text-slate-600 font-medium">
-                                        <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg"><AlertTriangle className="w-4 h-4 text-red-400"/> Fake or duplicate listings</div>
-                                        <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg"><AlertTriangle className="w-4 h-4 text-red-400"/> Bait-and-switch pricing</div>
-                                        <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg"><AlertTriangle className="w-4 h-4 text-red-400"/> Discriminatory language</div>
-                                        <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg"><AlertTriangle className="w-4 h-4 text-red-400"/> Listings not related to Real Estate</div>
+                                        <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg"><AlertTriangle className="w-4 h-4 text-red-400"/> {t('guidelines.sec4Bullet1', 'Fake or duplicate listings')}</div>
+                                        <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg"><AlertTriangle className="w-4 h-4 text-red-400"/> {t('guidelines.sec4Bullet2', 'Bait-and-switch pricing')}</div>
+                                        <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg"><AlertTriangle className="w-4 h-4 text-red-400"/> {t('guidelines.sec4Bullet3', 'Discriminatory language')}</div>
+                                        <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-lg"><AlertTriangle className="w-4 h-4 text-red-400"/> {t('guidelines.sec4Bullet4', 'Listings not related to Real Estate')}</div>
                                     </div>
                                 </div>
                             </div>
@@ -113,9 +126,11 @@ export default function Guidelines() {
                     </div>
 
                     <div className="mt-16 text-center">
-                        <p className="text-slate-500 mb-6">Ready to list your property and reach luxury buyers?</p>
+                        <p className="text-slate-500 mb-6">
+                            {t('guidelines.readyPrompt', 'Ready to list your property and reach luxury buyers?')}
+                        </p>
                         <Link to="/dashboard/create" className="inline-flex items-center justify-center bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 px-10 rounded-2xl shadow-lg shadow-brand-600/30 transition-all hover:-translate-y-1">
-                            Create Your Listing Now
+                            {t('guidelines.createBtn', 'Create Your Listing Now')}
                         </Link>
                     </div>
 
