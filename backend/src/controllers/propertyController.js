@@ -53,7 +53,7 @@ exports.createProperty = async (req, res) => {
             (owner_id, type_id, district_id, title, slug, description, listing_type, address,
              price_usd, area_m2, bedrooms, bathrooms, video_url, direction, latitude, longitude,
              mod_status, listing_status, expires_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'active', DATE_ADD(NOW(), INTERVAL 7 DAY))`,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 'active', DATE_ADD(NOW(), INTERVAL 7 DAY))`,
             [
                 owner_id, type_id, district_id || null,
                 title, slug, description, valid_listing_type,
