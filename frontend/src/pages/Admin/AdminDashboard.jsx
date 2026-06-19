@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Users, ListChecks, Clock, Flag, TrendingUp, CheckCircle, UserPlus } from 'lucide-react';
-import useLanguageStore from '../../store/languageStore';
 
 const StatCard = ({ icon: Icon, label, value, color }) => (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex items-center gap-5">
@@ -15,10 +14,11 @@ const StatCard = ({ icon: Icon, label, value, color }) => (
     </div>
 );
 
+const WEEKDAYS_VI = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
 export default function AdminDashboard() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
-    const { t, currentLang } = useLanguageStore();
 
     useEffect(() => {
         axios.get(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/stats`, { withCredentials: true })
@@ -41,18 +41,18 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-2xl font-bold text-slate-900">{t('admin.dashboard', 'Dashboard')}</h1>
-                <p className="text-slate-500 mt-1">{t('admin.overview', 'Platform overview and key metrics')}</p>
+                <h1 className="text-2xl font-bold text-slate-900">Bảng điều khiển</h1>
+                <p className="text-slate-500 mt-1">Tổng quan hệ thống và các chỉ số chính</p>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <StatCard icon={Users} label={t('admin.totalUsers', 'Total Users')} value={stats?.total_users} color="bg-brand-600" />
-                <StatCard icon={ListChecks} label={t('admin.totalListings', 'Total Listings')} value={stats?.total_listings} color="bg-emerald-500" />
-                <StatCard icon={Clock} label={t('admin.pendingApproval', 'Pending Approval')} value={stats?.pending_listings} color="bg-amber-500" />
-                <StatCard icon={CheckCircle} label={t('admin.approvedListings', 'Approved Listings')} value={stats?.approved_listings} color="bg-sky-500" />
-                <StatCard icon={Flag} label={t('admin.pendingReports', 'Pending Reports')} value={stats?.total_reports} color="bg-rose-500" />
-                <StatCard icon={UserPlus} label={t('admin.newUsersToday', 'New Users Today')} value={stats?.new_users_today} color="bg-violet-500" />
+                <StatCard icon={Users} label="Tổng người dùng" value={stats?.total_users} color="bg-brand-600" />
+                <StatCard icon={ListChecks} label="Tổng tin đăng" value={stats?.total_listings} color="bg-emerald-500" />
+                <StatCard icon={Clock} label="Chờ phê duyệt" value={stats?.pending_listings} color="bg-amber-500" />
+                <StatCard icon={CheckCircle} label="Tin đã duyệt" value={stats?.approved_listings} color="bg-sky-500" />
+                <StatCard icon={Flag} label="Báo cáo chờ xử lý" value={stats?.total_reports} color="bg-rose-500" />
+                <StatCard icon={UserPlus} label="Thành viên mới hôm nay" value={stats?.new_users_today} color="bg-violet-500" />
             </div>
 
             {/* Charts Section */}
@@ -62,9 +62,9 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-2">
                                 <TrendingUp className="w-5 h-5 text-brand-600" />
-                                <h2 className="font-bold text-slate-800">{t('admin.listingsCreated', 'Listings Created')}</h2>
+                                <h2 className="font-bold text-slate-800">Tin đăng mới tạo</h2>
                             </div>
-                            <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">{t('admin.last7Days', 'Last 7 Days')}</span>
+                            <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">7 ngày qua</span>
                         </div>
                         <div className="flex items-end gap-2 h-40 mt-auto">
                             {trend.map(({ day, count }) => {
@@ -82,13 +82,13 @@ export default function AdminDashboard() {
                                             />
                                         </div>
                                         <span className="text-[10px] sm:text-xs text-slate-400 font-medium">
-                                            {new Date(day).toLocaleDateString(currentLang === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' })}
+                                            {WEEKDAYS_VI[new Date(day).getDay()]}
                                         </span>
                                     </div>
                                 );
                             })}
                             {trend.length === 0 && (
-                                <div className="w-full flex items-center justify-center text-slate-400 text-sm pb-4">{t('admin.noListingsTrend', 'No listings in the last 7 days')}</div>
+                                <div className="w-full flex items-center justify-center text-slate-400 text-sm pb-4">Không có tin đăng nào trong 7 ngày qua</div>
                             )}
                         </div>
                     </div>
@@ -98,9 +98,9 @@ export default function AdminDashboard() {
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-2">
                                 <Users className="w-5 h-5 text-violet-600" />
-                                <h2 className="font-bold text-slate-800">{t('admin.newRegistrations', 'New User Registrations')}</h2>
+                                <h2 className="font-bold text-slate-800">Người dùng đăng ký mới</h2>
                             </div>
-                            <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">{t('admin.last7Days', 'Last 7 Days')}</span>
+                            <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-md">7 ngày qua</span>
                         </div>
                         <div className="flex items-end gap-2 h-40 mt-auto">
                             {userTrend.map(({ day, count }) => {
@@ -118,13 +118,13 @@ export default function AdminDashboard() {
                                             />
                                         </div>
                                         <span className="text-[10px] sm:text-xs text-slate-400 font-medium">
-                                            {new Date(day).toLocaleDateString(currentLang === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' })}
+                                            {WEEKDAYS_VI[new Date(day).getDay()]}
                                         </span>
                                     </div>
                                 );
                             })}
                             {userTrend.length === 0 && (
-                                <div className="w-full flex items-center justify-center text-slate-400 text-sm pb-4">{t('admin.noUsersTrend', 'No users joined in the last 7 days')}</div>
+                                <div className="w-full flex items-center justify-center text-slate-400 text-sm pb-4">Không có thành viên mới trong 7 ngày qua</div>
                             )}
                         </div>
                     </div>

@@ -5,14 +5,13 @@ import {
     ChevronRight, LogOut, Menu, X, ShieldCheck
 } from 'lucide-react';
 import useUserStore from '../../store/userStore';
-import useLanguageStore from '../../store/languageStore';
 
 const navItems = [
-    { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-    { to: '/admin/listings', label: 'Listings', icon: ListChecks },
-    { to: '/admin/users', label: 'Users', icon: Users },
-    { to: '/admin/reports', label: 'Reports', icon: Flag },
-    { to: '/admin/categories', label: 'Categories', icon: FolderTree },
+    { to: '/admin', label: 'Bảng điều khiển', icon: LayoutDashboard, exact: true },
+    { to: '/admin/listings', label: 'Tin đăng', icon: ListChecks },
+    { to: '/admin/users', label: 'Người dùng', icon: Users },
+    { to: '/admin/reports', label: 'Báo cáo', icon: Flag },
+    { to: '/admin/categories', label: 'Danh mục', icon: FolderTree },
 ];
 
 export default function AdminLayout() {
@@ -20,12 +19,9 @@ export default function AdminLayout() {
     const navigate = useNavigate();
     const logout = useUserStore(s => s.logout);
     const user = useUserStore(s => s.user);
-    const { t } = useLanguageStore();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const handleLogout = () => { logout(); navigate('/login'); };
-
-    const isActive = (to, exact) => exact ? pathname === to : pathname.startsWith(to) && to !== '/admin';
 
     const Sidebar = () => (
         <div className="flex flex-col h-full">
@@ -36,7 +32,7 @@ export default function AdminLayout() {
                 </div>
                 <div>
                     <p className="font-bold text-slate-900 text-sm leading-none">LuxEstates</p>
-                    <p className="text-xs text-slate-400 mt-0.5">{t('admin.panel', 'Admin Panel')}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Trang Quản Trị</p>
                 </div>
             </div>
 
@@ -56,7 +52,7 @@ export default function AdminLayout() {
                             }`}
                         >
                             <Icon className="w-4 h-4" />
-                            {t('admin.' + label.toLowerCase(), label)}
+                            {label}
                             {active && <ChevronRight className="w-4 h-4 ml-auto" />}
                         </Link>
                     );
@@ -78,7 +74,7 @@ export default function AdminLayout() {
                     onClick={handleLogout}
                     className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
                 >
-                    <LogOut className="w-4 h-4" /> {t('admin.logout', 'Logout')}
+                    <LogOut className="w-4 h-4" /> Đăng xuất
                 </button>
             </div>
         </div>
@@ -111,7 +107,7 @@ export default function AdminLayout() {
                     <button onClick={() => setSidebarOpen(true)}>
                         <Menu className="w-6 h-6 text-slate-600" />
                     </button>
-                    <span className="font-bold text-slate-900">{t('admin.panel', 'Admin Panel')}</span>
+                    <span className="font-bold text-slate-900">Trang Quản Trị</span>
                 </div>
 
                 {/* Page content */}

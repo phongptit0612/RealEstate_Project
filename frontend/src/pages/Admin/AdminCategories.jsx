@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Plus, Trash2, MapPin, Building, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
-import useLanguageStore from '../../store/languageStore';
 
 function Section({ title, icon: Icon, children }) {
     const [open, setOpen] = useState(true);
@@ -23,7 +22,6 @@ function Section({ title, icon: Icon, children }) {
 }
 
 export default function AdminCategories() {
-    const { t } = useLanguageStore();
     const [cities, setCities] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [types, setTypes] = useState([]);
@@ -56,7 +54,7 @@ export default function AdminCategories() {
         setNewCity(''); load();
     };
     const deleteCity = async (id) => {
-        if (!window.confirm(t('admin.deleteCityConfirm', 'Delete this city? This will also delete all its districts.'))) return;
+        if (!window.confirm('Xóa tỉnh/thành này? Tất cả các quận/huyện trực thuộc cũng sẽ bị xóa.')) return;
         await axios.delete(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/cities/${id}`, { withCredentials: true });
         load();
     };
@@ -93,7 +91,7 @@ export default function AdminCategories() {
         setNewFeature({ name: '', icon_name: '' }); load();
     };
     const deleteFeature = async (id) => {
-        if (!window.confirm(t('admin.deleteAmenityConfirm', 'Delete this amenity? It will be removed from all listings.'))) return;
+        if (!window.confirm('Xóa tiện ích này? Tiện ích sẽ bị gỡ bỏ khỏi tất cả các tin đăng.')) return;
         await axios.delete(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/admin/features/${id}`, { withCredentials: true });
         load();
     };
@@ -103,17 +101,17 @@ export default function AdminCategories() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-slate-900">{t('admin.categories', 'Categories')}</h1>
-                <p className="text-slate-500 mt-1">{t('admin.categoriesDesc', 'Manage cities, districts, and property types')}</p>
+                <h1 className="text-2xl font-bold text-slate-900">Danh mục</h1>
+                <p className="text-slate-500 mt-1">Quản lý tỉnh/thành phố, quận/huyện và loại bất động sản</p>
             </div>
 
             {/* Cities */}
-            <Section title={`${t('admin.citiesCount', 'Cities')} (${cities.length})`} icon={MapPin}>
+            <Section title={`Tỉnh / Thành phố (${cities.length})`} icon={MapPin}>
                 <form onSubmit={addCity} className="flex gap-3 mb-4">
                     <input value={newCity} onChange={e => setNewCity(e.target.value)}
-                        placeholder={t('admin.cityName', 'City name')} className={`flex-1 ${inputCls}`} />
+                        placeholder="Tên Tỉnh / Thành phố" className={`flex-1 ${inputCls}`} />
                     <button type="submit" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
-                        <Plus className="w-4 h-4" /> {t('admin.add', 'Add')}
+                        <Plus className="w-4 h-4" /> Thêm
                     </button>
                 </form>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -129,19 +127,19 @@ export default function AdminCategories() {
             </Section>
 
             {/* Districts */}
-            <Section title={`${t('admin.districtsCount', 'Districts')} (${districts.length})`} icon={MapPin}>
+            <Section title={`Quận / Huyện (${districts.length})`} icon={MapPin}>
                 <form onSubmit={addDistrict} className="flex gap-3 mb-4 flex-wrap">
                     <select value={newDistrict.city_id} onChange={e => setNewDistrict(d => ({ ...d, city_id: e.target.value }))}
                         className={inputCls}>
-                        <option value="">{t('admin.selectCity', 'Select city')}</option>
+                        <option value="">Chọn tỉnh/thành</option>
                         {cities.map(c => <option key={c.city_id} value={c.city_id}>{c.name}</option>)}
                     </select>
                     <input value={newDistrict.name} onChange={e => setNewDistrict(d => ({ ...d, name: e.target.value }))}
-                        placeholder={t('admin.districtName', 'District name')} className={`flex-1 min-w-[140px] ${inputCls}`} />
+                        placeholder="Tên Quận / Huyện" className={`flex-1 min-w-[140px] ${inputCls}`} />
                     <input value={newDistrict.zipcode} onChange={e => setNewDistrict(d => ({ ...d, zipcode: e.target.value }))}
-                        placeholder={t('admin.zipcodeOptional', 'Zipcode (optional)')} className={`w-28 ${inputCls}`} />
+                        placeholder="Mã bưu chính (tùy chọn)" className={`w-36 ${inputCls}`} />
                     <button type="submit" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
-                        <Plus className="w-4 h-4" /> {t('admin.add', 'Add')}
+                        <Plus className="w-4 h-4" /> Thêm
                     </button>
                 </form>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -160,17 +158,17 @@ export default function AdminCategories() {
             </Section>
 
             {/* Property Types */}
-            <Section title={`${t('admin.typesCount', 'Property Types')} (${types.length})`} icon={Building}>
+            <Section title={`Loại bất động sản (${types.length})`} icon={Building}>
                 <form onSubmit={addType} className="flex gap-3 mb-4 flex-wrap">
                     <input value={newType.name} onChange={e => setNewType(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder={t('admin.typeName', 'Type name (e.g. Penthouse)')} className={`flex-1 min-w-[160px] ${inputCls}`} />
+                        placeholder="Tên loại (VD: Biệt thự)" className={`flex-1 min-w-[160px] ${inputCls}`} />
                     <select value={newType.parent_id} onChange={e => setNewType(prev => ({ ...prev, parent_id: e.target.value }))}
                         className={inputCls}>
-                        <option value="">{t('admin.noParent', 'No parent')}</option>
+                        <option value="">Không có danh mục cha</option>
                         {types.filter(typ => !typ.parent_id).map(typ => <option key={typ.type_id} value={typ.type_id}>{typ.name}</option>)}
                     </select>
                     <button type="submit" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
-                        <Plus className="w-4 h-4" /> {t('admin.add', 'Add')}
+                        <Plus className="w-4 h-4" /> Thêm
                     </button>
                 </form>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -178,7 +176,7 @@ export default function AdminCategories() {
                         <div key={typ.type_id} className="flex items-center justify-between py-2 px-3 bg-surface rounded-xl">
                             <div>
                                 <span className="text-sm font-medium text-slate-800">{typ.name}</span>
-                                {typ.parent_name && <span className="ml-2 text-xs text-slate-400">{t('admin.under', 'under')} {typ.parent_name}</span>}
+                                {typ.parent_name && <span className="ml-2 text-xs text-slate-400">thuộc {typ.parent_name}</span>}
                             </div>
                             <button onClick={() => deleteType(typ.type_id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                                 <Trash2 className="w-4 h-4" />
@@ -189,28 +187,28 @@ export default function AdminCategories() {
             </Section>
 
             {/* Features / Amenities */}
-            <Section title={`${t('admin.featuresCount', 'Amenities / Features')} (${features.length})`} icon={Sparkles}>
-                <p className="text-xs text-slate-400 mb-3">{t('admin.featuresDesc', 'These appear as checkboxes when creating/editing a listing (e.g. Swimming Pool, Parking, Gym).')}</p>
+            <Section title={`Tiện ích / Tính năng (${features.length})`} icon={Sparkles}>
+                <p className="text-xs text-slate-400 mb-3">Các mục này sẽ hiển thị dưới dạng hộp chọn khi tạo/sửa tin đăng (VD: Hồ bơi, Chỗ đậu xe, Phòng gym).</p>
                 <form onSubmit={addFeature} className="flex gap-3 mb-4 flex-wrap">
                     <input
                         value={newFeature.name}
                         onChange={e => setNewFeature(f => ({ ...f, name: e.target.value }))}
-                        placeholder={t('admin.featureName', 'Amenity name (e.g. Swimming Pool)')}
+                        placeholder="Tên tiện ích (VD: Hồ bơi)"
                         className={`flex-1 min-w-[160px] ${inputCls}`}
                     />
                     <input
                         value={newFeature.icon_name}
                         onChange={e => setNewFeature(f => ({ ...f, icon_name: e.target.value }))}
-                        placeholder={t('admin.iconName', 'Icon name (optional, e.g. waves)')}
-                        className={`w-44 ${inputCls}`}
+                        placeholder="Tên biểu tượng (tùy chọn, VD: waves)"
+                        className={`w-48 ${inputCls}`}
                     />
                     <button type="submit" className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl flex items-center gap-1 transition-colors">
-                        <Plus className="w-4 h-4" /> {t('admin.add', 'Add')}
+                        <Plus className="w-4 h-4" /> Thêm
                     </button>
                 </form>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                     {features.length === 0 ? (
-                        <p className="text-sm text-slate-400 py-4 text-center">{t('admin.noFeatures', 'No amenities yet. Add one above.')}</p>
+                        <p className="text-sm text-slate-400 py-4 text-center">Chưa có tiện ích nào. Hãy thêm ở trên.</p>
                     ) : features.map(f => (
                         <div key={f.feature_id} className="flex items-center justify-between py-2 px-3 bg-surface rounded-xl">
                             <div className="flex items-center gap-2">
