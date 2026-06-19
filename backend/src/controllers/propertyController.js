@@ -226,7 +226,9 @@ exports.searchProperties = async (req, res) => {
             LEFT JOIN property_types pt ON p.type_id = pt.type_id
             LEFT JOIN districts d ON p.district_id = d.district_id
             LEFT JOIN cities c ON d.city_id = c.city_id
-            WHERE p.mod_status = 'approved' AND p.listing_status = 'active'
+            WHERE p.mod_status = 'approved' 
+              AND p.listing_status = 'active'
+              AND (p.expires_at IS NULL OR p.expires_at > NOW())
         `;
         const params = [];
 
@@ -577,6 +579,8 @@ exports.getSimilarProperties = async (req, res) => {
             LEFT JOIN cities c ON d.city_id = c.city_id
             WHERE p.property_id != ?
               AND p.mod_status = 'approved'
+              AND p.listing_status = 'active'
+              AND (p.expires_at IS NULL OR p.expires_at > NOW())
               AND (p.type_id = ? OR d.city_id <=> ?)
             ORDER BY 
               (p.type_id = ? AND d.city_id <=> ?) DESC,
