@@ -36,14 +36,25 @@ import Guidelines from './pages/Guidelines';
 // Guard: requires login
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useUserStore();
-  if (loading) return null;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="w-10 h-10 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 // Guard: requires admin role
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, user, loading } = useUserStore();
-  if (loading) return null;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-100">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-slate-500 text-sm font-medium">Đang xác thực...</p>
+      </div>
+    </div>
+  );
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (user?.role !== 'admin') return <Navigate to="/dashboard/properties" replace />;
   return children;

@@ -202,28 +202,28 @@ export default function AdminListings() {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-1.5 justify-end">
                                             {/* View */}
-                                            <button onClick={() => openView(l.property_id)} title={t('admin.viewDetails', 'View Details')}
+                                            <button onClick={() => openView(l.property_id)} title="Xem chi tiết"
                                                 className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
                                                 <Eye className="w-4 h-4" />
                                             </button>
                                             {/* Edit */}
-                                            <button onClick={() => openEdit(l)} title={t('admin.editTitle', 'Edit Listing')}
+                                            <button onClick={() => openEdit(l)} title="Chỉnh sửa tin đăng"
                                                 className="p-2 rounded-lg bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors">
                                                 <Pencil className="w-4 h-4" />
                                             </button>
                                             {l.mod_status !== 'approved' && (
-                                                <button onClick={() => approve(l.property_id)} title={t('common.approved', 'Approve')}
+                                                <button onClick={() => approve(l.property_id)} title="Duyệt tin đăng"
                                                     className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors">
                                                     <CheckCircle className="w-4 h-4" />
                                                 </button>
                                             )}
                                             {l.mod_status !== 'rejected' && (
-                                                <button onClick={() => setRejectModal({ id: l.property_id, title: l.title })} title={t('admin.rejectTitle', 'Reject')}
+                                                <button onClick={() => setRejectModal({ id: l.property_id, title: l.title })} title="Từ chối tin đăng"
                                                     className="p-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors">
                                                     <XCircle className="w-4 h-4" />
                                                 </button>
                                             )}
-                                            <button onClick={() => remove(l.property_id)} title={t('common.delete', 'Delete')}
+                                            <button onClick={() => remove(l.property_id)} title="Xóa"
                                                 className="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
