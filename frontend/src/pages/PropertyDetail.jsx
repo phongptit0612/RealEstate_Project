@@ -5,7 +5,7 @@ import {
     Bed, Bath, Square, MapPin, Compass, Home, Phone, Mail,
     ChevronLeft, ChevronRight, Tag, TrendingDown, Flag,
     Calendar, User, CheckCircle, Heart, Share2, ArrowLeft, Crown, Zap,
-    Printer, Eye, Video, Sparkles, ZoomIn, ZoomOut, Maximize, X
+    Printer, Eye, Video, Sparkles, ZoomIn, ZoomOut, Maximize, X, Clock
 } from 'lucide-react';
 import useCurrencyStore from '../store/currencyStore';
 import useLanguageStore from '../store/languageStore';
@@ -375,6 +375,40 @@ export default function PropertyDetail() {
                                     <span className="flex items-center gap-1">
                                         <Heart className="w-3.5 h-3.5 text-red-400 fill-current" /> {Number(property.favorites_count).toLocaleString()} {t('detail.savedCount')}
                                     </span>
+                                )}
+                            </div>
+
+                            {/* Timeline Stats (Ngày đăng, Ngày hết hạn, Số ngày còn lại) */}
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                                <div className="flex items-center gap-1">
+                                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>Ngày đăng: <span className="font-semibold text-slate-700">{new Date(property.created_at).toLocaleDateString('vi-VN')}</span></span>
+                                </div>
+                                {property.expires_at && (
+                                    <>
+                                        <div className="w-px h-3 bg-slate-200 hidden sm:block" />
+                                        <div className="flex items-center gap-1">
+                                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                                            <span>Ngày hết hạn: <span className="font-semibold text-slate-700">{new Date(property.expires_at).toLocaleDateString('vi-VN')}</span></span>
+                                        </div>
+                                        <div className="w-px h-3 bg-slate-200 hidden sm:block" />
+                                        <div className="flex items-center gap-1">
+                                            <Clock className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                                            <span>Còn lại: {' '}
+                                                {(() => {
+                                                    const expiry = new Date(property.expires_at);
+                                                    const now = new Date();
+                                                    expiry.setHours(0, 0, 0, 0);
+                                                    now.setHours(0, 0, 0, 0);
+                                                    const diffTime = expiry.getTime() - now.getTime();
+                                                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                                    if (diffDays > 0) return <span className="text-amber-600 font-bold">{diffDays} ngày</span>;
+                                                    if (diffDays === 0) return <span className="text-red-500 font-bold">Hết hạn hôm nay</span>;
+                                                    return <span className="text-red-600 font-bold">Đã hết hạn</span>;
+                                                })()}
+                                            </span>
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         </div>

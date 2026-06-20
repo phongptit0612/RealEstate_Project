@@ -28,6 +28,7 @@ export default function EditListing() {
     const [deletingImg, setDeletingImg]         = useState(null);
     const [newImages, setNewImages]             = useState(null);
     const [uploadingImg, setUploadingImg]       = useState(false);
+    const [createdAt, setCreatedAt]             = useState(null);
 
     const [form, setForm] = useState({
         title: '',
@@ -44,6 +45,7 @@ export default function EditListing() {
         video_url: '',
         latitude: null,
         longitude: null,
+        expires_at: '',
     });
 
     // ── Fetch metadata & property ───────────────────────────
@@ -66,6 +68,7 @@ export default function EditListing() {
 
                 const priceDb = prop.price_usd || 0;
                 const uiPrice = preferredCurrency === 'USD' ? (priceDb / 25400) : priceDb;
+                setCreatedAt(prop.created_at);
                 setForm({
                     title: prop.title || '',
                     description: prop.description || '',
@@ -81,6 +84,7 @@ export default function EditListing() {
                     video_url: prop.video_url || '',
                     latitude: prop.latitude || null,
                     longitude: prop.longitude || null,
+                    expires_at: prop.expires_at ? prop.expires_at.split('T')[0] : '',
                 });
                 setLocalPriceInput(preferredCurrency === 'VND' 
                     ? uiPrice.toLocaleString('vi-VN') 
@@ -159,6 +163,17 @@ export default function EditListing() {
             alert(err.response?.data?.error || t('edit.uploadFailed', 'Upload failed'));
         }
         setUploadingImg(false);
+    };
+
+    const isExpiryEditable = () => {
+        if (!createdAt) return true;
+        const created = new Date(createdAt);
+        const now = new Date();
+        created.setHours(0, 0, 0, 0);
+        now.setHours(0, 0, 0, 0);
+        const diffTime = now.getTime() - created.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays <= 7;
     };
 
     // ── Save form ───────────────────────────────────────────
@@ -377,10 +392,25 @@ export default function EditListing() {
                     <input type="text" value={form.address} onChange={set('address')} placeholder={t('create.autoFillMap')} className={inputClass} />
                 </div>
 
-                {/* Video URL */}
-                <div>
-                    <label className={labelClass}>{t('create.videoUrl')}</label>
-                    <input type="url" value={form.video_url} onChange={set('video_url')} placeholder="https://youtube.com/..." className={inputClass} />
+                {/* Video URL & Expiry Date */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className={labelClass}>{t('create.videoUrl')}</label>
+                        <input type="url" value={form.video_url} onChange={set('video_url')} placeholder="https://youtube.com/..." className={inputClass} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>
+                            Ngày hết hạn 
+                            {!isExpiryEditable() && <span className="text-[10px] text-red-500 font-bold ml-1.5 uppercase">(Đã quá 7 ngày - Không thể sửa)</span>}
+                        </label>
+                        <input 
+                            type="date" 
+                            value={form.expires_at} 
+                            onChange={set('expires_at')} 
+                            disabled={!isExpiryEditable()}
+                            className={`${inputClass} disabled:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed`} 
+                        />
+                    </div>
                 </div>
 
                 {/* Map Picker */}

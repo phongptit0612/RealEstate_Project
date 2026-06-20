@@ -102,12 +102,12 @@ exports.getMyProperties = async (req, res) => {
             WHERE p.owner_id = ?
             ORDER BY p.created_at DESC
         `, [owner_id]);
-        
+
         // Fetch primary images for these properties
         if (properties.length > 0) {
             const propIds = properties.map(p => p.property_id);
             const [images] = await pool.query('SELECT property_id, image_url FROM property_images WHERE property_id IN (?) AND sort_order = 1', [propIds]);
-            
+
             properties.forEach(p => {
                 const img = images.find(i => i.property_id === p.property_id);
                 p.primary_image = img ? img.image_url : null;
@@ -156,8 +156,8 @@ exports.updateProperty = async (req, res) => {
             fields.push('title = ?');
             values.push(title);
         }
-        if (description !== undefined)  { fields.push('description = ?');   values.push(description); }
-        if (price_usd !== undefined)    {
+        if (description !== undefined) { fields.push('description = ?'); values.push(description); }
+        if (price_usd !== undefined) {
             // Record price history if price changed
             const oldPrice = parseFloat(existing[0].price_usd);
             const newPrice = parseFloat(price_usd);
@@ -169,16 +169,46 @@ exports.updateProperty = async (req, res) => {
             }
             fields.push('price_usd = ?'); values.push(price_usd);
         }
-        if (area_sqm !== undefined)     { fields.push('area_m2 = ?');       values.push(area_sqm || null); }
-        if (bedrooms !== undefined)     { fields.push('bedrooms = ?');       values.push(bedrooms || null); }
-        if (bathrooms !== undefined)    { fields.push('bathrooms = ?');      values.push(bathrooms || null); }
-        if (listing_type !== undefined) { fields.push('listing_type = ?');   values.push(listing_type); }
-        if (address !== undefined)      { fields.push('address = ?');        values.push(address); }
-        if (video_url !== undefined)    { fields.push('video_url = ?');      values.push(video_url || null); }
-        if (req.body.latitude !== undefined)   { fields.push('latitude = ?');    values.push(req.body.latitude || null); }
-        if (req.body.longitude !== undefined)  { fields.push('longitude = ?');   values.push(req.body.longitude || null); }
-        if (req.body.direction !== undefined)  { fields.push('direction = ?');   values.push(req.body.direction || null); }
-        if (req.body.district_id !== undefined){ fields.push('district_id = ?'); values.push(req.body.district_id ? parseInt(req.body.district_id) : null); }
+        if (area_sqm !== undefined) { fields.push('area_m2 = ?'); values.push(area_sqm || null); }
+        if (bedrooms !== undefined) { fields.push('bedrooms = ?'); values.push(bedrooms || null); }
+        if (bathrooms !== undefined) { fields.push('bathrooms = ?'); values.push(bathrooms || null); }
+        if (listing_type !== undefined) { fields.push('listing_type = ?'); values.push(listing_type); }
+        if (address !== undefined) { fields.push('address = ?'); values.push(address); }
+        if (video_url !== undefined) { fields.push('video_url = ?'); values.push(video_url || null); }
+        if (req.body.latitude !== undefined) { fields.push('latitude = ?'); values.push(req.body.latitude || null); }
+        if (req.body.longitude !== undefined) { fields.push('longitude = ?'); values.push(req.body.longitude || null); }
+        if (req.body.direction !== undefined) { fields.push('direction = ?'); values.push(req.body.direction || null); }
+        if (req.body.district_id !== undefined) { fields.push('district_id = ?'); values.push(req.body.district_id ? parseInt(req.body.district_id) : null); }
+
+        if (req.body.expires_at !== undefined) {
+            const oldExpiresAt = existing[0].expires_at ? new Date(existing[0].expires_at).toISOString().split('T')[0] : '';
+            const newExpiresAt = req.body.expires_at ? new Date(req.body.expires_at).toISOString().split('T')[0] : '';
+
+            if (oldExpiresAt !== newExpiresAt) {
+                const created = new Date(existing[0].created_at);
+                const now = new Date();
+                created.setHours(0, 0, 0, 0);
+                now.setHours(0, 0, 0, 0);
+                const diffTime = now.getTime() - created.getTime();
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 7) {
+                    return res.status(400).json({ error: 'Không thể thay đổi ngày hết hạn sau khi tin đăng đã được tạo quá 7 ngày.' });
+                }
+
+                if (req.body.expires_at) {
+                    const expiryDate = new Date(req.body.expires_at);
+                    expiryDate.setHours(0, 0, 0, 0);
+                    if (expiryDate.getTime() === now.getTime()) {
+                        fields.push('listing_status = ?');
+                        values.push('hidden');
+                    }
+                }
+
+                fields.push('expires_at = ?');
+                values.push(req.body.expires_at ? new Date(req.body.expires_at) : null);
+            }
+        }
 
         // Editing resets mod_status to pending (needs re-approval)
         fields.push('mod_status = ?'); values.push('pending');
@@ -203,7 +233,7 @@ exports.searchProperties = async (req, res) => {
         } = req.query;
 
         // Pagination
-        const page  = Math.max(1, parseInt(req.query.page)  || 1);
+        const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = Math.min(50, parseInt(req.query.limit) || 12);
         const offset = (page - 1) * limit;
 
@@ -287,12 +317,12 @@ exports.searchProperties = async (req, res) => {
         const hasVip = cols.length > 0;
         // Safe whitelist of user-selectable sort options
         const sortMap = {
-            newest:     'p.created_at DESC',
-            oldest:     'p.created_at ASC',
-            price_asc:  'p.price_usd ASC',
+            newest: 'p.created_at DESC',
+            oldest: 'p.created_at ASC',
+            price_asc: 'p.price_usd ASC',
             price_desc: 'p.price_usd DESC',
-            area_asc:   'p.area_m2 ASC',
-            area_desc:  'p.area_m2 DESC',
+            area_asc: 'p.area_m2 ASC',
+            area_desc: 'p.area_m2 DESC',
         };
         const sortClause = sortMap[sort] || 'p.created_at DESC';
         const orderClause = hasVip
@@ -325,7 +355,7 @@ exports.searchProperties = async (req, res) => {
         if (properties.length > 0) {
             const propIds = properties.map(p => p.property_id);
             const [images] = await pool.query('SELECT property_id, image_url FROM property_images WHERE property_id IN (?) AND sort_order = 1', [propIds]);
-            
+
             properties.forEach(p => {
                 const img = images.find(i => i.property_id === p.property_id);
                 p.primary_image = img ? img.image_url : null;
@@ -457,9 +487,9 @@ exports.getRecentlyViewed = async (req, res) => {
 
 exports.getSearchMetadata = async (req, res) => {
     try {
-        const [cities]   = await pool.query('SELECT city_id, name FROM cities WHERE is_active = TRUE ORDER BY name');
+        const [cities] = await pool.query('SELECT city_id, name FROM cities WHERE is_active = TRUE ORDER BY name');
         const [districts] = await pool.query('SELECT district_id, city_id, name FROM districts WHERE is_active = TRUE ORDER BY name');
-        const [types]    = await pool.query('SELECT type_id, name FROM property_types WHERE is_active = TRUE ORDER BY name');
+        const [types] = await pool.query('SELECT type_id, name FROM property_types WHERE is_active = TRUE ORDER BY name');
         const [features] = await pool.query('SELECT feature_id, name, icon_name FROM features ORDER BY name');
         res.json({ cities, districts, types, features });
     } catch (error) {
@@ -532,8 +562,8 @@ exports.getPropertyById = async (req, res) => {
                 pool.query(
                     'INSERT INTO recently_viewed (user_id, property_id, viewed_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE viewed_at = NOW()',
                     [decoded.userId, propId]
-                ).catch(() => {});
-            } catch (_) {}
+                ).catch(() => { });
+            } catch (_) { }
         }
 
         // Track view count from recently_viewed
@@ -558,7 +588,7 @@ exports.getSimilarProperties = async (req, res) => {
         const isNumeric = /^\d+$/.test(id);
         const queryField = isNumeric ? 'p.property_id' : 'p.slug';
         const [[base]] = await pool.query(
-            `SELECT p.property_id, p.type_id, d.city_id 
+            `SELECT p.property_id, p.type_id, p.listing_type, d.city_id, p.district_id 
              FROM properties p 
              LEFT JOIN districts d ON p.district_id = d.district_id 
              WHERE ${queryField} = ?`, [id]
@@ -578,14 +608,29 @@ exports.getSimilarProperties = async (req, res) => {
               AND p.mod_status = 'approved'
               AND p.listing_status = 'active'
               AND (p.expires_at IS NULL OR p.expires_at > NOW())
+              AND p.listing_type = ?
               AND (p.type_id = ? OR d.city_id <=> ?)
             ORDER BY 
-              (p.type_id = ? AND d.city_id <=> ?) DESC,
+              (p.district_id = ? AND p.type_id = ?) DESC,
+              (d.city_id <=> ? AND p.type_id = ?) DESC,
+              (d.city_id <=> ?) DESC,
+              (p.type_id = ?) DESC,
               p.vip_tier = 'gold' DESC, 
               p.vip_tier = 'silver' DESC, 
               p.created_at DESC
             LIMIT 4
-        `, [base.property_id, base.type_id, base.city_id, base.type_id, base.city_id]);
+        `, [
+            base.property_id,
+            base.listing_type,
+            base.type_id,
+            base.city_id,
+            base.district_id,
+            base.type_id,
+            base.city_id,
+            base.type_id,
+            base.city_id,
+            base.type_id
+        ]);
 
         res.json(similar);
     } catch (error) {
