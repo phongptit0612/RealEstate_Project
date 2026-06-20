@@ -111,29 +111,56 @@ export default function ManageListings() {
                                 <h2 className="font-bold text-slate-800">{t('manage.topListings', 'Top Performing Listings (Views)')}</h2>
                             </div>
                         </div>
-                        <div className="flex items-end justify-around gap-4 h-40 mt-auto">
-                            {topProperties.map(prop => {
-                                const max = Math.max(...topProperties.map(p => p.view_count || 0), 1);
-                                const count = prop.view_count || 0;
-                                const heightPct = Math.round((count / max) * 100);
-                                return (
-                                    <div key={prop.property_id} className="flex-1 flex flex-col items-center gap-2 group">
-                                        <span className="text-xs font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-100 px-2 py-0.5 rounded-md">
-                                            {count}
-                                        </span>
-                                        <div className="w-full max-w-[48px] sm:max-w-[64px] relative flex justify-center items-end flex-1 bg-slate-50 rounded-t-xl overflow-hidden">
-                                            <div
-                                                className="w-full bg-gradient-to-t from-brand-600 to-brand-400 rounded-t-xl transition-all duration-500 hover:brightness-110"
-                                                style={{ height: `${Math.max(heightPct, 5)}%` }}
-                                            />
-                                        </div>
-                                        <span className="text-[10px] sm:text-xs text-slate-500 font-medium truncate w-full max-w-[80px] text-center px-1">
-                                            {prop.title}
-                                        </span>
+                        {(() => {
+                            const max = Math.max(...topProperties.map(p => p.view_count || 0), 1);
+                            const ticks = [max, Math.round(max * 0.66), Math.round(max * 0.33), 0];
+                            return (
+                                <div className="flex items-stretch h-56 mt-auto">
+                                    {/* Y-axis */}
+                                    <div className="flex flex-col justify-between text-[10px] sm:text-xs text-slate-400 font-semibold pr-3 border-r border-slate-100 select-none pb-7 h-full w-8">
+                                        {ticks.map((t, idx) => (
+                                            <span key={idx} className="text-right h-4 flex items-center justify-end">{t}</span>
+                                        ))}
                                     </div>
-                                );
-                            })}
-                        </div>
+                                    {/* Chart area */}
+                                    <div className="flex-grow h-full relative">
+                                        {/* Grid lines */}
+                                        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-7 pr-1">
+                                            {[...Array(4)].map((_, idx) => (
+                                                <div key={idx} className="border-t border-dashed border-slate-100 w-full h-0" />
+                                            ))}
+                                        </div>
+                                        {/* Bars */}
+                                        <div className="flex items-end gap-3 h-full relative z-10 pl-2">
+                                            {topProperties.map(prop => {
+                                                const count = prop.view_count || 0;
+                                                const heightPct = Math.round((count / max) * 100);
+                                                return (
+                                                    <div key={prop.property_id} className="flex-1 flex flex-col items-center justify-end h-full group relative">
+                                                        {/* Tooltip */}
+                                                        <div className="absolute bottom-[calc(100%-1.5rem)] mb-2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none bg-slate-800 text-white text-[10px] sm:text-xs px-2.5 py-1.5 rounded-lg shadow-lg font-semibold flex flex-col items-center max-w-[150px]">
+                                                            <span className="font-bold text-center line-clamp-1">{prop.title}</span>
+                                                            <span className="text-brand-300 font-bold mt-0.5">{count} {t('manage.views', 'views')}</span>
+                                                        </div>
+                                                        {/* Bar column */}
+                                                        <div className="w-full bg-slate-50 hover:bg-slate-100/80 rounded-t-lg flex items-end flex-1 transition-all h-[calc(100%-1.75rem)] relative cursor-pointer overflow-hidden border border-transparent hover:border-slate-200/50">
+                                                            <div
+                                                                className="w-full bg-gradient-to-t from-brand-600 to-brand-400 rounded-t-lg transition-all duration-500"
+                                                                style={{ height: `${Math.max(heightPct, 3)}%` }}
+                                                            />
+                                                        </div>
+                                                        {/* X Label */}
+                                                        <span className="h-5 flex items-end text-[10px] sm:text-xs text-slate-500 font-semibold mt-1 truncate w-full max-w-[80px] justify-center px-1">
+                                                            {prop.title}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             )}
