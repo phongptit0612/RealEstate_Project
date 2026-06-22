@@ -9,7 +9,10 @@ router.get('/metadata', propertyController.getSearchMetadata);
 router.get('/recently-viewed', protect, propertyController.getRecentlyViewed);
 router.post('/', protect, validate(schemas.createProperty), propertyController.createProperty);
 router.get('/me', protect, propertyController.getMyProperties);
+router.get('/geocode', protect, propertyController.geocodeAddress);
+router.get('/reverse-geocode', protect, propertyController.reverseGeocodeCoordinates);
 router.patch('/:property_id/status', protect, propertyController.updatePropertyStatus);
+
 router.patch('/:property_id/renew', protect, propertyController.renewListing);
 router.put('/:property_id', protect, propertyController.updateProperty);
 router.delete('/:property_id', protect, propertyController.deleteProperty);

@@ -3,6 +3,8 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-lea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin, Search, Loader2, X } from 'lucide-react';
+import api from '../lib/api';
+
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -44,16 +46,12 @@ export default function LocationPicker({ initialLat, initialLng, onSelect }) {
     const [searchResults, setSearchResults] = useState([]);
     const [reverseLoading, setReverseLoading] = useState(false);
 
-    // Reverse geocode — get address from lat/lng (Nominatim)
+    // Reverse geocode — get address from lat/lng via backend proxy
     const reverseGeocode = useCallback(async (lat, lng) => {
         setReverseLoading(true);
         try {
-            const r = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-                { headers: { 'Accept-Language': 'en' } }
-            );
-            const data = await r.json();
-            const address = data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            const res = await api.get(`/properties/reverse-geocode?lat=${lat}&lng=${lng}`);
+            const address = res.data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             onSelect({ lat, lng, address });
         } catch {
             onSelect({ lat, lng, address: `${lat.toFixed(6)}, ${lng.toFixed(6)}` });
@@ -69,22 +67,19 @@ export default function LocationPicker({ initialLat, initialLng, onSelect }) {
         setSearchResults([]);
     }, [reverseGeocode]);
 
-    // Search by name
+    // Search by name via backend proxy
     const handleSearch = async (e) => {
         e.preventDefault();
         if (!searchQuery.trim()) return;
         setSearching(true);
         setSearchResults([]);
         try {
-            const r = await fetch(
-                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=5&countrycodes=vn`,
-                { headers: { 'Accept-Language': 'en' } }
-            );
-            const data = await r.json();
-            setSearchResults(data);
+            const res = await api.get(`/properties/geocode?q=${encodeURIComponent(searchQuery)}`);
+            setSearchResults(res.data || []);
         } catch { /* silent */ }
         finally { setSearching(false); }
     };
+
 
     const pickResult = (result) => {
         const lat = parseFloat(result.lat);
@@ -156,8 +151,10 @@ export default function LocationPicker({ initialLat, initialLng, onSelect }) {
                     scrollWheelZoom={true}
                 >
                     <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-                        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                        attribution='&copy; <a href="https://maps.google.com">Google Maps</a>'
+                        url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                        subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+                        maxZoom={20}
                     />
                     <ClickHandler onMapClick={handleMapClick} />
                     {position && (

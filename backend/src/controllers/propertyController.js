@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 const slugify = require('../utils/slugify');
+const axios = require('axios');
 
 exports.createProperty = async (req, res) => {
     try {
@@ -634,6 +635,105 @@ exports.getSimilarProperties = async (req, res) => {
 
         res.json(similar);
     } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.geocodeAddress = async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q || !q.trim()) {
+            return res.json([]);
+        }
+
+        const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+        if (apiKey) {
+            try {
+                // Call Google Geocoding API
+                const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(q)}&key=${apiKey}&language=vi`;
+                const response = await axios.get(url);
+                
+                if (response.data && response.data.status === 'OK') {
+                    const results = response.data.results.map(item => ({
+                        lat: item.geometry.location.lat,
+                        lon: item.geometry.location.lng,
+                        display_name: item.formatted_address
+                    }));
+                    return res.json(results);
+                } else if (response.data && response.data.status === 'ZERO_RESULTS') {
+                    return res.json([]);
+                }
+                // If Google fails, log and fallback to Nominatim
+                console.warn(`Google Geocoding API returned status: ${response.data.status}. Details:`, JSON.stringify(response.data), `Falling back to Nominatim.`);
+
+            } catch (googleError) {
+                console.error('Google Geocoding API error. Falling back to Nominatim:', googleError.message);
+            }
+        }
+
+        // Fallback: OpenStreetMap Nominatim
+        const fallbackUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&countrycodes=vn`;
+        const response = await axios.get(fallbackUrl, {
+            headers: {
+                'Accept-Language': 'vi,en',
+                'User-Agent': 'LuxEstatesGeocodingProxy/1.0'
+            }
+        });
+        const results = (response.data || []).map(item => ({
+            lat: parseFloat(item.lat),
+            lon: parseFloat(item.lon),
+            display_name: item.display_name
+        }));
+        res.json(results);
+    } catch (error) {
+        console.error('Geocoding error:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.reverseGeocodeCoordinates = async (req, res) => {
+    try {
+        const { lat, lng } = req.query;
+        if (!lat || !lng) {
+            return res.status(400).json({ error: 'Missing latitude or longitude' });
+        }
+
+        const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+        if (apiKey) {
+            try {
+                // Call Google Reverse Geocoding API
+                const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=vi`;
+                const response = await axios.get(url);
+                
+                if (response.data && response.data.status === 'OK' && response.data.results.length > 0) {
+                    return res.json({
+                        display_name: response.data.results[0].formatted_address
+                    });
+                }
+                console.warn(`Google Reverse Geocoding API returned status: ${response.data.status}. Details:`, JSON.stringify(response.data), `Falling back to Nominatim.`);
+
+            } catch (googleError) {
+                console.error('Google Reverse Geocoding error. Falling back to Nominatim:', googleError.message);
+            }
+        }
+
+        // Fallback: OpenStreetMap Nominatim Reverse
+        const fallbackUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
+        const response = await axios.get(fallbackUrl, {
+            headers: {
+                'Accept-Language': 'vi,en',
+                'User-Agent': 'LuxEstatesGeocodingProxy/1.0'
+            }
+        });
+        
+        if (response.data && response.data.display_name) {
+            return res.json({
+                display_name: response.data.display_name
+            });
+        }
+        res.json({ display_name: `${parseFloat(lat).toFixed(6)}, ${parseFloat(lng).toFixed(6)}` });
+    } catch (error) {
+        console.error('Reverse geocoding error:', error);
         res.status(500).json({ error: error.message });
     }
 };
