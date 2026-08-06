@@ -238,14 +238,15 @@ exports.searchProperties = async (req, res) => {
         const limit = Math.min(50, parseInt(req.query.limit) || 12);
         const offset = (page - 1) * limit;
 
-        let vndMin = parseFloat(minPrice) || 0;
-        let vndMax = parseFloat(maxPrice) || 999999999999;
+        let searchMin = parseFloat(minPrice) || 0;
+        let searchMax = parseFloat(maxPrice) || 999999999999;
 
-        // Currency Scaling logic (base is VND)
+        // Base currency in database column `price_usd` is USD
         const searchCurrency = currency || 'USD';
-        if (searchCurrency === 'USD') {
-            if (minPrice) vndMin = parseFloat(minPrice) * 25400;
-            if (maxPrice) vndMax = parseFloat(maxPrice) * 25400;
+        if (searchCurrency === 'VND') {
+            // If user searches in VND, convert VND filter bounds to USD base for DB query
+            if (minPrice) searchMin = parseFloat(minPrice) / 25400;
+            if (maxPrice) searchMax = parseFloat(maxPrice) / 25400;
         }
 
         let queryStr = `
@@ -272,7 +273,7 @@ exports.searchProperties = async (req, res) => {
         }
         if (minPrice || maxPrice) {
             queryStr += ` AND p.price_usd BETWEEN ? AND ?`;
-            params.push(vndMin, vndMax);
+            params.push(searchMin, searchMax);
         }
         if (type_id) {
             queryStr += ` AND p.type_id = ?`;
