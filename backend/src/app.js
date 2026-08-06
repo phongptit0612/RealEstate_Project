@@ -28,15 +28,7 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 // ── Compression (gzip) ─────────────────────────────────────────
 app.use(compression());
 
-// ── Rate Limiting ──────────────────────────────────────────────
-// General auth limiter: 30 requests per 15 minutes
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 30,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: 'Too many requests, please try again in 15 minutes.' },
-});
+
 
 // ── Stripe webhook needs raw body BEFORE json parsing ──────────
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
@@ -56,7 +48,7 @@ const favoriteRoutes = require('./routes/favoriteRoutes');
 const conversationRoutes = require('./routes/conversationRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 
-app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/admin', adminRoutes);
